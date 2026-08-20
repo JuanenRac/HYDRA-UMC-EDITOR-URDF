@@ -89,19 +89,33 @@ def build_mesh_resolver(root: str | Path, urdf_file_dir: str | Path) -> Callable
         # own path tail - "package://some_pkg/meshes/link1.stl" ->
         # "meshes/link1.stl". A bare relative/absolute path has no "://"
         # and passes through unchanged.
+        had_scheme = "://" in mesh_filename
         tail = mesh_filename.split("://", 1)[-1]
-        # Drop a leading package name segment too (package:// URIs put
-        # the ROS package name as the first path component, which has no
-        # meaning as a real directory in a plain downloaded folder).
-        tail_parts = Path(tail).parts
-        tail_without_pkg = Path(*tail_parts[1:]) if len(tail_parts) > 1 else Path(tail)
 
         candidate = (urdf_file_dir / tail).resolve()
         if candidate.is_file():
             return candidate
-        candidate = (urdf_file_dir / tail_without_pkg).resolve()
-        if candidate.is_file():
-            return candidate
+
+        # Drop a leading package name segment too (package:// URIs put
+        # the ROS package name as the first path component, which has no
+        # meaning as a real directory in a plain downloaded folder) - but
+        # ONLY when `mesh_filename` actually had a scheme to begin with.
+        # BUG (found in audit): this used to run unconditionally for ANY
+        # multi-segment tail, including a bare relative path like
+        # "sub/mesh.stl" or "../meshes/mesh.stl" with no package:// at
+        # all - if candidate1 above didn't exist (a broken/moved relative
+        # path, a real-world case), it would then probe
+        # urdf_file_dir/<basename> directly and silently return THAT file
+        # if one of the same name happened to sit there, even when it was
+        # a completely unrelated file - before ever reaching the honest
+        # basename-wide search below. Gating this on `had_scheme` makes
+        # it only ever fire for the package:// case it was written for.
+        if had_scheme:
+            tail_parts = Path(tail).parts
+            tail_without_pkg = Path(*tail_parts[1:]) if len(tail_parts) > 1 else Path(tail)
+            candidate = (urdf_file_dir / tail_without_pkg).resolve()
+            if candidate.is_file():
+                return candidate
 
         as_absolute = Path(mesh_filename)
         if as_absolute.is_absolute() and as_absolute.is_file():

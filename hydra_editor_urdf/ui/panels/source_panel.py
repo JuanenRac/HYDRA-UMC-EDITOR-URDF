@@ -58,7 +58,20 @@ class SourcePanel(QWidget):
     def __init__(self, controller: EditorController, parent=None):
         super().__init__(parent)
         self._controller = controller
-        self._fetch_thread: _GithubFetchThread | None = None
+        # BUG (found in audit): this used to be a single `_fetch_thread`
+        # attribute, overwritten on every new fetch. The Fetch button is
+        # disabled while a fetch runs so the UI itself can't retrigger
+        # one, but the underlying QThread object still only stays alive
+        # via this one Python reference - if this panel (or the whole
+        # app) were torn down while a fetch was still in flight, the
+        # QThread could be garbage-collected while Qt still had it
+        # running, which PySide reports as a hard "QThread: Destroyed
+        # while thread is still running" and can crash. Keeping every
+        # started thread in this set (not just the latest) until its own
+        # `finished` signal fires - and deleteLater()-ing it only then -
+        # means a thread is never dropped by Python while Qt still owns
+        # it, regardless of how/when this panel gets destroyed.
+        self._live_fetch_threads: set[_GithubFetchThread] = set()
 
         layout = QVBoxLayout(self)
 
