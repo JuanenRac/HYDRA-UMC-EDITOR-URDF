@@ -63,7 +63,22 @@ class UploadPanel(QWidget):
         super().__init__(parent)
         self._controller = controller
         self._client: StudioClient | None = None
-        self._thread: _ServerCallThread | None = None
+        # BUG (found in audit): this used to be a single `_thread`
+        # attribute shared by connect/push/refresh/pull - each of those 4
+        # call sites overwrites it with a brand-new QThread. Refresh in
+        # particular is triggered automatically right after a successful
+        # connect/push (_on_connected/_on_push_ok both call
+        # _on_refresh_models()) and there's nothing stopping the operator
+        # from clicking Push again while a background refresh from the
+        # previous action hasn't fired its `finished` yet - the old
+        # in-flight QThread would then lose its only Python reference
+        # while Qt still had it running (crashes as "QThread: Destroyed
+        # while thread is still running"), same class of bug fixed in
+        # source_panel.py's own fetch thread. Tracking every live thread
+        # in a set until its own `finished` signal confirms run() has
+        # actually returned closes that gap for all 4 call sites at once,
+        # since they all go through the shared _run_on_thread() helper.
+        self._live_threads: set[_ServerCallThread] = set()
 
         layout = QVBoxLayout(self)
 
@@ -211,7 +226,15 @@ class UploadPanel(QWidget):
     # --- thread helper ----------------------------------------------------
 
     def _run_on_thread(self, fn, on_ok, on_error) -> None:
-        self._thread = _ServerCallThread(fn)
-        self._thread.finished_ok.connect(on_ok)
-        self._thread.finished_error.connect(on_error)
-        self._thread.start()
+        thread = _ServerCallThread(fn)
+        self._live_threads.add(thread)
+        thread.finished_ok.connect(on_ok)
+        thread.finished_error.connect(on_error)
+        thread.finished.connect(lambda t=thread: self._reap_thread(t))
+        thread.start()
+
+    def _reap_thread(self, thread: "_ServerCallThread") -> None:
+        # See the comment on _live_threads above - only safe to drop once
+        # QThread.finished confirms run() has actually returned.
+        self._live_threads.discard(thread)
+        thread.deleteLater()

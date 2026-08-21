@@ -131,10 +131,20 @@ class SourcePanel(QWidget):
             return
         self._github_fetch_btn.setEnabled(False)
         self._status.setText(_("SOURCE_STATUS_FETCHING", url=url))
-        self._fetch_thread = _GithubFetchThread(self._controller, url)
-        self._fetch_thread.finished_ok.connect(lambda: self._github_fetch_btn.setEnabled(True))
-        self._fetch_thread.finished_error.connect(self._on_fetch_thread_error)
-        self._fetch_thread.start()
+        thread = _GithubFetchThread(self._controller, url)
+        self._live_fetch_threads.add(thread)
+        thread.finished_ok.connect(lambda: self._github_fetch_btn.setEnabled(True))
+        thread.finished_error.connect(self._on_fetch_thread_error)
+        thread.finished.connect(lambda t=thread: self._reap_fetch_thread(t))
+        thread.start()
+
+    def _reap_fetch_thread(self, thread: "_GithubFetchThread") -> None:
+        # QThread.finished fires once run() has actually returned - only
+        # then is it safe to let go of Python's own reference (see the
+        # comment on _live_fetch_threads above for why a bare local/
+        # attribute reference isn't enough on its own).
+        self._live_fetch_threads.discard(thread)
+        thread.deleteLater()
 
     def _on_fetch_thread_error(self, message: str) -> None:
         self._github_fetch_btn.setEnabled(True)

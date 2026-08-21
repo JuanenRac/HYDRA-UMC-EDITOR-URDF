@@ -139,6 +139,19 @@ class GLMeshBuffer:
         gl.glDrawArrays(gl.GL_TRIANGLES, 0, self.vertex_count)
         gl.glBindVertexArray(0)
 
+    def delete(self) -> None:
+        """Frees the actual GPU-side VAO/VBO. Must be called (with the
+        right GL context current) before the last Python reference to
+        this object goes away - garbage-collecting a GLMeshBuffer does
+        NOT free its GPU resources on its own (no __del__ here on
+        purpose: by the time the GC runs, the GL context that owns these
+        handles may no longer be current on this thread, which is a
+        recipe for a wrong-context glDelete* call or a silent no-op, not
+        a reliable free - see _rebuild_buffers_now's own explicit call
+        to this, inside its own makeCurrent()/doneCurrent() block)."""
+        gl.glDeleteVertexArrays(1, [self.vao])
+        gl.glDeleteBuffers(1, [self.vbo])
+
 
 DEFAULT_COLOR = (0.72, 0.75, 0.80)
 
@@ -223,6 +236,20 @@ class UrdfViewport(QOpenGLWidget):
     def _rebuild_buffers_now(self, robot: Robot | None) -> None:
         self.makeCurrent()
         try:
+            # BUG (found in audit): this used to just do `self._buffers =
+            # {}`, dropping every previous GLMeshBuffer's own Python
+            # reference without ever calling glDeleteVertexArrays/
+            # glDeleteBuffers on the GPU handles it held - a leak of real
+            # GPU memory (not just Python heap, so no GC pass ever
+            # reclaims it) on every single call. rebuild_buffers() is not
+            # a rare event either: it fires on every "Modify scale"/
+            # recolor-that-changes-material-set/retype-joint edit from
+            # properties_panel.py, not just once at import - a long
+            # editing session hammering the same link's scale repeatedly
+            # would leak a full VAO/VBO set per click. Free the old ones
+            # first, while the right GL context is still current here.
+            for buf in self._buffers.values():
+                buf.delete()
             self._buffers = {}
             if robot is not None:
                 self._colors = self._collect_colors(robot)

@@ -208,4 +208,21 @@ class PropertiesPanel(QWidget):
                 effort=joint.limit.effort if joint.limit is not None else 100.0,
                 velocity=joint.limit.velocity if joint.limit is not None else 1.0,
             )
+        else:
+            # BUG (found in audit): retyping a joint AWAY from REVOLUTE/
+            # PRISMATIC (e.g. to FIXED) used to leave the previous
+            # JointLimit object sitting on joint.limit untouched - urdf/
+            # writer.py emits a <limit> element whenever joint.limit is
+            # not None, regardless of type, so a FIXED joint that used to
+            # be REVOLUTE would round-trip back out with a meaningless
+            # <limit lower=... upper=.../> a real URDF consumer has no
+            # use for on a joint with no motion. CONTINUOUS is the one
+            # exception that keeps whatever limit it had (the URDF spec
+            # allows an optional <limit> there too, and this app's own
+            # jog slider - ui/panels/viewport_panel.py's own
+            # _JointSlider - already treats a CONTINUOUS joint with no
+            # limit as a full-turn default, so clearing it here would
+            # just lose real user-entered data for no benefit).
+            if joint.type != JointType.CONTINUOUS:
+                joint.limit = None
         self._controller.notify_tree_changed()
