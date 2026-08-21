@@ -1,6 +1,0 @@
-DofReport.is_feasible: False
-DofReport.multi_parent_link_names: ['B']
-DofReport.reasons: ['1 link(s) are the <child> of more than one <joint> - invalid per the URDF spec (a link may have at most one parent joint): B.', "0 DOF is below HYDRA-UMC-STUDIO's supported range (3-6 DOF)."]
-root_link_name(): A
-Calling compute_link_world_transforms()...
-TIMEOUT: compute_link_world_transforms did not return within 3s - CONFIRMED infinite loop.
