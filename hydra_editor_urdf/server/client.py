@@ -134,7 +134,11 @@ class StudioClient:
         resend" round-trip half of the owner's own spec."""
         data = self._request("GET", f"/api/models/{category}/{slug}/download")
         urdf_xml = data.get("urdfXml", "")
-        urdf_filename = data.get("urdfFilename") or f"{slug}.urdf"
+        # See the matching comment on the mesh-filename loop below - same
+        # server-controlled-filename risk applies here, so the same
+        # Path(...).name sanitization applies before it's ever joined onto
+        # out_dir.
+        urdf_filename = Path(data.get("urdfFilename") or f"{slug}.urdf").name or f"{slug}.urdf"
         mesh_files = data.get("meshFiles") or []
 
         out_dir = Path(dest_dir) / slug
@@ -150,6 +154,20 @@ class StudioClient:
                 b64 = mf.get("base64")
                 if not filename or not b64:
                     continue
-                (mesh_dir / filename).write_bytes(base64.b64decode(b64))
+                # BUG (found in audit): `filename` here comes straight from
+                # the server's own JSON response (GET /api/models/:category/
+                # :slug/download), unlike every OTHER filename this app
+                # writes to disk (which are either operator-picked via a
+                # native QFileDialog, or resolved against a real existing
+                # file by source/scan.py). A malformed/compromised response
+                # returning e.g. "../../../../some_startup_folder/evil.dll"
+                # would write outside mesh_dir the same way an unsanitized
+                # zip-slip would - Path(filename).name strips any directory
+                # component first, so the write always lands inside
+                # mesh_dir regardless of what the server sent.
+                safe_name = Path(filename).name
+                if not safe_name:
+                    continue
+                (mesh_dir / safe_name).write_bytes(base64.b64decode(b64))
 
         return urdf_path

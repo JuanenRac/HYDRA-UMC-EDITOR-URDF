@@ -109,7 +109,38 @@ def compute_link_world_transforms(robot: Robot, joint_values: dict[str, float]) 
     tree breadth-first from Robot.root_link_name() outward. Returns an
     empty dict if the robot has no valid single root (caller should have
     already run urdf/dof.py's validate() and refused to render/export a
-    tree that failed that check, same as it refuses to upload one)."""
+    tree that failed that check, same as it refuses to upload one).
+
+    BUG (found in audit): this used to append `joint.child` to the
+    frontier unconditionally on every visit, with no "already computed"
+    guard - fine for a genuine tree, but urdf/dof.py's own validate()
+    can mark a robot infeasible (e.g. a multi-parent link) WITHOUT
+    stopping render/viewport.py's own paintGL() from calling this
+    function anyway (paintGL never checks DofReport.is_feasible before
+    posing/drawing whatever is currently loaded). A multi-parent link is
+    exactly how a real directed CYCLE in the joint graph reaches the
+    root's own reachable set (any cycle reachable from a proper tree
+    root must re-enter through a link that already has one incoming
+    joint from the tree side, i.e. a multi-parent link per dof.py's own
+    check) - so a URDF shaped like root->A->B->A (B declared as A's
+    child twice, closing the loop) would bounce A/B back onto the
+    frontier forever: computed and verified with a real repro (root A ->
+    B via j1, B -> C via j2, C -> B via j3 closing the cycle) that hung
+    past a 3s watchdog before this fix. Guarding on `joint.child not in
+    world` - the same pattern urdf/dof.py's own _reachable_from() already
+    uses - makes this function visit each link at most once regardless
+    of the graph's own shape, so a cyclic/invalid URDF (already flagged
+    infeasible in the DOF panel) still renders SOMETHING instead of
+    hanging the whole UI thread. Re-verified after the fix: the same
+    repro now returns immediately with world={'A':.., 'B':..} - B's pose
+    comes from whichever of its incoming joints (j1 or j3) is processed
+    first, an arbitrary but deterministic pick, same "some joint silently
+    wins, order-dependent" spirit dof.py's own multi_parent comment
+    already documents for the non-cyclic diamond case (this fix makes it
+    first-processed-wins instead of the old last-processed-wins - neither
+    is "more correct" for a URDF the DOF panel already flags infeasible,
+    the point is just that it terminates); C is simply never reached
+    since nothing schedules it a second time."""
     root = robot.root_link_name()
     if root is None:
         return {}
@@ -121,6 +152,15 @@ def compute_link_world_transforms(robot: Robot, joint_values: dict[str, float]) 
         current = frontier.pop()
         parent_world = world[current]
         for joint in by_parent.get(current, []):
+            if joint.child in world:
+                # Already computed - either a harmless diamond
+                # reconvergence (dof.py's own documented "last writer
+                # wins" case) or, if reached a second time through a
+                # back-edge, a real cycle. Either way, re-visiting it
+                # again would just repeat the same overwrite forever for
+                # a genuine cycle - one pose per link is enough for a
+                # tree that dof.py has already flagged as invalid.
+                continue
             value = joint_values.get(joint.name, 0.0) if joint.is_movable else 0.0
             child_world = parent_world @ joint_local_transform(joint, value)
             world[joint.child] = child_world

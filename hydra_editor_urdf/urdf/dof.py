@@ -127,6 +127,32 @@ def validate(robot: Robot) -> DofReport:
         if joint.type != JointType.CONTINUOUS and joint.limit is None:
             reasons.append(f"Joint {joint.name!r} ({joint.type.value}) has no <limit> - required by the URDF spec for anything but a CONTINUOUS joint.")
 
+    # BUG (found in audit): a link's <inertial><mass value="..."/> was
+    # parsed as a plain float (urdf/parser.py's own _parse_inertial())
+    # with no check anywhere in this file that it's non-negative. A
+    # negative mass isn't just physically meaningless - real ROS tooling
+    # built on top of a URDF (robot_state_publisher, MoveIt, Gazebo/
+    # ros2_control's own inertia-based dynamics) either rejects it
+    # outright or produces silently-wrong dynamics (a negative mass
+    # flips the sign of every inertial force term downstream), so an
+    # operator re-exporting a URDF that came in with one would hand
+    # HYDRA-UMC-STUDIO's own catalog a file that's broken for any real
+    # ROS consumer even though this app's own viewport (which never
+    # reads Inertial at all - see render/viewport.py) shows nothing
+    # wrong. Reported the same way every other structural issue here is
+    # (a reason string, not an exception) - this app has no inertial
+    # editor yet (see mejoras_futuras.txt), so the only way this fires is
+    # a source URDF that already shipped a bad value; nothing about this
+    # app's own editing features can introduce one.
+    negative_mass_links = sorted(
+        link.name for link in robot.links.values() if link.inertial is not None and link.inertial.mass < 0.0
+    )
+    if negative_mass_links:
+        reasons.append(
+            f"{len(negative_mass_links)} link(s) have a negative <inertial><mass>, which is physically invalid and "
+            f"breaks real ROS consumers (robot_state_publisher/Gazebo/MoveIt): {', '.join(negative_mass_links)}."
+        )
+
     return DofReport(
         dof_count=dof_count,
         movable_joint_names=[j.name for j in movable],
