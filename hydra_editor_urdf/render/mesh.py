@@ -36,6 +36,18 @@ class UnsupportedMeshFormat(Exception):
     specifically isn't attempted rather than half-supported."""
 
 
+class MalformedMeshFile(Exception):
+    """Raised by load_obj() for a file whose extension IS supported but
+    whose content violates the Wavefront OBJ spec in a way this loader
+    can detect (today: a literal `0` vertex/normal index in an `f` line -
+    OBJ indices are 1-based, so 0 is never valid, positive or negative).
+    Caught by render/viewport.py's own _build_visual_mesh() the same way
+    as UnsupportedMeshFormat (skip that one visual, don't crash the whole
+    rebuild) - kept as its own exception type rather than reusing
+    UnsupportedMeshFormat because the failure here is "this specific file
+    is broken", not "this app doesn't support this format at all"."""
+
+
 @dataclass
 class Mesh:
     """Flat vertex+normal arrays ready for a GL_TRIANGLES VBO - 3 vertices
@@ -105,6 +117,7 @@ def load_obj(path: str | Path) -> Mesh:
     from CAD in the overwhelming majority of cases - a face with more
     than 4 vertices is fan-triangulated from its first vertex, the same
     simple rule most OBJ consumers apply."""
+    path = Path(path)  # normalized up front so the MalformedMeshFile messages below can always use path.name, even when called with a bare str
     positions: list[tuple[float, float, float]] = []
     normals_in: list[tuple[float, float, float]] = []
     out_vertices: list[tuple[float, float, float]] = []
@@ -132,12 +145,22 @@ def load_obj(path: str | Path) -> Mesh:
         # "v", "v/vt", "v/vt/vn", or "v//vn" - only v (position) and vn
         # (normal) matter here, vt (texcoord) is parsed and discarded.
         parts = token.split("/")
-        v_idx = int(parts[0])
-        v_idx = v_idx - 1 if v_idx > 0 else len(positions) + v_idx  # OBJ allows negative (relative) indices
+        v_raw = int(parts[0])
+        if v_raw == 0:
+            # OBJ indices are 1-based; 0 is never valid (neither the
+            # first vertex nor a legal negative/relative offset) - without
+            # this check it fell into the "else" branch meant for
+            # negative indices and computed len(positions) + 0, an
+            # out-of-range index that raised a bare IndexError with no
+            # hint that the source .obj itself is malformed.
+            raise MalformedMeshFile(f"{path.name}: face token {token!r} uses vertex index 0, which is invalid - OBJ indices are 1-based (no zero index).")
+        v_idx = v_raw - 1 if v_raw > 0 else len(positions) + v_raw  # OBJ allows negative (relative) indices
         n_idx = None
         if len(parts) == 3 and parts[2]:
-            n_idx = int(parts[2])
-            n_idx = n_idx - 1 if n_idx > 0 else len(normals_in) + n_idx
+            n_raw = int(parts[2])
+            if n_raw == 0:
+                raise MalformedMeshFile(f"{path.name}: face token {token!r} uses normal index 0, which is invalid - OBJ indices are 1-based (no zero index).")
+            n_idx = n_raw - 1 if n_raw > 0 else len(normals_in) + n_raw
         return v_idx, n_idx
 
     with open(path, encoding="utf-8", errors="replace") as f:

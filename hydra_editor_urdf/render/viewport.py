@@ -29,7 +29,7 @@ from PySide6.QtOpenGLWidgets import QOpenGLWidget
 
 from hydra_editor_urdf.models import BoxGeometry, CylinderGeometry, Material, MeshGeometry, Robot, SphereGeometry, Visual
 from hydra_editor_urdf.render.kinematics import compute_link_world_transforms, default_joint_values, origin_to_matrix
-from hydra_editor_urdf.render.mesh import Mesh, UnsupportedMeshFormat, load_mesh_file, make_box_mesh, make_cylinder_mesh, make_sphere_mesh
+from hydra_editor_urdf.render.mesh import MalformedMeshFile, Mesh, UnsupportedMeshFormat, load_mesh_file, make_box_mesh, make_cylinder_mesh, make_sphere_mesh
 
 VERTEX_SHADER = """
 #version 330 core
@@ -276,7 +276,7 @@ class UrdfViewport(QOpenGLWidget):
                 return None
             try:
                 mesh = load_mesh_file(resolved)
-            except (UnsupportedMeshFormat, OSError):
+            except (UnsupportedMeshFormat, MalformedMeshFile, OSError):
                 return None
             if geometry.scale != (1.0, 1.0, 1.0):
                 mesh = mesh.scaled(geometry.scale)

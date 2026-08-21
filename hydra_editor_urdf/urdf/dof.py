@@ -47,6 +47,7 @@ class DofReport:
     root_link_name: str | None = None
     orphan_link_names: list[str] = field(default_factory=list)  # links reachable from no joint at all
     disconnected_link_names: list[str] = field(default_factory=list)  # a real chain of >1 link, but reachable from no root
+    multi_parent_link_names: list[str] = field(default_factory=list)  # appear as <child> of >1 <joint> - invalid per the URDF spec (a link has at most one parent)
 
 
 def _reachable_from(robot: Robot, root: str) -> set[str]:
@@ -90,6 +91,23 @@ def validate(robot: Robot) -> DofReport:
     if disconnected:
         reasons.append(f"{len(disconnected)} link(s) not reachable from the root link by any joint chain: {', '.join(disconnected)}.")
 
+    # The URDF spec requires a link to be the <child> of at most one
+    # <joint> (it's a tree, every node has one parent). A link that's the
+    # child of two-or-more joints doesn't crash render/kinematics.py's own
+    # compute_link_world_transforms() - it just lets whichever joint gets
+    # processed last silently "win" that link's world transform, with no
+    # signal to the operator that the URDF is structurally invalid.
+    child_joint_counts: dict[str, int] = {}
+    for joint in robot.joints.values():
+        child_joint_counts[joint.child] = child_joint_counts.get(joint.child, 0) + 1
+    multi_parent = sorted(name for name, count in child_joint_counts.items() if count > 1)
+
+    if multi_parent:
+        reasons.append(
+            f"{len(multi_parent)} link(s) are the <child> of more than one <joint> - invalid per the URDF spec "
+            f"(a link may have at most one parent joint): {', '.join(multi_parent)}."
+        )
+
     if unsupported:
         reasons.append(
             f"{len(unsupported)} joint(s) use a type HYDRA-UMC-STUDIO's kinematics doesn't support at all "
@@ -118,4 +136,5 @@ def validate(robot: Robot) -> DofReport:
         root_link_name=root,
         orphan_link_names=orphans,
         disconnected_link_names=disconnected,
+        multi_parent_link_names=multi_parent,
     )
