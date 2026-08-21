@@ -2,6 +2,8 @@
 
 ### 🖌️ Créateur/Éditeur graphique de URDF pour le catalogue de modèles de HYDRA-UMC-STUDIO
 
+**Version actuelle :** 1.0.0 (`MAJOR.MINOR.PATCH` - voir la section **Build de production** ci-dessous pour comprendre comment ce numéro évolue)
+
 ---
 
 ## 🎯 Aperçu
@@ -110,7 +112,9 @@ Réutilise verbatim le propre `assets/qss/industrial_dark.qss` de HYDRA-UMC SUIT
 HYDRA-UMC-EDITOR-URDF/
 ├── main.py                        # Point d'entree - QApplication, theme, demarrage maximise, bascule plein ecran F11
 ├── requirements.txt                # PySide6, PyOpenGL, numpy-stl, numpy (versions figees)
-├── build_exe.bat / build_exe.sh    # Scripts de build d'executable autonome Windows/Linux (PyInstaller)
+├── build_exe.bat / build_exe.sh    # Scripts de build d'executable autonome Windows/Linux (PyInstaller) - fait d'abord monter le numero de version
+├── bump_version.py                 # Incrementation de version de type compteur kilometrique, appelee par build_exe.bat/.sh avant chaque build reel
+├── CHANGELOG.md                    # Historique des versions
 ├── README.md                       # Ce fichier
 ├── README_spa.md / README_ita.md / README_fra.md / README_deu.md  # <- traductions
 ├── LICENSE                         # GPL-3.0
@@ -118,6 +122,7 @@ HYDRA-UMC-EDITOR-URDF/
 │   └── qss/industrial_dark.qss     # Reutilise verbatim depuis HYDRA-UMC-SUITE
 ├── language/                       # english/spanish/italian/french/german.lng - se trouve a cote de l'exe, pas integre
 ├── hydra_editor_urdf/
+│   ├── __init__.py                 # __version__ - source unique de verite, lue par la boite de dialogue A propos et reecrite par bump_version.py
 │   ├── app.py                      # EditorController - proprietaire unique de "ce qui est charge", signaux Qt que chaque panneau ecoute
 │   ├── models.py                   # Arbre d'objets URDF interne (Robot/Link/Joint/Visual/Geometry/Material/...)
 │   ├── i18n.py                     # Chargeur de language/*.lng, persistance de la configuration - porte depuis le propre i18n.py de HYDRA-UMC-SUITE
@@ -178,7 +183,9 @@ Compile un exécutable autonome (aucune installation de Python n'est nécessaire
 - **Windows :** exécutez `build_exe.bat` → produit `dist\HYDRA-UMC_EDITOR-URDF.exe`
 - **Linux :** exécutez `./build_exe.sh` (`chmod +x build_exe.sh` une fois au préalable) → produit `dist/HYDRA-UMC_EDITOR-URDF`
 
-Les deux scripts créent/activent leur propre `.venv`, installent `requirements.txt` plus `pyinstaller`, nettoient tout `build`/`dist` précédent, compilent, et enfin copient `README.md`, `LICENSE`, et l'intégralité du dossier `language/` à côté du binaire résultant (`language/` n'est délibérément **pas** intégré à l'intérieur de l'exécutable via `--add-data`, de sorte qu'un fichier `.lng` puisse être modifié ou ajouté ensuite sans reconstruction).
+Les deux scripts créent/activent leur propre `.venv`, installent `requirements.txt` plus `pyinstaller`, nettoient tout `build`/`dist` précédent, **font monter le numéro de version**, compilent, et enfin copient `README.md`, `LICENSE`, et l'intégralité du dossier `language/` à côté du binaire résultant (`language/` n'est délibérément **pas** intégré à l'intérieur de l'exécutable via `--add-data`, de sorte qu'un fichier `.lng` puisse être modifié ou ajouté ensuite sans reconstruction).
+
+**Numérotation de version :** la version de l'application (`hydra_editor_urdf/__version__`, affichée dans la boîte de dialogue Aide → À propos) suit le schéma `MAJOR.MINOR.PATCH`. Chaque exécution réelle de `build_exe.bat`/`build_exe.sh` appelle d'abord `bump_version.py`, qui applique une incrémentation de type compteur kilométrique : `PATCH` augmente de 1 ; une fois que `PATCH` dépasserait 9, il revient à 0 et c'est `MINOR` qui augmente de 1 à la place (p. ex. `1.0.9` → `1.1.0`). `MAJOR` n'est jamais touché automatiquement - cela reste une décision délibérée et manuelle. Voir `CHANGELOG.md` pour l'historique des versions.
 
 Si vous préférez exécuter les étapes équivalentes à la main plutôt que via le script - utile pour adapter le build sur une plateforme que les scripts ne couvrent pas, ou pour déboguer un indicateur PyInstaller - le processus manuel est :
 

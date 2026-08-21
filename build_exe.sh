@@ -15,6 +15,14 @@
 # own header), so those --hidden-import flags are dropped below.
 set -euo pipefail
 
+# Keeps the terminal window open until the user presses Enter, on BOTH the
+# success path and every error path - including a command that aborts the
+# whole script via `set -e` above (not just the explicit `exit 1` calls
+# below). A trap on EXIT fires no matter how/where the script exits, so
+# this one line covers every exit point without needing a duplicate
+# read -p next to each individual error check.
+trap 'read -p "Pulsa Enter para cerrar / Press Enter to close..." _ || true' EXIT
+
 echo
 echo " ==============================================================="
 echo "  H Y D R A - U M C   E D I T O R - U R D F  -  Linux build"
@@ -26,7 +34,7 @@ echo "  License: GPL-3.0 (see LICENSE)"
 echo " ==============================================================="
 echo
 
-echo "[1/6] Checking for system Qt/OpenGL runtime libraries..."
+echo "[1/7] Checking for system Qt/OpenGL runtime libraries..."
 if ! python3 -c "import ctypes; ctypes.CDLL('libGL.so.1')" 2>/dev/null; then
     echo "      libGL.so.1 not found."
     echo "      On Debian/Ubuntu:  sudo apt install libgl1 libxkbcommon-x11-0 libxcb-cursor0"
@@ -37,7 +45,7 @@ fi
 echo "      Found."
 echo
 
-echo "[2/6] Creating/activating virtual environment..."
+echo "[2/7] Creating/activating virtual environment..."
 if [ ! -d .venv ]; then
     python3 -m venv .venv
 fi
@@ -45,19 +53,30 @@ source .venv/bin/activate
 echo "      Done."
 echo
 
-echo "[3/6] Installing Python dependencies..."
+echo "[3/7] Installing Python dependencies..."
 python3 -m pip install --upgrade pip >/dev/null
 python3 -m pip install -r requirements.txt
 python3 -m pip install pyinstaller
 echo "      Done."
 echo
 
-echo "[4/6] Cleaning previous build..."
+echo "[4/7] Cleaning previous build..."
 rm -rf build dist
 echo "      Done."
 echo
 
-echo "[5/6] Compiling HYDRA-UMC_EDITOR-URDF with PyInstaller..."
+echo "[5/7] Bumping version number..."
+# Odometer-style bump (see bump_version.py): PATCH+1 per real build,
+# carrying into MINOR past 9 (e.g. 1.0.9 -> 1.1.0). Runs for EVERY real
+# packaged build, unconditionally - if you're iterating on this script
+# without wanting a version bump each time, run the actual PyInstaller
+# command by hand instead of through this script. `set -e` above already
+# aborts (and the trap above still pauses) if this fails.
+python3 bump_version.py
+echo "      Done."
+echo
+
+echo "[6/7] Compiling HYDRA-UMC_EDITOR-URDF with PyInstaller..."
 # See HYDRA-UMC-SUITE's own build_exe.sh for the full reasoning behind
 # staging only these 4 Qt plugin subfolders instead of --collect-all
 # PySide6 (a ~3x smaller binary for the same working result), and for
@@ -79,7 +98,7 @@ fi
 echo "      Done."
 echo
 
-echo "[6/6] Copying files that must sit next to the binary, not inside it..."
+echo "[7/7] Copying files that must sit next to the binary, not inside it..."
 if [ -f README.md ]; then
     cp README.md dist/README.md
     echo "      Copied README.md into dist/"

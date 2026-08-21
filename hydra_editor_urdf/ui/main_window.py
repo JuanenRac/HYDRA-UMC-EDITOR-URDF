@@ -20,6 +20,7 @@ from PySide6.QtCore import Qt
 from PySide6.QtGui import QActionGroup
 from PySide6.QtWidgets import QDockWidget, QFileDialog, QMainWindow, QMessageBox
 
+from hydra_editor_urdf import __version__
 from hydra_editor_urdf.app import EditorController
 from hydra_editor_urdf.i18n import _, AVAILABLE_LANGUAGES, current_language, save_config, CONFIG_FILE_PATH
 from hydra_editor_urdf.ui.panels.dof_panel import DofPanel
@@ -140,7 +141,7 @@ class MainWindow(QMainWindow):
             QMessageBox.critical(self, _("MENU_EXPORT_URDF"), str(e))
 
     def _show_about(self) -> None:
-        QMessageBox.information(self, _("TITLE_ABOUT"), _("MSG_ABOUT_BODY"))
+        QMessageBox.information(self, _("TITLE_ABOUT"), _("MSG_ABOUT_BODY", version=__version__))
 
     def _on_language_change(self, code: str) -> None:
         if save_config({"language": code}):

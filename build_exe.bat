@@ -25,7 +25,7 @@ echo   License: GPL-3.0 (see LICENSE)
 echo  ===============================================================
 echo.
 
-echo [1/5] Creating/activating virtual environment...
+echo [1/6] Creating/activating virtual environment...
 if not exist .venv (
     python -m venv .venv
 )
@@ -33,27 +33,43 @@ call .venv\Scripts\activate.bat
 echo       Done.
 echo.
 
-echo [2/5] Installing Python dependencies...
+echo [2/6] Installing Python dependencies...
 python -m pip install --upgrade pip >nul
 python -m pip install -r requirements.txt
 python -m pip install pyinstaller
 echo       Done.
 echo.
 
-echo [3/5] Cleaning previous build...
+echo [3/6] Cleaning previous build...
 if exist build rmdir /s /q build
 if exist dist (
     rmdir /s /q dist
     if exist dist (
         echo       ERROR: couldn't remove dist\ - is HYDRA-UMC_EDITOR-URDF.exe currently running?
         echo       Close it first, then run this script again.
+        pause
         exit /b 1
     )
 )
 echo       Done.
 echo.
 
-echo [4/5] Compiling HYDRA-UMC_EDITOR-URDF.exe with PyInstaller...
+echo [4/6] Bumping version number...
+REM Odometer-style bump (see bump_version.py): PATCH+1 per real build,
+REM carrying into MINOR past 9 (e.g. 1.0.9 -> 1.1.0). This happens for
+REM EVERY real packaged build, unconditionally - if you're iterating on
+REM this script without wanting a version bump each time, run the actual
+REM PyInstaller command by hand instead of through this script.
+python bump_version.py
+if errorlevel 1 (
+    echo       ERROR: bump_version.py failed - see the output above.
+    pause
+    exit /b 1
+)
+echo       Done.
+echo.
+
+echo [5/6] Compiling HYDRA-UMC_EDITOR-URDF.exe with PyInstaller...
 REM See HYDRA-UMC-SUITE's own build_exe.bat for the full reasoning behind
 REM staging only these 4 Qt plugin subfolders instead of --collect-all
 REM PySide6 (a ~3x smaller .exe for the same working result).
@@ -72,12 +88,13 @@ python -m PyInstaller --onefile --windowed --noconfirm --name "HYDRA-UMC_EDITOR-
     main.py
 if not exist dist\HYDRA-UMC_EDITOR-URDF.exe (
     echo       ERROR: PyInstaller did not produce dist\HYDRA-UMC_EDITOR-URDF.exe - see the output above.
+    pause
     exit /b 1
 )
 echo       Done.
 echo.
 
-echo [5/5] Copying files that must sit next to the .exe, not inside it...
+echo [6/6] Copying files that must sit next to the .exe, not inside it...
 if exist README.md (
     copy /Y README.md dist\README.md >nul
     echo       Copied README.md into dist\

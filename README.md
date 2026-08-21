@@ -2,6 +2,8 @@
 
 ### 🖌️ Graphical URDF Creator/Editor for the HYDRA-UMC-STUDIO Model Catalog
 
+**Current version:** 1.0.0 (`MAJOR.MINOR.PATCH` - see the **Production Build** section below for how this number moves)
+
 ---
 
 ## 🎯 Overview
@@ -110,7 +112,9 @@ Reuses HYDRA-UMC SUITE's own `assets/qss/industrial_dark.qss` verbatim (same rel
 HYDRA-UMC-EDITOR-URDF/
 ├── main.py                        # Entry point - QApplication, theme, maximized start, F11 fullscreen toggle
 ├── requirements.txt                # PySide6, PyOpenGL, numpy-stl, numpy (pinned)
-├── build_exe.bat / build_exe.sh    # Windows/Linux standalone-executable build scripts (PyInstaller)
+├── build_exe.bat / build_exe.sh    # Windows/Linux standalone-executable build scripts (PyInstaller) - bumps the version first
+├── bump_version.py                 # Odometer-style version bump, called by build_exe.bat/.sh before every real build
+├── CHANGELOG.md                    # Version history
 ├── README.md                       # This file
 ├── README_spa.md / README_ita.md / README_fra.md / README_deu.md  # <- translations
 ├── LICENSE                         # GPL-3.0
@@ -118,6 +122,7 @@ HYDRA-UMC-EDITOR-URDF/
 │   └── qss/industrial_dark.qss     # Reused verbatim from HYDRA-UMC-SUITE
 ├── language/                       # english/spanish/italian/french/german.lng - sits beside the exe, not bundled
 ├── hydra_editor_urdf/
+│   ├── __init__.py                 # __version__ - single source of truth, read by the About dialog and rewritten by bump_version.py
 │   ├── app.py                      # EditorController - single owner of "what's loaded", Qt signals every panel listens to
 │   ├── models.py                   # In-house URDF object tree (Robot/Link/Joint/Visual/Geometry/Material/...)
 │   ├── i18n.py                     # language/*.lng loader, config persistence - ported from HYDRA-UMC-SUITE's own i18n.py
@@ -178,7 +183,9 @@ Compiles a standalone executable (no Python installation needed to run it) via P
 - **Windows:** run `build_exe.bat` → produces `dist\HYDRA-UMC_EDITOR-URDF.exe`
 - **Linux:** run `./build_exe.sh` (`chmod +x build_exe.sh` once first) → produces `dist/HYDRA-UMC_EDITOR-URDF`
 
-Both scripts create/activate their own `.venv`, install `requirements.txt` plus `pyinstaller`, clean any previous `build`/`dist`, compile, and finally copy `README.md`, `LICENSE`, and the whole `language/` folder next to the resulting binary (`language/` is deliberately **not** bundled inside the executable via `--add-data`, so a `.lng` file can be edited or added afterward with no rebuild).
+Both scripts create/activate their own `.venv`, install `requirements.txt` plus `pyinstaller`, clean any previous `build`/`dist`, **bump the version number**, compile, and finally copy `README.md`, `LICENSE`, and the whole `language/` folder next to the resulting binary (`language/` is deliberately **not** bundled inside the executable via `--add-data`, so a `.lng` file can be edited or added afterward with no rebuild).
+
+**Versioning:** the app's version (`hydra_editor_urdf/__version__`, shown in the Help → About dialog) follows `MAJOR.MINOR.PATCH`. Every real run of `build_exe.bat`/`build_exe.sh` calls `bump_version.py` first, which applies an odometer-style bump: `PATCH` goes up by 1; once `PATCH` would exceed 9 it resets to 0 and `MINOR` goes up by 1 instead (e.g. `1.0.9` → `1.1.0`). `MAJOR` is never touched automatically - that stays a deliberate, manual decision. See `CHANGELOG.md` for the version history.
 
 If you'd rather run the equivalent steps by hand instead of the script - useful for adapting the build on a platform the scripts don't cover, or for debugging a PyInstaller flag - the manual process is:
 

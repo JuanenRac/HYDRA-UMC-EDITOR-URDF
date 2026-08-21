@@ -1,0 +1,106 @@
+# Changelog
+
+All notable changes to HYDRA-UMC EDITOR-URDF are documented in this file.
+
+Versioning follows the ecosystem-wide `MAJOR.MINOR.PATCH` scheme with an
+"odometer" bump rule applied automatically on every real packaged build (see
+`bump_version.py`, invoked from `build_exe.bat`/`build_exe.sh`): `PATCH`
+goes up by 1 per build; once `PATCH` would exceed 9 it resets to 0 and
+`MINOR` goes up by 1 instead (e.g. `1.0.9` -> `1.1.0`). `MAJOR` is only ever
+bumped by hand, as a deliberate decision.
+
+## [1.0.0]
+
+Version numbering introduced for this project - it had no version number
+at all before this point.
+
+- Added `__version__` to `hydra_editor_urdf/__init__.py`, starting at
+  `1.0.0`.
+- Added `bump_version.py` (odometer-style PATCH/MINOR bump) and wired it
+  into `build_exe.bat`/`build_exe.sh` as a step that runs automatically
+  right before every real PyInstaller build.
+- The About dialog (Help menu) now shows the running version.
+- Added `CHANGELOG.md` (this file).
+
+## Unreleased history (pre-1.0.0, summarized from internal audit notes)
+
+The sections below summarize work completed before version numbering
+existed, drawn from the project's internal audit log
+(`SONNET/HYDRA-UMC-EDITOR-URDF/auditoria_historial.txt`).
+
+### Project commissioned
+
+Full specification received for a graphical URDF (3D object + kinematics)
+creator/editor for HYDRA-UMC-STUDIO's model catalog. Design direction set:
+reuse HYDRA-UMC-SUITE's proven pattern (Python + PySide6/Qt6, dockable
+Photoshop-style workspace, custom OpenGL viewport) rather than evaluating
+a new framework.
+
+### Application built
+
+Full application implemented: `EditorController` (single owner of "what
+URDF is loaded and where it came from"), a mutable dataclass model tree
+for editing URDF interactively, honest unsupported-format errors for
+xacro and `.dae`/COLLADA (no silent partial support), DOF validation
+(3-6 DOF, matching what HYDRA-UMC-STUDIO's kinematics support), generic
+forward kinematics for arbitrary imported URDFs (Rodrigues' rotation
+formula, not a fixed robot registry), a real OpenGL 3.3 core-profile
+viewport, mesh path resolution that handles `package://` URIs without a
+live ROS workspace, git-free GitHub zipball fetching, and a client for
+HYDRA-UMC-STUDIO's model submit/list/download API. Five-panel dockable UI
+(Source/DOF/Viewport/Properties/Upload) with 5-language i18n. `tests/`
+exists but was empty at this point.
+
+### Documentation and verification
+
+README.md written from scratch (Overview, design-decision rationale,
+repository structure, development/build instructions). `python -m
+py_compile` and real imports (via HYDRA-UMC-SUITE's venv, same pinned
+PySide6/PyOpenGL/numpy-stl versions) confirmed clean across the full
+package, including the UI/render/mesh chain.
+
+### Line-by-line audit, round 1
+
+Every one of the 26 `.py` modules reviewed line by line, with real
+end-to-end pipeline testing (a synthetic 6-DOF robot referencing real STL
+meshes from HYDRA-UMC-STUDIO's catalog) and a field-by-field cross-check
+of `server/client.py` against the real `HYDRA-UMC-STUDIO/server.ts`.
+
+4 real bugs found and fixed:
+1. `source/scan.py` mesh resolver applied its package-name-stripping step
+   unconditionally, letting it resolve to an unrelated file outside the
+   search root for a plain relative path with no `package://` scheme.
+2. `source_panel.py`/`upload_panel.py` QThread instances could be
+   overwritten mid-flight by an auto-triggered refresh, leaving Qt running
+   a thread with no live Python reference - fixed by tracking live threads
+   in a set until their `finished` signal fires.
+3. `render/viewport.py` never freed GPU VAO/VBO buffers on rebuild - a
+   real GPU memory leak on every live edit - fixed with explicit
+   `glDeleteVertexArrays`/`glDeleteBuffers` before discarding old buffers.
+4. `properties_panel.py` left a stale `<limit>` on a joint retyped away
+   from revolute/prismatic, producing invalid exported URDF - fixed by
+   clearing `joint.limit` on retype (except for `continuous`, where a
+   `<limit>` is valid per spec).
+
+### README translated to 5 languages
+
+`README_spa.md`, `README_ita.md`, `README_fra.md`, `README_deu.md` added
+as faithful section-by-section translations, matching the convention
+already used in URTC-FLASHER/URTC-TESTER. License section expanded to
+cover both GPL-3.0 (code) and CC BY-SA 4.0 (documentation).
+
+### Line-by-line audit, round 2
+
+Remaining open items from the previous audit's "reasonable doubts"
+resolved as 2 additional real bugs, each reproduced before and after the
+fix:
+1. `urdf/dof.py` `validate()` never detected a link declared as `<child>`
+   of more than one `<joint>` (invalid per URDF spec) - fixed by adding
+   `multi_parent_link_names` detection and a corresponding reason string.
+2. `render/mesh.py` `load_obj()` mishandled a literal `0` vertex/normal
+   index in a Wavefront `f` line (invalid per spec, 1-based), raising an
+   unclear `IndexError` - fixed with an explicit check that raises a new
+   `MalformedMeshFile` with a clear message instead.
+
+No commits were made during any of this work - the owner makes their own
+commits.

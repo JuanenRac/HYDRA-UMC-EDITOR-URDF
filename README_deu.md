@@ -2,6 +2,8 @@
 
 ### 🖌️ Grafischer URDF-Ersteller/-Editor für den Modellkatalog von HYDRA-UMC-STUDIO
 
+**Aktuelle Version:** 1.0.0 (`MAJOR.MINOR.PATCH` - siehe den Abschnitt **Produktions-Build** weiter unten dafür, wie sich diese Zahl bewegt)
+
 ---
 
 ## 🎯 Überblick
@@ -110,7 +112,9 @@ Verwendet die eigene `assets/qss/industrial_dark.qss` von HYDRA-UMC SUITE wörtl
 HYDRA-UMC-EDITOR-URDF/
 ├── main.py                        # Einstiegspunkt - QApplication, Theme, maximierter Start, F11-Vollbild-Umschalter
 ├── requirements.txt                # PySide6, PyOpenGL, numpy-stl, numpy (fest gepinnt)
-├── build_exe.bat / build_exe.sh    # Build-Skripte für eigenständige Windows-/Linux-Executables (PyInstaller)
+├── build_exe.bat / build_exe.sh    # Build-Skripte für eigenständige Windows-/Linux-Executables (PyInstaller) - erhöht zuerst die Versionsnummer
+├── bump_version.py                 # Erhöhung der Version im Kilometerzähler-Stil, aufgerufen von build_exe.bat/.sh vor jedem echten Build
+├── CHANGELOG.md                    # Versionshistorie
 ├── README.md                       # Diese Datei
 ├── README_spa.md / README_ita.md / README_fra.md / README_deu.md  # <- Übersetzungen
 ├── LICENSE                         # GPL-3.0
@@ -118,6 +122,7 @@ HYDRA-UMC-EDITOR-URDF/
 │   └── qss/industrial_dark.qss     # Wörtlich von HYDRA-UMC-SUITE wiederverwendet
 ├── language/                       # english/spanish/italian/french/german.lng - liegt neben der exe, nicht gebündelt
 ├── hydra_editor_urdf/
+│   ├── __init__.py                 # __version__ - einzige Quelle der Wahrheit, gelesen vom Über-Dialog und neu geschrieben von bump_version.py
 │   ├── app.py                      # EditorController - alleiniger Besitzer von „was geladen ist", Qt-Signale, denen jedes Panel zuhört
 │   ├── models.py                   # Hausgemachter URDF-Objektbaum (Robot/Link/Joint/Visual/Geometry/Material/...)
 │   ├── i18n.py                     # Loader für language/*.lng, Persistenz der Konfiguration - portiert aus der eigenen i18n.py von HYDRA-UMC-SUITE
@@ -178,7 +183,9 @@ Kompiliert eine eigenständige ausführbare Datei (keine Python-Installation zum
 - **Windows:** `build_exe.bat` ausführen → erzeugt `dist\HYDRA-UMC_EDITOR-URDF.exe`
 - **Linux:** `./build_exe.sh` ausführen (zuvor einmalig `chmod +x build_exe.sh`) → erzeugt `dist/HYDRA-UMC_EDITOR-URDF`
 
-Beide Skripte erstellen/aktivieren ihre eigene `.venv`, installieren `requirements.txt` plus `pyinstaller`, bereinigen ein etwaiges vorheriges `build`/`dist`, kompilieren und kopieren schließlich `README.md`, `LICENSE` sowie den gesamten Ordner `language/` neben die entstandene Binärdatei (`language/` wird absichtlich **nicht** über `--add-data` in die ausführbare Datei gebündelt, sodass eine `.lng`-Datei danach ohne Neubau bearbeitet oder hinzugefügt werden kann).
+Beide Skripte erstellen/aktivieren ihre eigene `.venv`, installieren `requirements.txt` plus `pyinstaller`, bereinigen ein etwaiges vorheriges `build`/`dist`, **erhöhen die Versionsnummer**, kompilieren und kopieren schließlich `README.md`, `LICENSE` sowie den gesamten Ordner `language/` neben die entstandene Binärdatei (`language/` wird absichtlich **nicht** über `--add-data` in die ausführbare Datei gebündelt, sodass eine `.lng`-Datei danach ohne Neubau bearbeitet oder hinzugefügt werden kann).
+
+**Versionierung:** Die Version der App (`hydra_editor_urdf/__version__`, angezeigt im Dialog Hilfe → Über) folgt `MAJOR.MINOR.PATCH`. Jeder reale Lauf von `build_exe.bat`/`build_exe.sh` ruft zuerst `bump_version.py` auf, das eine Erhöhung im Kilometerzähler-Stil anwendet: `PATCH` erhöht sich um 1; sobald `PATCH` 9 überschreiten würde, wird es auf 0 zurückgesetzt und stattdessen `MINOR` um 1 erhöht (z. B. `1.0.9` → `1.1.0`). `MAJOR` wird nie automatisch angefasst - das bleibt eine bewusste, manuelle Entscheidung. Siehe `CHANGELOG.md` für die Versionshistorie.
 
 Wenn Sie die entsprechenden Schritte lieber von Hand ausführen möchten, statt das Skript zu verwenden - nützlich, um den Build an eine Plattform anzupassen, die die Skripte nicht abdecken, oder um ein PyInstaller-Flag zu debuggen -, sieht der manuelle Ablauf so aus:
 
