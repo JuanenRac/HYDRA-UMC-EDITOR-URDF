@@ -1,5 +1,13 @@
 # 🦾 HYDRA-UMC EDITOR-URDF
 
+<p align="left">
+  <img src="https://img.shields.io/badge/Licencia-GPL%203.0-blue.svg" alt="GPL 3.0">
+  <img src="https://img.shields.io/badge/Lenguaje-Python%203.11-3776AB.svg" alt="Python">
+  <img src="https://img.shields.io/badge/Framework-PySide6-41CD52.svg" alt="PySide6">
+  <img src="https://img.shields.io/badge/Formato-URDF-red.svg" alt="URDF">
+</p>
+
+
 ### 🖌️ Creador/Editor Gráfico de URDF para el Catálogo de Modelos de HYDRA-UMC-STUDIO
 
 **Versión actual:** 1.0.0 (`MAJOR.MINOR.PATCH` - ver la sección **Compilación de Producción** más abajo para saber cómo se mueve este número)
