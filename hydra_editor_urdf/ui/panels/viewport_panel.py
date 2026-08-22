@@ -88,6 +88,13 @@ class ViewportPanel(QWidget):
         center = QWidget()
         center_layout = QVBoxLayout(center)
         self._viewport = UrdfViewport(mesh_resolver=lambda name: controller.mesh_resolver(name))
+        # See UrdfViewport's own mesh_warning Signal docstring (audit
+        # finding: a missing/broken mesh reference used to fail silently,
+        # rendering a "ghost" robot with no indication anything was
+        # skipped) - routed through the same status_message path
+        # ui/main_window.py already wires to the status bar, not a new
+        # UI mechanism.
+        self._viewport.mesh_warning.connect(self._controller.status_message.emit)
         center_layout.addWidget(self._viewport, stretch=1)
         splitter.addWidget(center)
 

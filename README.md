@@ -86,7 +86,7 @@ Real `QDockWidget` panels - drag to float, drag back to dock, merge into tabs, s
 
 ## ☁️ Server Round-Trip
 
-Talks to HYDRA-UMC-STUDIO's own model-submission contract (`POST /api/models/submit`, `GET /api/models`, `GET /api/models/:category/:slug/download` in that project's own `server.ts`, gated behind its own **Config > Models > "Accept model submissions"** toggle) using the standard library's own `urllib.request` - one more HTTP call didn't justify pulling in `httpx`/`requests` for a project that only ever needs 4 endpoints, not a persistent live connection. Every call runs on a background `QThread` so a slow or unreachable server never freezes the UI.
+Talks to HYDRA-UMC-SERVER's own model-submission contract (`POST /api/models/submit`, `GET /api/models`, `GET /api/models/:category/:slug/download` in that project's own `server.ts`, gated behind its own **Config > Models > "Accept model submissions"** toggle) using the standard library's own `urllib.request` - one more HTTP call didn't justify pulling in `httpx`/`requests` for a project that only ever needs 4 endpoints, not a persistent live connection. Every call runs on a background `QThread` so a slow or unreachable server never freezes the UI. This contract used to live inside HYDRA-UMC-STUDIO's own process before that project split into a pure frontend (STUDIO) plus a separate headless backend (HYDRA-UMC-SERVER, see **Related Projects** below) - this app doesn't hardcode either name, the operator just points the **Upload** panel's host/port fields at wherever the real backend is running.
 
 - **Login** - `POST /api/login`; only an `admin`-role token can actually reach `POST /api/models/submit` server-side, so this app is only really usable against an admin account, same as every other admin-only STUDIO feature.
 - **Push** - serializes the current robot back to URDF XML and base64-encodes every mesh file its visuals reference (resolved through the same mesh resolver built at import time) inline in the request body, tagged with the operator-picked category (mirroring STUDIO's own Config > UI > Module Visibility categories: Robot 3-6DOF, CNC, Pick & Place, Laser, Vacuum Table, XY Table, Heated Bed, ATC Tools - a URDF has no field of its own that says which of these it is). A name collision comes back as the server's own 409 response; the operator decides whether to resubmit with **Overwrite** checked or rename, this app never guesses.
@@ -139,7 +139,7 @@ HYDRA-UMC-EDITOR-URDF/
 │   │   ├── github_fetcher.py       # GitHub zipball download + extraction (urllib + zipfile, no git dependency)
 │   │   └── local_folder.py         # Local folder validation - the thin counterpart to github_fetcher.py
 │   ├── server/
-│   │   └── client.py               # StudioClient - login/list_models/push_model/pull_model against HYDRA-UMC-STUDIO's server.ts
+│   │   └── client.py               # StudioClient - login/list_models/push_model/pull_model against HYDRA-UMC-SERVER's server.ts (STUDIO's own backend before the two repos split)
 │   └── ui/
 │       ├── main_window.py          # QMainWindow - dockable workspace, menu bar, language switcher, status bar
 │       ├── theme.py                 # Applies assets/qss/industrial_dark.qss

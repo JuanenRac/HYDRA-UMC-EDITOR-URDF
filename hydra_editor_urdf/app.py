@@ -13,6 +13,7 @@
 # =============================================================================
 from __future__ import annotations
 
+import sys
 import tempfile
 from pathlib import Path
 from typing import Callable
@@ -34,7 +35,27 @@ from hydra_editor_urdf.urdf.writer import robot_to_urdf_string
 # MB and take real time - losing it to a temp sweep between "fetch" and
 # "review the result" would be a bad surprise). See .gitignore's own
 # `work/` entry - never meant to be committed.
-WORK_DIR = Path(__file__).resolve().parent.parent / "work"
+#
+# BUG (found in audit): plain `Path(__file__).resolve().parent.parent`
+# is only "this app's own install/checkout" when running from source.
+# build_exe.bat packages this app with PyInstaller's own --onefile mode
+# (see that script's own [5/6] step) - under --onefile, every bundled
+# module's __file__ resolves inside the PyInstaller run's own extraction
+# temp dir (sys._MEIPASS, a fresh path under the OS temp folder EVERY
+# launch), not next to the real .exe. The old code would have put
+# WORK_DIR exactly in the bare OS temp dir this comment says it
+# deliberately avoids, and silently lost it the moment the .exe process
+# exits (PyInstaller cleans up _MEIPASS on normal exit) - the opposite of
+# "survives a crash/restart for inspection" for every packaged build.
+# i18n.py's own LANGUAGE_FOLDER/CONFIG_FILE_PATH already solve this
+# exact problem (see its own header comment) by keying off
+# `sys.executable`'s directory when frozen instead of `__file__` -
+# reusing that same pattern here rather than inventing a second one.
+if getattr(sys, "frozen", False):
+    _base_dir = Path(sys.executable).resolve().parent
+else:
+    _base_dir = Path(__file__).resolve().parent.parent
+WORK_DIR = _base_dir / "work"
 
 
 class EditorController(QObject):
@@ -142,7 +163,23 @@ class EditorController(QObject):
         text = self.export_urdf_string()
         if text is None:
             raise ValueError("No robot loaded to export.")
-        Path(path).write_text(text, encoding="utf-8")
+        path = Path(path)
+        # BUG (found in audit): this used to call write_text() directly
+        # over whatever file the operator picked - if that path already
+        # existed (the overwhelmingly common case: "Export" onto the same
+        # .urdf just imported, after a live edit) and the process died
+        # mid-write (disk full, power loss, OS kill), write_text()'s own
+        # open(mode="w") had already truncated the original file to 0
+        # bytes before writing a single new byte, so the operator's
+        # original source file - not just the new export - was the thing
+        # actually at risk. Back up the existing file first (a single
+        # `.bak` copy, not a versioned history - matches the scope of a
+        # crash-safety net, not a full undo mechanism, which is tracked
+        # separately in mejoras_futuras.txt item 7) so a failed write
+        # still leaves a recoverable copy of what was there before.
+        if path.exists():
+            path.replace(path.with_name(path.name + ".bak"))
+        path.write_text(text, encoding="utf-8")
 
     @property
     def source_description(self) -> str:

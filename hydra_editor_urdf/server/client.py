@@ -3,11 +3,20 @@
 # Copyright (C) 2026 JuanenRac (Electro Hobby 3D) <electrohobby3d@gmail.com>
 # GPL-3.0 - see LICENSE
 #
-# Talks to HYDRA-UMC-STUDIO's own model-submission contract (server.ts's
+# Talks to HYDRA-UMC-SERVER's own model-submission contract (server.ts's
 # POST /api/models/submit, GET /api/models, GET /api/models/:category/:slug/
 # download - see that project's own docs/REMOTE_API.md and server.ts for
 # the authoritative contract, this comment can drift from it the same way
 # every other client in this ecosystem's own comments admit theirs can).
+# NOTE (docs sync, 12-project audit): this contract used to be implemented
+# inside HYDRA-UMC-STUDIO's own process - it now lives in the separate
+# HYDRA-UMC-SERVER repo (STUDIO is a pure static frontend that talks to
+# it over the network). The request/response contract itself (every field
+# name below, the 409-on-collision behavior, requireAdmin gating) is
+# unchanged by that split - confirmed field-by-field against the real,
+# current HYDRA-UMC-SERVER/src/server.ts. This client doesn't hardcode a
+# host - the operator points ui/panels/upload_panel.py's own host:port
+# fields at wherever that server is actually running.
 # stdlib `urllib.request` only, same reasoning as source/github_fetcher.py:
 # one more HTTP call doesn't justify a new dependency (httpx/requests) this
 # project doesn't otherwise need. Synchronous/blocking - callers (upload_panel.py)
@@ -69,10 +78,12 @@ class StudioClient:
 
     def login(self, username: str, password: str) -> None:
         """POST /api/login - only an `admin`-role token can actually use
-        push_model()/pull_model() below (server.ts's own requireAdmin on
-        POST /api/models/submit), so this app is only really usable
-        against an admin account, same as every other admin-only STUDIO
-        feature (Config > Users, Config > Remote Access)."""
+        push_model()/pull_model() below (HYDRA-UMC-SERVER's own server.ts,
+        requireAdmin on POST /api/models/submit), so this app is only
+        really usable against an admin account, same as every other
+        admin-only feature reachable from STUDIO's own UI (Config > Users,
+        Config > Remote Access) - STUDIO's frontend is what the operator
+        sees, but the account/token check itself lives in SERVER now."""
         data = self._request("POST", "/api/login", {"username": username, "password": password})
         token = data.get("token")
         if not token:

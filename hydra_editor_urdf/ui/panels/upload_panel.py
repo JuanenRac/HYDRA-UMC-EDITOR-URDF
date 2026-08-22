@@ -4,12 +4,15 @@
 # GPL-3.0 - see LICENSE
 #
 # Push the currently-loaded, DOF-feasible robot to a running
-# HYDRA-UMC-STUDIO server's own catalog (server/client.py), or pull an
-# already-submitted one back down for editing - both directions of the
-# owner's own "extraer, modificar, volver a enviar" round-trip. Every
-# server call runs on a background QThread (server/client.py's own HTTP
-# calls are blocking) so a slow/unreachable server never freezes the UI,
-# same pattern source_panel.py already uses for the GitHub fetch.
+# HYDRA-UMC-SERVER instance's own model catalog (server/client.py) - the
+# same catalog HYDRA-UMC-STUDIO's own UI renders, but the backend that
+# actually stores it lives in the separate HYDRA-UMC-SERVER repo, not in
+# STUDIO itself (see server/client.py's own header for the split) - or
+# pull an already-submitted one back down for editing - both directions
+# of the owner's own "extraer, modificar, volver a enviar" round-trip.
+# Every server call runs on a background QThread (server/client.py's own
+# HTTP calls are blocking) so a slow/unreachable server never freezes the
+# UI, same pattern source_panel.py already uses for the GitHub fetch.
 # =============================================================================
 from __future__ import annotations
 
@@ -33,10 +36,12 @@ from hydra_editor_urdf.i18n import _
 from hydra_editor_urdf.server.client import StudioClient, StudioClientError
 
 # Mirrors HYDRA-UMC-STUDIO's own Config > UI > Module Visibility categories
-# (Config.tsx's own moduleOptions) - the operator picks which of these the
-# submitted model belongs under, since server.ts's own /api/models/submit
-# stores it by category folder and has no way to infer this from the URDF
-# itself (a URDF has no "this is a CNC vs a robot arm" field).
+# (Config.tsx's own moduleOptions - that part is still genuinely STUDIO's,
+# a frontend-only config screen) - the operator picks which of these the
+# submitted model belongs under, since HYDRA-UMC-SERVER's own server.ts's
+# /api/models/submit stores it by category folder and has no way to infer
+# this from the URDF itself (a URDF has no "this is a CNC vs a robot arm"
+# field).
 CATEGORIES = ["Robot 3-6DOF", "CNC", "PickAndPlace", "Laser", "Vacuum Table", "XY Table", "Heated Bed", "ATC Tools"]
 
 

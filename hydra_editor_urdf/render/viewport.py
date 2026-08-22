@@ -23,7 +23,7 @@ from typing import Callable
 
 import numpy as np
 from OpenGL import GL as gl
-from PySide6.QtCore import QPointF, Qt
+from PySide6.QtCore import QPointF, Qt, Signal
 from PySide6.QtGui import QMouseEvent, QWheelEvent
 from PySide6.QtOpenGLWidgets import QOpenGLWidget
 
@@ -164,6 +164,16 @@ class UrdfViewport(QOpenGLWidget):
     jog-preview slider move, which does NOT touch the GPU buffers at all,
     only the per-visual model matrix computed at draw time."""
 
+    # This widget's own way of telling ui/panels/viewport_panel.py "I
+    # silently skipped drawing one or more visuals" (see
+    # _build_visual_mesh()'s own "BUG (found in audit)" comment below),
+    # so that panel can surface it to the operator via
+    # EditorController.status_message - the same status-bar path
+    # load_failed/robot_loaded already use - instead of the operator only
+    # ever finding out by noticing a part of the robot is missing in the
+    # viewport with zero indication of why.
+    mesh_warning = Signal(str)
+
     def __init__(self, mesh_resolver: Callable[[str], "Path | None"], parent=None):
         super().__init__(parent)
         self.setMinimumSize(320, 240)
@@ -251,18 +261,34 @@ class UrdfViewport(QOpenGLWidget):
             for buf in self._buffers.values():
                 buf.delete()
             self._buffers = {}
+            missing: list[str] = []
             if robot is not None:
                 self._colors = self._collect_colors(robot)
                 for link in robot.links.values():
                     for i, visual in enumerate(link.visuals):
-                        mesh = self._build_visual_mesh(visual)
+                        mesh = self._build_visual_mesh(visual, link.name, missing)
                         if mesh is not None:
                             self._buffers[(link.name, i)] = GLMeshBuffer(mesh)
         finally:
             self.doneCurrent()
+        if missing:
+            # BUG (found in audit): a mesh_resolver miss or a mesh load
+            # failure used to just make _build_visual_mesh() return None,
+            # which this loop already silently skips (correct - one bad
+            # visual shouldn't crash the whole rebuild) - but nothing ever
+            # told the OPERATOR a visual went missing. A robot with a
+            # broken/moved mesh reference would render as a silently
+            # incomplete "ghost" model with no visible link between "this
+            # part isn't drawn" and "here's why" - the operator has no way
+            # to tell that apart from the part legitimately not existing.
+            # Surfaced through the same status-bar path everything else in
+            # this app already uses (see this class's own mesh_warning
+            # Signal above), not a new dialog/mechanism.
+            count_label = f"{len(missing)} mesh(es)" if len(missing) > 1 else "1 mesh"
+            self.mesh_warning.emit(f"{count_label} could not be loaded and won't be shown: {', '.join(missing[:3])}" + (", ..." if len(missing) > 3 else ""))
         self.update()
 
-    def _build_visual_mesh(self, visual: Visual) -> Mesh | None:
+    def _build_visual_mesh(self, visual: Visual, link_name: str = "", missing: list[str] | None = None) -> Mesh | None:
         geometry = visual.geometry
         if isinstance(geometry, BoxGeometry):
             return make_box_mesh(geometry.size)
@@ -273,10 +299,14 @@ class UrdfViewport(QOpenGLWidget):
         if isinstance(geometry, MeshGeometry):
             resolved = self._mesh_resolver(geometry.filename)
             if resolved is None:
+                if missing is not None:
+                    missing.append(f"{link_name}: {geometry.filename}" if link_name else geometry.filename)
                 return None
             try:
                 mesh = load_mesh_file(resolved)
             except (UnsupportedMeshFormat, MalformedMeshFile, OSError):
+                if missing is not None:
+                    missing.append(f"{link_name}: {geometry.filename}" if link_name else geometry.filename)
                 return None
             if geometry.scale != (1.0, 1.0, 1.0):
                 mesh = mesh.scaled(geometry.scale)
