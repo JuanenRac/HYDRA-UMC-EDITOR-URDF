@@ -1,0 +1,282 @@
+/* =============================================================================
+HYDRA-UMC SUITE - industrial_dark.qss
+Copyright (C) 2026 JuanenRac (Electro Hobby 3D) <electrohobby3d@gmail.com>
+GPL-3.0 - see LICENSE
+
+"Futuristic industrial" theme - dark slate base, cyan accent, matching the
+same visual language HYDRA-UMC-STUDIO's own web UI already established
+(same family of dark-panel/cyan-highlight industrial dashboards) rather
+than inventing an unrelated look for this sibling project.
+============================================================================= */
+
+* {
+    font-family: "Segoe UI", "Inter", sans-serif;
+    font-size: 13px;
+    color: #d6dee6;
+}
+
+QMainWindow, QDialog {
+    background-color: #0b0e13;
+}
+
+QWidget#centralWorkspace {
+    background-color: #0b0e13;
+}
+
+QMenuBar {
+    background-color: #11151c;
+    border-bottom: 1px solid #1c232d;
+    padding: 2px;
+}
+QMenuBar::item {
+    background: transparent;
+    padding: 4px 10px;
+}
+QMenuBar::item:selected {
+    background-color: #1a2129;
+    border-radius: 3px;
+}
+QMenu {
+    background-color: #12161d;
+    border: 1px solid #232b36;
+}
+QMenu::item {
+    padding: 6px 22px;
+}
+QMenu::item:selected {
+    background-color: #1e94a8;
+    color: #0b0e13;
+}
+
+QToolBar {
+    background-color: #11151c;
+    border-bottom: 1px solid #1c232d;
+    spacing: 6px;
+    padding: 4px;
+}
+
+QStatusBar {
+    background-color: #11151c;
+    border-top: 1px solid #1c232d;
+    color: #7f8ea1;
+}
+
+/* Dock widgets - the Photoshop-style panel system's own chrome */
+QDockWidget {
+    titlebar-close-icon: none;
+    color: #d6dee6;
+    border: 1px solid #1c232d;
+}
+QDockWidget::title {
+    background-color: #151b23;
+    padding: 6px 8px;
+    border-bottom: 1px solid #222b36;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    font-weight: 600;
+    font-size: 11px;
+    color: #21c6de;
+}
+QDockWidget::close-button, QDockWidget::float-button {
+    background: transparent;
+    border: none;
+    padding: 2px;
+}
+QDockWidget::close-button:hover, QDockWidget::float-button:hover {
+    background-color: #232d38;
+    border-radius: 3px;
+}
+
+QTabBar::tab {
+    background-color: #11151c;
+    color: #8b98a8;
+    padding: 6px 14px;
+    border: 1px solid #1c232d;
+    border-bottom: none;
+}
+QTabBar::tab:selected {
+    background-color: #182029;
+    color: #21c6de;
+    border-bottom: 2px solid #21c6de;
+}
+QTabWidget::pane {
+    border: 1px solid #1c232d;
+    background-color: #0f131a;
+}
+
+QGroupBox {
+    border: 1px solid #1c232d;
+    border-radius: 4px;
+    margin-top: 12px;
+    padding-top: 8px;
+    background-color: #0f131a;
+}
+QGroupBox::title {
+    subcontrol-origin: margin;
+    left: 8px;
+    padding: 0 4px;
+    color: #7f8ea1;
+    text-transform: uppercase;
+    font-size: 11px;
+    letter-spacing: 1px;
+}
+
+QPushButton {
+    background-color: #182029;
+    border: 1px solid #263140;
+    border-radius: 4px;
+    padding: 6px 14px;
+    color: #d6dee6;
+}
+QPushButton:hover {
+    background-color: #1f2a36;
+    border-color: #21c6de;
+}
+QPushButton:pressed {
+    background-color: #14313a;
+}
+QPushButton:disabled {
+    color: #4a5563;
+    border-color: #1c232d;
+}
+QPushButton#primaryAction {
+    background-color: #14818f;
+    border-color: #1ba4b6;
+    color: #06141a;
+    font-weight: 600;
+}
+QPushButton#primaryAction:hover {
+    background-color: #17a0b1;
+}
+QPushButton#dangerAction {
+    background-color: #3a1620;
+    border-color: #7a2b3b;
+    color: #ff8fa3;
+}
+QPushButton#dangerAction:hover {
+    background-color: #4d1b28;
+}
+
+QLineEdit, QSpinBox, QDoubleSpinBox, QComboBox {
+    background-color: #0f131a;
+    border: 1px solid #232b36;
+    border-radius: 3px;
+    padding: 4px 6px;
+    selection-background-color: #1e94a8;
+}
+QLineEdit:focus, QSpinBox:focus, QDoubleSpinBox:focus, QComboBox:focus {
+    border-color: #21c6de;
+}
+QComboBox::drop-down {
+    border: none;
+    width: 20px;
+}
+QComboBox QAbstractItemView {
+    background-color: #12161d;
+    border: 1px solid #232b36;
+    selection-background-color: #1e94a8;
+    selection-color: #0b0e13;
+}
+
+QSlider::groove:horizontal {
+    height: 4px;
+    background: #1c232d;
+    border-radius: 2px;
+}
+QSlider::sub-page:horizontal {
+    background: #1e94a8;
+    border-radius: 2px;
+}
+QSlider::handle:horizontal {
+    width: 14px;
+    height: 14px;
+    margin: -6px 0;
+    background: #21c6de;
+    border-radius: 7px;
+}
+QSlider::handle:horizontal:hover {
+    background: #4fe0f5;
+}
+
+QDial {
+    background: transparent;
+}
+
+QTableWidget, QTableView {
+    background-color: #0f131a;
+    alternate-background-color: #12161d;
+    gridline-color: #1c232d;
+    border: 1px solid #1c232d;
+    selection-background-color: #1e94a8;
+    selection-color: #0b0e13;
+}
+QHeaderView::section {
+    background-color: #151b23;
+    color: #7f8ea1;
+    padding: 6px;
+    border: none;
+    border-right: 1px solid #1c232d;
+    border-bottom: 1px solid #1c232d;
+    text-transform: uppercase;
+    font-size: 11px;
+    letter-spacing: 1px;
+}
+
+QListWidget, QTreeWidget {
+    background-color: #0f131a;
+    border: 1px solid #1c232d;
+    alternate-background-color: #12161d;
+}
+QListWidget::item, QTreeWidget::item {
+    padding: 5px;
+}
+QListWidget::item:selected, QTreeWidget::item:selected {
+    background-color: #1e94a8;
+    color: #0b0e13;
+}
+
+QScrollBar:vertical {
+    background: #0f131a;
+    width: 10px;
+}
+QScrollBar::handle:vertical {
+    background: #263140;
+    border-radius: 4px;
+    min-height: 24px;
+}
+QScrollBar::handle:vertical:hover {
+    background: #34455a;
+}
+QScrollBar:horizontal {
+    background: #0f131a;
+    height: 10px;
+}
+QScrollBar::handle:horizontal {
+    background: #263140;
+    border-radius: 4px;
+    min-width: 24px;
+}
+
+QLabel#panelHeading {
+    color: #21c6de;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    font-size: 11px;
+}
+QLabel#statusOnline {
+    color: #3ddc84;
+    font-weight: 600;
+}
+QLabel#statusOffline {
+    color: #ff5c72;
+    font-weight: 600;
+}
+QLabel#statusConnecting {
+    color: #f5c542;
+    font-weight: 600;
+}
+
+QSplitter::handle {
+    background-color: #1c232d;
+}

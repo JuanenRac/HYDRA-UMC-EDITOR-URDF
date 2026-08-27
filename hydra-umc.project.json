@@ -1,0 +1,22 @@
+{
+  "schema_version": "1.0",
+  "ecosystem": "HYDRA-UMC",
+  "name": "HYDRA-UMC-EDITOR-URDF",
+  "version": "0.0.2",
+  "role": "tool",
+  "stack": "python",
+  "technologies": [
+    "Python",
+    "Blender add-on API"
+  ],
+  "deployment_target": "user-pc",
+  "maturity": "established",
+  "family": "Core Backend & Clients",
+  "parent": "HYDRA-UMC-SERVER",
+  "build": "Blender add-on. No standalone package installation. See repository README for Blender installation.",
+  "notes": "Blender add-on with real, shipped features (automatic center-of-mass/inertia estimation, a gallery of verified robot description repositories) - pushes validated URDF models to HYDRA-UMC-SERVER's own robot catalog.",
+  "native_version": {
+    "file": "hydra_editor_urdf/__init__.py",
+    "pattern": "__version__\\s*=\\s*\"(\\d+)\\.(\\d+)\\.(\\d+)\""
+  }
+}
