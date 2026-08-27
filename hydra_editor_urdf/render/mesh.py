@@ -13,8 +13,8 @@
 # NOT supported - it's a much larger XML scene-graph format (skeletal
 # animation, multiple coordinate systems, embedded materials/textures)
 # that would need its own real parser to do honestly rather than a
-# best-effort guess at the handful of tags a "simple" DAE happens to use
-# - see SONNET/HYDRA-UMC-EDITOR-URDF/mejoras_futuras.txt. load_mesh_file()
+# best-effort guess at the handful of tags a "simple" DAE happens to use.
+# load_mesh_file()
 # below raises UnsupportedMeshFormat for .dae (and anything else
 # unrecognized) with that limitation spelled out, rather than silently
 # skipping the link or crashing on a bare KeyError deep in some other

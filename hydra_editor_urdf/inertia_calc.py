@@ -9,9 +9,8 @@
 # has no such closed form (it's an arbitrary triangle soup); the
 # reasonable approximation there is the mesh's own AXIS-ALIGNED BOUNDING
 # BOX treated as a solid box, which is exactly what the audit's own idea
-# asked for ("aproximado, por geometría de la malla/primitiva" -
-# SONNET/AUDITORIA_COMPLETA_44_PROYECTOS.txt, HYDRA-UMC-EDITOR-URDF
-# section). This is explicitly an approximation, not a real per-mesh
+# asked for ("aproximado, por geometría de la malla/primitiva"). This is
+# explicitly an approximation, not a real per-mesh
 # integral (that would need signed-tetrahedron volume integration over
 # every triangle, a meaningfully bigger feature) - every function below
 # that returns a Mesh-derived result says so in its own docstring, and

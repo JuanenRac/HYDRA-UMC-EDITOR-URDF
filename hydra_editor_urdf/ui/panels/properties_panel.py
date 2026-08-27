@@ -106,8 +106,7 @@ class PropertiesPanel(QWidget):
         outer.addWidget(self._joint_group)
 
         # Mass/inertia tensor (audit idea: "calculador automático de
-        # centros de masa e inercias, aproximado" -
-        # SONNET/AUDITORIA_COMPLETA_44_PROYECTOS.txt). "Auto-calculate"
+        # centros de masa e inercias, aproximado"). "Auto-calculate"
         # only FILLS these fields from the selected link's own geometry
         # (inertia_calc.py's real closed-form formulas) - it doesn't
         # write to the model until "Apply", same 2-step pattern as Scale/

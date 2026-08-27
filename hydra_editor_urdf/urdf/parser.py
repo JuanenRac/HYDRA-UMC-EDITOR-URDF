@@ -13,8 +13,7 @@
 # authored against (macro args, included files via `$(find pkg)`, etc.).
 # ParserError below reports a raw `.xacro` file or literal `${` found in
 # an otherwise-URDF-shaped file as a clear, named limitation rather than
-# silently mis-parsing it - see SONNET/HYDRA-UMC-EDITOR-URDF/
-# mejoras_futuras.txt for "real xacro support" as documented future work,
+# silently mis-parsing it. Real xacro support is documented future work,
 # not a silent gap.
 # =============================================================================
 from __future__ import annotations

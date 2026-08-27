@@ -4,8 +4,7 @@
 # GPL-3.0 - see LICENSE
 #
 # A short starter list of real, public, currently-active robot-description
-# repositories (audit idea: "galería de robots pre-validados" -
-# SONNET/AUDITORIA_COMPLETA_44_PROYECTOS.txt) - each one verified to
+# repositories. Each one is verified to
 # actually exist and contain real URDF/xacro files before being added
 # here (WebFetch against the live repo, not assumed from memory), per
 # [[No reference -> reuse, don't invent]]. This is a STARTER list, not a
