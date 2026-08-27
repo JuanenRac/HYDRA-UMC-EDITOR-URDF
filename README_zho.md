@@ -321,16 +321,3 @@ HYDRA-UMC EDITOR-URDF 版权所有 (c) 2026 JuanenRac（Electro Hobby 3D）。�
 本编辑器是 [HYDRA-UMC STUDIO](https://github.com/JuanenRac/HYDRA-UMC-STUDIO) 目录的模型创作工具——其自身服务端的许可事宜参见该仓库，本仓库自身的许可证并不延伸至该仓库,反之亦然。
 
 如果你基于本项目进行开发，请留意这种许可证划分：这里的代码更改应保持 GPL-3.0，文档衍生品（本 README 及其翻译版本）应保持 CC BY-SA 4.0，任何经过本编辑器（导入、编辑或导出）的网格资产都应保持在其自身原始源仓库所携带的许可证之下，并附带指向该来源的署名。
-
-## 关联项目
-
-> Canonical public ecosystem relationship map.
-
-**Direct integrations:**
-[HYDRA-UMC-OS](https://github.com/JuanenRac/HYDRA-UMC-OS) · [HYDRA-UMC-SDK](https://github.com/JuanenRac/HYDRA-UMC-SDK) · [HYDRA-UMC-SERVER](https://github.com/JuanenRac/HYDRA-UMC-SERVER) · [URTC](https://github.com/JuanenRac/URTC) · [HYDRA-UMC-TWIN](https://github.com/JuanenRac/HYDRA-UMC-TWIN) · [HYDRA-UMC-PHYSICS-REPLICA](https://github.com/JuanenRac/HYDRA-UMC-PHYSICS-REPLICA) · [HYDRA-UMC-HIL-BRIDGE](https://github.com/JuanenRac/HYDRA-UMC-HIL-BRIDGE)
-
-**Platform and contracts:**
-[HYDRA-UMC-OS](https://github.com/JuanenRac/HYDRA-UMC-OS) · [HYDRA-UMC-SDK](https://github.com/JuanenRac/HYDRA-UMC-SDK)
-
-**Rest of the ecosystem:**
-All remaining public repositories are grouped by the seven ecosystem layers in the [JuanenRac ecosystem dashboard](https://juanenrac.github.io/JuanenRac/).

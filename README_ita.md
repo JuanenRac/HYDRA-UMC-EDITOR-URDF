@@ -322,16 +322,3 @@ Questa app non distribuisce alcun asset mesh di robot di terze parti proprio - a
 Questo editor è lo strumento di creazione modelli per il catalogo di [HYDRA-UMC STUDIO](https://github.com/JuanenRac/HYDRA-UMC-STUDIO) - consulta quel repository per la propria licenza lato server, a cui la licenza propria di questo repository non si estende, e viceversa.
 
 Se costruisci su questo progetto, tieni presente la separazione delle licenze: le modifiche al codice qui dovrebbero rimanere GPL-3.0, i derivati della documentazione (questo README e le sue traduzioni) dovrebbero rimanere CC BY-SA 4.0, e qualsiasi asset mesh che passa attraverso questo editor (importato, modificato o esportato) dovrebbe rimanere sotto qualunque licenza porti il suo repository sorgente originale, con attribuzione a quella sorgente.
-
-## Progetti correlati
-
-> Canonical public ecosystem relationship map.
-
-**Direct integrations:**
-[HYDRA-UMC-OS](https://github.com/JuanenRac/HYDRA-UMC-OS) · [HYDRA-UMC-SDK](https://github.com/JuanenRac/HYDRA-UMC-SDK) · [HYDRA-UMC-SERVER](https://github.com/JuanenRac/HYDRA-UMC-SERVER) · [URTC](https://github.com/JuanenRac/URTC) · [HYDRA-UMC-TWIN](https://github.com/JuanenRac/HYDRA-UMC-TWIN) · [HYDRA-UMC-PHYSICS-REPLICA](https://github.com/JuanenRac/HYDRA-UMC-PHYSICS-REPLICA) · [HYDRA-UMC-HIL-BRIDGE](https://github.com/JuanenRac/HYDRA-UMC-HIL-BRIDGE)
-
-**Platform and contracts:**
-[HYDRA-UMC-OS](https://github.com/JuanenRac/HYDRA-UMC-OS) · [HYDRA-UMC-SDK](https://github.com/JuanenRac/HYDRA-UMC-SDK)
-
-**Rest of the ecosystem:**
-All remaining public repositories are grouped by the seven ecosystem layers in the [JuanenRac ecosystem dashboard](https://juanenrac.github.io/JuanenRac/).

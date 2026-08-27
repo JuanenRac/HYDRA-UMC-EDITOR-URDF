@@ -323,16 +323,3 @@ Este editor es la herramienta de creación de modelos para el catálogo de [HYDR
 
 Si construyes sobre este proyecto, ten en cuenta la separación de licencias: los cambios de código aquí deberían mantenerse GPL-3.0, los derivados de documentación (este README y sus traducciones) deberían mantenerse CC BY-SA 4.0, y cualquier asset de malla que pase por este editor (importado, editado, o exportado) debería mantenerse bajo cualquier licencia que lleve su propio repositorio fuente original, con atribución de vuelta a esa fuente.
 </content>
-
-## Proyectos relacionados
-
-> Canonical public ecosystem relationship map.
-
-**Direct integrations:**
-[HYDRA-UMC-OS](https://github.com/JuanenRac/HYDRA-UMC-OS) · [HYDRA-UMC-SDK](https://github.com/JuanenRac/HYDRA-UMC-SDK) · [HYDRA-UMC-SERVER](https://github.com/JuanenRac/HYDRA-UMC-SERVER) · [URTC](https://github.com/JuanenRac/URTC) · [HYDRA-UMC-TWIN](https://github.com/JuanenRac/HYDRA-UMC-TWIN) · [HYDRA-UMC-PHYSICS-REPLICA](https://github.com/JuanenRac/HYDRA-UMC-PHYSICS-REPLICA) · [HYDRA-UMC-HIL-BRIDGE](https://github.com/JuanenRac/HYDRA-UMC-HIL-BRIDGE)
-
-**Platform and contracts:**
-[HYDRA-UMC-OS](https://github.com/JuanenRac/HYDRA-UMC-OS) · [HYDRA-UMC-SDK](https://github.com/JuanenRac/HYDRA-UMC-SDK)
-
-**Rest of the ecosystem:**
-All remaining public repositories are grouped by the seven ecosystem layers in the [JuanenRac ecosystem dashboard](https://juanenrac.github.io/JuanenRac/).
