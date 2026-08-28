@@ -1,31 +1,32 @@
 @echo off
+REM HYDRA_UMC_SCRIPT_STANDARD_HEADER_BEGIN
+REM *****************************************************************************
+REM Project   : HYDRA-UMC-EDITOR-URDF
+REM Script    : build_exe.bat
+REM Purpose   : Incremental standalone executable build and packaging workflow.
+REM Author    : JuanenRac (Electro Hobby 3D)
+REM Email     : electrohobby3d@gmail.com
+REM Copyright : (C) 2026 JuanenRac
+REM License   : GPL-3.0 - see LICENSE
+REM *****************************************************************************
+REM HYDRA_UMC_SCRIPT_STANDARD_HEADER_END
+REM HYDRA_UMC_SCRIPT_STANDARD_BANNER_BEGIN
+echo.
+echo *****************************************************************************
+echo * HYDRA-UMC-EDITOR-URDF - build_exe.bat
+echo * Mode      : INCREMENTAL BUILD
+echo * Author    : JuanenRac (Electro Hobby 3D)
+echo * Email     : electrohobby3d@gmail.com
+echo * Copyright : (C) 2026 JuanenRac
+echo * License   : GPL-3.0 - see LICENSE
+echo * ------------------------------------------------------------------------- *
+echo * 1. Increment the project version and synchronise its manifest.
+echo * 2. Run this project's declared build, verification and packaging commands.
+echo * 3. Report the result and keep an interactive terminal open.
+echo *****************************************************************************
+echo.
+REM HYDRA_UMC_SCRIPT_STANDARD_BANNER_END
 setlocal EnableDelayedExpansion
-REM Builds a standalone Windows .exe for HYDRA-UMC EDITOR-URDF.
-REM Run this on a Windows machine with Python installed.
-REM
-REM Usage:
-REM   build_exe.bat
-REM
-REM Output: dist\HYDRA-UMC_EDITOR-URDF.exe (no Python installation needed to run it)
-REM
-REM Structurally a port of HYDRA-UMC-SUITE's own build_exe.bat (this
-REM project's sibling, same PySide6/PyInstaller toolchain) - per
-REM [[No reference -> reuse, don't invent]]. The one real difference:
-REM this app has no qasync/websockets dependency (see main.py's own
-REM header for why), so those 2 --hidden-import flags are dropped below.
-
-echo.
-echo  ===============================================================
-echo   H Y D R A - U M C   E D I T O R - U R D F  -  Windows build
-echo  ===============================================================
-echo   Graphical URDF creator/editor for HYDRA-UMC-STUDIO's catalog
-echo   Author:  JuanenRac (Electro Hobby 3D)
-echo   E-mail:  electrohobby3d@gmail.com
-echo   License: GPL-3.0 (see LICENSE)
-echo  ===============================================================
-echo.
-
-echo [1/6] Creating/activating virtual environment...
 if not exist .venv (
     python -m venv .venv
 )
@@ -60,8 +61,12 @@ REM carrying into MINOR past 9 (e.g. 1.0.9 -> 1.1.0). This happens for
 REM EVERY real packaged build, unconditionally - if you're iterating on
 REM this script without wanting a version bump each time, run the actual
 REM PyInstaller command by hand instead of through this script.
+REM HYDRA_UMC_SCRIPT_STANDARD_VERSION_STEP
+echo [1/6] Incrementing project version and synchronising its manifest...
 python bump_version.py
 if errorlevel 1 ( echo NATIVE VERSION BUMP FAILED. & pause & exit /b 1 )
+REM HYDRA_UMC_SCRIPT_STANDARD_VERSION_CAPTURE_BEFORE
+for /f "usebackq delims=" %%V in (`python -c "import json; print(json.load(open(r'%~dp0hydra-umc.project.json', encoding='utf-8'))['version'])"`) do set "HYDRA_UMC_VERSION_BEFORE=%%V"
 python "%~dp0bump_manifest_version.py" --sync
 if errorlevel 1 ( echo VERSION SYNCHRONIZATION FAILED. & pause & exit /b 1 )
 if errorlevel 1 (
@@ -69,6 +74,18 @@ if errorlevel 1 (
     pause
     exit /b 1
 )
+REM HYDRA_UMC_SCRIPT_STANDARD_VERSION_CAPTURE_AFTER
+for /f "usebackq delims=" %%V in (`python -c "import json; print(json.load(open(r'%~dp0hydra-umc.project.json', encoding='utf-8'))['version'])"`) do set "HYDRA_UMC_VERSION_AFTER=%%V"
+if not defined HYDRA_UMC_VERSION_BEFORE set "HYDRA_UMC_VERSION_BEFORE=unknown"
+if not defined HYDRA_UMC_VERSION_AFTER set "HYDRA_UMC_VERSION_AFTER=unknown"
+echo.
+echo *****************************************************************************
+echo * VERSION INCREMENT COMPLETED
+echo * v%HYDRA_UMC_VERSION_BEFORE% ^> v%HYDRA_UMC_VERSION_AFTER%
+echo * Project manifest has been synchronised by the project build flow.
+echo *****************************************************************************
+echo.
+echo.
 echo       Done.
 echo.
 
