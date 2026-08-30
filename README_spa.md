@@ -171,6 +171,10 @@ HYDRA-UMC-EDITOR-URDF/
 │           ├── viewport_panel.py   # Alojamiento del viewport 3D, árbol de enlaces, controles deslizantes de jog
 │           ├── properties_panel.py # Editores de recolorear / reescalar / retipar-y-re-limitar
 │           └── upload_panel.py     # Conexión/subida/descarga con el servidor
+├── docs/
+│   ├── ARCHITECTURE.md
+│   ├── BUILD_AND_RUN.md
+│   └── INTEGRATION_CONTRACT.md
 └── work/                            # Espacio de trabajo temporal en tiempo de ejecución para repositorios de GitHub extraídos y modelos descargados del servidor (ignorado por git)
 ```
 

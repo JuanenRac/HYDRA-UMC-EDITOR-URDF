@@ -171,6 +171,10 @@ HYDRA-UMC-EDITOR-URDF/
 │           ├── viewport_panel.py   # 3D ビューポートホスト、リンクツリー、ジョグスライダー
 │           ├── properties_panel.py # 色変更/スケール変更/タイプと限位の再設定エディター
 │           └── upload_panel.py     # サーバーの接続/プッシュ/プル
+├── docs/
+│   ├── ARCHITECTURE.md
+│   ├── BUILD_AND_RUN.md
+│   └── INTEGRATION_CONTRACT.md
 └── work/                            # 取得した GitHub リポジトリとプルしたサーバーモデルのランタイム作業領域（gitignore 対象）
 ```
 

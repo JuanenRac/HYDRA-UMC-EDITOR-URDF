@@ -171,6 +171,10 @@ HYDRA-UMC-EDITOR-URDF/
 │           ├── viewport_panel.py   # 3D 视口宿主、连杆树、点动滑块
 │           ├── properties_panel.py # 重新着色 / 重新缩放 / 重新指定类型与限位编辑器
 │           └── upload_panel.py     # 服务器连接/推送/拉取
+├── docs/
+│   ├── ARCHITECTURE.md
+│   ├── BUILD_AND_RUN.md
+│   └── INTEGRATION_CONTRACT.md
 └── work/                            # 已拉取的 GitHub 仓库和已拉取的服务器模型的运行时暂存空间（已加入 gitignore）
 ```
 

@@ -170,6 +170,10 @@ HYDRA-UMC-EDITOR-URDF/
 │           ├── viewport_panel.py   # 3D-Viewport-Host, Link-Baum, Jog-Schieberegler
 │           ├── properties_panel.py # Editoren für Umfärben / Neu-Skalieren / Gelenktyp-und-Grenzen-Neusetzen
 │           └── upload_panel.py     # Server-Verbindung/Push/Pull
+├── docs/
+│   ├── ARCHITECTURE.md
+│   ├── BUILD_AND_RUN.md
+│   └── INTEGRATION_CONTRACT.md
 └── work/                            # Laufzeit-Arbeitsbereich für abgerufene GitHub-Repositories und heruntergeladene Server-Modelle (per gitignore ausgeschlossen)
 ```
 
