@@ -7,14 +7,16 @@
   "stack": "python",
   "technologies": [
     "Python",
-    "Blender add-on API"
+    "PySide6",
+    "Qt6",
+    "OpenGL"
   ],
   "deployment_target": "user-pc",
   "maturity": "established",
   "family": "Core Backend & Clients",
-  "parent": "HYDRA-UMC-SERVER",
-  "build": "Blender add-on. No standalone package installation. See repository README for Blender installation.",
-  "notes": "Blender add-on with real, shipped features (automatic center-of-mass/inertia estimation, a gallery of verified robot description repositories) - pushes validated URDF models to HYDRA-UMC-SERVER's own robot catalog.",
+  "parent": "HYDRA-UMC-STUDIO",
+  "build": "Desktop PySide6/Qt6 app. run.bat/run.sh runs it from source; build_exe.bat/build_exe.sh produces a standalone PyInstaller executable. See repository README for full build/run instructions.",
+  "notes": "Desktop graphical URDF creator/editor with real, shipped features (GitHub/local source loading, mesh reference resolution, DOF feasibility validation, live 3D preview editing) - pushes finished models to HYDRA-UMC-STUDIO's own model catalog via HYDRA-UMC-SERVER's POST /api/models/submit.",
   "native_version": {
     "file": "hydra_editor_urdf/__init__.py",
     "pattern": "__version__\\s*=\\s*\"(\\d+)\\.(\\d+)\\.(\\d+)\""
