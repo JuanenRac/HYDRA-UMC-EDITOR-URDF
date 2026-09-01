@@ -104,6 +104,10 @@ python -m PyInstaller --onefile --windowed --noconfirm --name "HYDRA-UMC_EDITOR-
     --add-data "%PYSIDE_DIR%\plugins\iconengines;PySide6\plugins\iconengines" ^
     --hidden-import PySide6.QtOpenGL ^
     --hidden-import PySide6.QtOpenGLWidgets ^
+    --hidden-import PySide6.QtQml ^
+    --hidden-import PySide6.QtQuick ^
+    --hidden-import PySide6.QtQuickWidgets ^
+    --collect-all PySide6.QtQuick ^
     --hidden-import OpenGL.platform.win32 ^
     main.py
 if not exist dist\HYDRA-UMC_EDITOR-URDF.exe (

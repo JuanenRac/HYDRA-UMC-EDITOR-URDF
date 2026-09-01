@@ -24,7 +24,7 @@
 
 ### 🖌️ Graphical URDF Creator/Editor for the HYDRA-UMC-STUDIO Model Catalog
 
-**Current version:** 0.0.0 (`MAJOR.MINOR.PATCH` - see the **Production Build** section below for how this number moves)
+**Current version:** 0.0.2 (`MAJOR.MINOR.PATCH` - see the **Production Build** section below for how this number moves)
 
 ---
 
@@ -124,6 +124,13 @@ Full interface translation across **English, Spanish, Italian, French, and Germa
 
 ## 🎛️ Theme
 
+The dock workspace also embeds a **Qt Quick/QML command deck** through
+QQuickWidget, using the same renderer and visual language as
+HYDRA-UMC-UPDATER and HYDRA-UMC-SUITE. Its Source, DOF, Viewport, Properties
+and Upload buttons only raise the existing docks; Export and About forward to
+the existing actions. It does not replace the OpenGL viewport, editor, parser
+or server-upload implementation.
+
 Reuses HYDRA-UMC SUITE's own `assets/qss/industrial_dark.qss` verbatim (same relative path, same file) rather than designing a new visual theme for a sibling desktop tool in the same ecosystem.
 
 ---
@@ -141,6 +148,8 @@ HYDRA-UMC-EDITOR-URDF/
 ├── README_spa.md / README_ita.md / README_fra.md / README_deu.md / README_zho.md / README_jpn.md  # <- translations
 ├── LICENSE                         # GPL-3.0
 ├── assets/
+│   ├── HYDRA_UMC_ICON.svg          # Animated HYDRA-UMC mark used by the Qt Quick command deck
+│   ├── qml/CommandDeck.qml         # Qt Quick command deck; forwards to existing widgets/actions
 │   └── qss/industrial_dark.qss     # Reused verbatim from HYDRA-UMC-SUITE
 ├── language/                       # english/spanish/italian/french/german.lng - sits beside the exe, not bundled
 ├── hydra_editor_urdf/
@@ -164,6 +173,7 @@ HYDRA-UMC-EDITOR-URDF/
 │   │   └── client.py               # StudioClient - login/list_models/push_model/pull_model against HYDRA-UMC-SERVER's server.ts (STUDIO's own backend before the two repos split)
 │   └── ui/
 │       ├── main_window.py          # QMainWindow - dockable workspace, menu bar, language switcher, status bar
+│       ├── qtquick_deck.py         # QObject bridge between CommandDeck.qml and the existing workspace
 │       ├── theme.py                 # Applies assets/qss/industrial_dark.qss
 │       └── panels/
 │           ├── source_panel.py     # GitHub URL / local folder input, found-URDF list

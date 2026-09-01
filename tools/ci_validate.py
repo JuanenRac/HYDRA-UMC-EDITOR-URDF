@@ -57,6 +57,20 @@ VERSION_HEADING = re.compile(r"(?im)^#{1,3}\s*\[?(\d+\.\d+\.\d+)(?:\]|\s|$)")
 SEMVER = re.compile(r"^\d+\.\d+\.\d+$")
 BUILD_RUN_SECTION_MARKERS = (
     "BUILD & RUN",
+    "INSTALL AND RUN",
+    "INSTALAR Y EJECUTAR",
+    "INSTALLATION ET EXÉCUTION",
+    "INSTALLAZIONE ED ESECUZIONE",
+    "INSTALLATION UND AUSFÜHRUNG",
+    "インストールと実行",
+    "安装与运行",
+    "DEVELOPMENT ENVIRONMENT",
+    "ENTORNO DE DESARROLLO",
+    "ENVIRONNEMENT DE DÉVELOPPEMENT",
+    "AMBIENTE DI SVILUPPO",
+    "ENTWICKLUNGSUMGEBUNG",
+    "開発環境",
+    "开发环境",
     "COMPILACIÓN Y EJECUCIÓN",
     "COMPILATION ET EXÉCUTION",
     "COMPILAZIONE ED ESECUZIONE",
@@ -69,7 +83,8 @@ BUILD_RUN_SECTION_MARKERS = (
 
 def has_build_run_section(text: str) -> bool:
     """Accept the translated BUILD & RUN heading in every public README."""
-    return any(marker in text for marker in BUILD_RUN_SECTION_MARKERS)
+    normalized = text.upper()
+    return any(marker.upper() in normalized for marker in BUILD_RUN_SECTION_MARKERS)
 
 
 def fail(message: str) -> None:

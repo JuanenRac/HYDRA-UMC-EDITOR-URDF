@@ -24,7 +24,7 @@
 
 ### 🖌️ Creador/Editor Gráfico de URDF para el Catálogo de Modelos de HYDRA-UMC-STUDIO
 
-**Versión actual:** 0.0.0 (`MAJOR.MINOR.PATCH` - ver la sección **Compilación de Producción** más abajo para saber cómo se mueve este número)
+**Versión actual:** 0.0.2 (`MAJOR.MINOR.PATCH` - ver la sección **Compilación de Producción** más abajo para saber cómo se mueve este número)
 
 ---
 
@@ -124,6 +124,13 @@ Traducción completa de la interfaz a través de **inglés, español, italiano, 
 
 ## 🎛️ Tema
 
+El espacio de trabajo acoplable también incorpora un **panel de comandos
+Qt Quick/QML** mediante QQuickWidget, con el mismo motor visual de
+HYDRA-UMC-UPDATER y HYDRA-UMC-SUITE. Sus botones Source, DOF, Viewport,
+Properties y Upload sólo enfocan los docks existentes; Export y About reusan
+las acciones existentes. No sustituye el visor OpenGL, editor, parser ni la
+implementación de subida al servidor.
+
 Reutiliza el propio `assets/qss/industrial_dark.qss` de HYDRA-UMC SUITE tal cual (misma ruta relativa, mismo archivo) en vez de diseñar un tema visual nuevo para una herramienta de escritorio hermana en el mismo ecosistema.
 
 ---
@@ -141,6 +148,8 @@ HYDRA-UMC-EDITOR-URDF/
 ├── README_spa.md / README_ita.md / README_fra.md / README_deu.md / README_zho.md / README_jpn.md  # <- traducciones
 ├── LICENSE                         # GPL-3.0
 ├── assets/
+│   ├── HYDRA_UMC_ICON.svg          # Marca animada HYDRA-UMC usada por el panel Qt Quick
+│   ├── qml/CommandDeck.qml         # Panel Qt Quick; reenvía a widgets/acciones existentes
 │   └── qss/industrial_dark.qss     # Reutilizado tal cual desde HYDRA-UMC-SUITE
 ├── language/                       # english/spanish/italian/french/german.lng - junto al exe, no empaquetado dentro
 ├── hydra_editor_urdf/
@@ -164,6 +173,7 @@ HYDRA-UMC-EDITOR-URDF/
 │   │   └── client.py               # StudioClient - login/list_models/push_model/pull_model contra el server.ts de HYDRA-UMC-SERVER (el backend de STUDIO antes de que ambos repos se separaran)
 │   └── ui/
 │       ├── main_window.py          # QMainWindow - espacio de trabajo acoplable, barra de menú, selector de idioma, barra de estado
+│       ├── qtquick_deck.py         # Puente QObject entre CommandDeck.qml y el espacio de trabajo existente
 │       ├── theme.py                 # Aplica assets/qss/industrial_dark.qss
 │       └── panels/
 │           ├── source_panel.py     # Entrada de URL de GitHub / carpeta local, lista de URDF encontrados

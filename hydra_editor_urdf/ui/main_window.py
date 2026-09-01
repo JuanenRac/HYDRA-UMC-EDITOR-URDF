@@ -16,9 +16,10 @@ from __future__ import annotations
 
 from pathlib import Path
 
-from PySide6.QtCore import Qt
+from PySide6.QtCore import Qt, QUrl
 from PySide6.QtGui import QActionGroup
-from PySide6.QtWidgets import QDockWidget, QFileDialog, QMainWindow, QMessageBox
+from PySide6.QtQuickWidgets import QQuickWidget
+from PySide6.QtWidgets import QDockWidget, QFileDialog, QMainWindow, QMessageBox, QToolBar
 
 from hydra_editor_urdf import __version__
 from hydra_editor_urdf.app import EditorController
@@ -28,6 +29,7 @@ from hydra_editor_urdf.ui.panels.properties_panel import PropertiesPanel
 from hydra_editor_urdf.ui.panels.source_panel import SourcePanel
 from hydra_editor_urdf.ui.panels.upload_panel import UploadPanel
 from hydra_editor_urdf.ui.panels.viewport_panel import ViewportPanel
+from hydra_editor_urdf.ui.qtquick_deck import UrdfDeckBridge
 
 ASSETS_DIR = Path(__file__).resolve().parent.parent.parent / "assets"
 
@@ -49,9 +51,12 @@ class MainWindow(QMainWindow):
 
         self._build_menu()
         self._build_panels()
+        self._build_command_deck()
         self._build_status_bar()
 
-        self.controller.load_failed.connect(lambda msg: self._status.showMessage(msg, 8000))
+        self.controller.load_failed.connect(self._on_status_message)
+        self.controller.status_message.connect(self._on_status_message)
+        self.controller.robot_loaded.connect(self._on_robot_loaded)
 
     # --- panels ---------------------------------------------------------------
 
@@ -79,6 +84,10 @@ class MainWindow(QMainWindow):
         dock_viewport = self._make_dock(_("DOCK_VIEWPORT"), self.viewport_panel, Qt.DockWidgetArea.RightDockWidgetArea)
         dock_properties = self._make_dock(_("DOCK_PROPERTIES"), self.properties_panel, Qt.DockWidgetArea.RightDockWidgetArea)
         dock_upload = self._make_dock(_("DOCK_UPLOAD"), self.upload_panel, Qt.DockWidgetArea.BottomDockWidgetArea)
+        self._deck_docks = {
+            "source": dock_source, "dof": dock_dof, "viewport": dock_viewport,
+            "properties": dock_properties, "upload": dock_upload,
+        }
 
         # Sensible default arrangement - fully rearrangeable afterward
         # (float/merge/split/close), same as every other project in this
@@ -90,6 +99,41 @@ class MainWindow(QMainWindow):
 
         for dock in (dock_source, dock_dof, dock_viewport, dock_properties, dock_upload):
             self._view_menu.addAction(dock.toggleViewAction())
+
+    def _build_command_deck(self) -> None:
+        """Embed the shared QML shell without replacing the real editor docks."""
+        toolbar = QToolBar("HYDRA-UMC command deck", self)
+        toolbar.setObjectName("urdfQtQuickCommandDeck")
+        toolbar.setMovable(False)
+        toolbar.setFloatable(False)
+        toolbar.setMinimumHeight(76)
+        self.addToolBar(Qt.ToolBarArea.TopToolBarArea, toolbar)
+        icon_path = ASSETS_DIR / "HYDRA_UMC_ICON.svg"
+        self._deck_bridge = UrdfDeckBridge(__version__, QUrl.fromLocalFile(str(icon_path)).toString())
+        self._deck_bridge.navigateRequested.connect(self._navigate_deck)
+        self._deck_bridge.exportRequested.connect(self._on_export_urdf)
+        self._deck_bridge.aboutRequested.connect(self._show_about)
+        quick_deck = QQuickWidget(toolbar)
+        quick_deck.setResizeMode(QQuickWidget.ResizeMode.SizeRootObjectToView)
+        quick_deck.setClearColor(Qt.GlobalColor.transparent)
+        quick_deck.setMinimumWidth(1120)
+        quick_deck.setMinimumHeight(64)
+        quick_deck.setInitialProperties({"deckBackend": self._deck_bridge})
+        quick_deck.setSource(QUrl.fromLocalFile(str(ASSETS_DIR / "qml" / "CommandDeck.qml")))
+        toolbar.addWidget(quick_deck)
+
+    def _navigate_deck(self, destination: str) -> None:
+        dock = self._deck_docks.get(destination)
+        if dock is not None:
+            dock.show()
+            dock.raise_()
+
+    def _on_status_message(self, message: str) -> None:
+        self._status.showMessage(message, 8000)
+        self._deck_bridge.set_status(message.upper()[:64] if message else "READY")
+
+    def _on_robot_loaded(self, robot, report) -> None:
+        self._deck_bridge.set_model(robot.name)
 
     def _build_menu(self) -> None:
         menu = self.menuBar()
@@ -122,10 +166,6 @@ class MainWindow(QMainWindow):
     def _build_status_bar(self) -> None:
         self._status = self.statusBar()
         self._status.showMessage(_("STATUS_READY"))
-        self.controller.status_message.connect(lambda msg: self._status.showMessage(msg, 5000))
-        self.controller.robot_loaded.connect(lambda robot, report: self._status.showMessage(
-            _("STATUS_LOADED", name=robot.name, dof=report.dof_count), 5000
-        ))
 
     def _on_export_urdf(self) -> None:
         if self.controller.robot is None:

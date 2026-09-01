@@ -4,18 +4,19 @@
   "name": "HYDRA-UMC-EDITOR-URDF",
   "version": "0.0.2",
   "role": "tool",
-  "stack": "python",
+  "stack": "python-qtquick",
   "technologies": [
     "Python",
     "PySide6",
     "Qt6",
+    "Qt Quick/QML",
     "OpenGL"
   ],
   "deployment_target": "user-pc",
   "maturity": "established",
   "family": "Core Backend & Clients",
   "parent": "HYDRA-UMC-STUDIO",
-  "build": "Desktop PySide6/Qt6 app. run.bat/run.sh runs it from source; build_exe.bat/build_exe.sh produces a standalone PyInstaller executable. See repository README for full build/run instructions.",
+  "build": "Desktop PySide6/Qt6 + Qt Quick app. run.bat/run.sh runs it from source; build-test.bat/build-test.sh validates sources without versioning; build_exe.bat/build_exe.sh produces a standalone PyInstaller executable.",
   "notes": "Desktop graphical URDF creator/editor with real, shipped features (GitHub/local source loading, mesh reference resolution, DOF feasibility validation, live 3D preview editing) - pushes finished models to HYDRA-UMC-STUDIO's own model catalog via HYDRA-UMC-SERVER's POST /api/models/submit.",
   "native_version": {
     "file": "hydra_editor_urdf/__init__.py",

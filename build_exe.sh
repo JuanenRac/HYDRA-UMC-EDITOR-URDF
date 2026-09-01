@@ -116,6 +116,10 @@ python3 -m PyInstaller --onefile --noconfirm --name "HYDRA-UMC_EDITOR-URDF" \
     --add-data "$PYSIDE_DIR/Qt/plugins/iconengines:PySide6/Qt/plugins/iconengines" \
     --hidden-import PySide6.QtOpenGL \
     --hidden-import PySide6.QtOpenGLWidgets \
+    --hidden-import PySide6.QtQml \
+    --hidden-import PySide6.QtQuick \
+    --hidden-import PySide6.QtQuickWidgets \
+    --collect-all PySide6.QtQuick \
     main.py
 if [ ! -f dist/HYDRA-UMC_EDITOR-URDF ]; then
     echo "      ERROR: PyInstaller did not produce dist/HYDRA-UMC_EDITOR-URDF - see the output above."

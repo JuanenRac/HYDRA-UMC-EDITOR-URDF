@@ -11,6 +11,21 @@ bumped by hand, as a deliberate decision.
 
 ## [Unreleased] - Chinese and Japanese added to the language menu
 
+- The Qt Quick command deck now keeps Export disabled until a real URDF model
+  has been loaded, matching the actual availability of the established export
+  action instead of showing an avoidable no-model dialog.
+- The dock workspace now has a real QML/Qt Quick command deck, embedded through
+  QQuickWidget on the same renderer used by HYDRA-UMC-UPDATER and
+  HYDRA-UMC-SUITE. Its Source, DOF, Viewport, Properties and Upload actions
+  raise the existing live docks; Export and About forward to the existing
+  actions. No URDF parser, editor, OpenGL viewport or server-upload path was
+  duplicated.
+- The deck reports real controller status and the name of each loaded robot.
+  The bundled HYDRA-UMC SVG is rendered by Qt Quick as the visual identity;
+  native window icons remain platform-static.
+- PyInstaller build scripts include the Qt Quick/QML runtime needed by the
+  embedded deck.
+
 - New `language/chinese.lng` (简体中文) and `language/japanese.lng` (日本語) -
   full translation of all 82 keys, matching the coverage of the existing
   english/spanish/italian/french/german files. Added to `i18n.py`'s own

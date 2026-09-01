@@ -124,6 +124,13 @@
 
 ## 🎛️ テーマ
 
+ドッキング可能なワークスペースには、HYDRA-UMC-UPDATER と
+HYDRA-UMC-SUITE と同じ描画エンジンを使う **Qt Quick/QML コマンドデッキ**も
+QQuickWidget 経由で組み込まれています。Source、DOF、Viewport、Properties、
+Upload は既存のドックを表示するだけで、Export と About も既存のアクションを
+再利用します。OpenGL ビューポート、エディター、パーサー、サーバーアップロードの
+実装を置き換えるものではありません。
+
 同一エコシステム内の姉妹デスクトップツール向けに新しい視覚テーマを設計するのではなく、HYDRA-UMC SUITE 自身の `assets/qss/industrial_dark.qss` をそのまま（同じ相対パス、同じファイル）再利用しています。
 
 ---
@@ -141,6 +148,8 @@ HYDRA-UMC-EDITOR-URDF/
 ├── README_spa.md / README_ita.md / README_fra.md / README_deu.md / README_zho.md / README_jpn.md  # <- 翻訳
 ├── LICENSE                         # GPL-3.0
 ├── assets/
+│   ├── HYDRA_UMC_ICON.svg          # Qt Quick コマンドデッキで使用するアニメーション HYDRA-UMC マーク
+│   ├── qml/CommandDeck.qml         # Qt Quick コマンドデッキ。既存のウィジェット/操作へ転送
 │   └── qss/industrial_dark.qss     # HYDRA-UMC-SUITE からそのまま再利用
 ├── language/                       # english/spanish/italian/french/german/chinese/japanese.lng —— exe の隣に置かれ、バンドルされない
 ├── hydra_editor_urdf/
@@ -164,6 +173,7 @@ HYDRA-UMC-EDITOR-URDF/
 │   │   └── client.py               # StudioClient —— HYDRA-UMC-SERVER の server.ts（2 つのリポジトリが分割される前は STUDIO 自身のバックエンド）に対する login/list_models/push_model/pull_model
 │   └── ui/
 │       ├── main_window.py          # QMainWindow —— ドッキング可能なワークスペース、メニューバー、言語切り替え、ステータスバー
+│       ├── qtquick_deck.py         # CommandDeck.qml と既存ワークスペースをつなぐ QObject ブリッジ
 │       ├── theme.py                 # assets/qss/industrial_dark.qss を適用
 │       └── panels/
 │           ├── source_panel.py     # GitHub URL / ローカルフォルダ入力、見つかった URDF の一覧

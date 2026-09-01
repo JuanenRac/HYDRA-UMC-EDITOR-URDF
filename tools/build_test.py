@@ -46,6 +46,18 @@ def compile_python_sources() -> None:
     print(f"PYTHON_COMPILE=PASS files={len(files)}")
 
 
+def validate_qtquick_deck() -> None:
+    """Validate deployable Qt Quick deck sources without a graphics backend."""
+    qml_sources = sorted((ROOT / "assets" / "qml").glob("*.qml"))
+    if not qml_sources:
+        fail("Qt Quick stack is missing assets/qml/*.qml")
+    for source in qml_sources:
+        text = source.read_text(encoding="utf-8", errors="replace")
+        if "import QtQuick" not in text:
+            fail(f"Qt Quick import missing from {source.relative_to(ROOT)}")
+    print(f"QML_SOURCE=PASS files={len(qml_sources)} runtime=manual-visual-check")
+
+
 def main() -> int:
     try:
         manifest = json.loads((ROOT / "hydra-umc.project.json").read_text(encoding="utf-8"))
@@ -57,8 +69,10 @@ def main() -> int:
         fail("manifest stack must be a string")
     print(f"BUILD_TEST project={manifest.get('name', ROOT.name)} stack={stack}")
 
-    if stack in {"python", "python-bare"}:
+    if stack in {"python", "python-bare", "python-qtquick"}:
         compile_python_sources()
+        if stack == "python-qtquick":
+            validate_qtquick_deck()
     elif stack == "node":
         npm = "npm.cmd" if os.name == "nt" else "npm"
         # Reuse an existing local dependency tree so a running editor/linter

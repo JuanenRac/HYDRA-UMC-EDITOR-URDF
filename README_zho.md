@@ -124,6 +124,11 @@
 
 ## 🎛️ 主题
 
+可停靠工作区还通过 QQuickWidget 嵌入了 **Qt Quick/QML 命令控制台**，使用与
+HYDRA-UMC-UPDATER 和 HYDRA-UMC-SUITE 相同的渲染引擎。Source、DOF、Viewport、
+Properties 和 Upload 按钮只会显示既有停靠面板；Export 与 About 复用既有操作。
+它不替代 OpenGL 视口、编辑器、解析器或服务器上传实现。
+
 原样复用 HYDRA-UMC SUITE 自身的 `assets/qss/industrial_dark.qss`（相同的相对路径，相同的文件），而不是为本生态系统中的同类桌面工具设计一套新的视觉主题。
 
 ---
@@ -141,6 +146,8 @@ HYDRA-UMC-EDITOR-URDF/
 ├── README_spa.md / README_ita.md / README_fra.md / README_deu.md / README_zho.md / README_jpn.md  # <- 翻译
 ├── LICENSE                         # GPL-3.0
 ├── assets/
+│   ├── HYDRA_UMC_ICON.svg          # Qt Quick 命令面板使用的动画 HYDRA-UMC 标志
+│   ├── qml/CommandDeck.qml         # Qt Quick 命令面板；转发到既有部件/操作
 │   └── qss/industrial_dark.qss     # 原样复用自 HYDRA-UMC-SUITE
 ├── language/                       # english/spanish/italian/french/german/chinese/japanese.lng —— 位于 exe 旁边，未打包
 ├── hydra_editor_urdf/
@@ -164,6 +171,7 @@ HYDRA-UMC-EDITOR-URDF/
 │   │   └── client.py               # StudioClient —— 针对 HYDRA-UMC-SERVER 的 server.ts（两个仓库拆分前是 STUDIO 自身的后端）进行 login/list_models/push_model/pull_model
 │   └── ui/
 │       ├── main_window.py          # QMainWindow —— 可停靠工作区、菜单栏、语言切换器、状态栏
+│       ├── qtquick_deck.py         # CommandDeck.qml 与既有工作区之间的 QObject 桥接
 │       ├── theme.py                 # 应用 assets/qss/industrial_dark.qss
 │       └── panels/
 │           ├── source_panel.py     # GitHub URL / 本地文件夹输入，找到的 URDF 列表

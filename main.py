@@ -23,6 +23,7 @@ import sys
 
 from PySide6.QtCore import Qt
 from PySide6.QtGui import QShortcut, QKeySequence
+from PySide6.QtQuickControls2 import QQuickStyle
 from PySide6.QtWidgets import QApplication
 
 from hydra_editor_urdf.ui.main_window import MainWindow
@@ -30,6 +31,10 @@ from hydra_editor_urdf.ui.theme import apply_theme
 
 
 def main() -> int:
+    # Qt Quick's portable Basic style honors the deck's custom rounded
+    # backgrounds on every desktop. The native Windows style can discard
+    # those QML backgrounds, making the shared Updater visual language vanish.
+    QQuickStyle.setStyle("Basic")
     app = QApplication(sys.argv)
     app.setApplicationName("HYDRA-UMC EDITOR-URDF")
     app.setOrganizationName("Electro Hobby 3D")
