@@ -11,6 +11,28 @@ bumped by hand, as a deliberate decision.
 
 ## [Unreleased] - Chinese and Japanese added to the language menu
 
+- **Fixed: command deck rendered as a blank black bar; real About dialog
+  added.** Real per-project screenshots (not just code reading) confirmed
+  the Qt Quick/QML command deck described in the bullets below painted
+  solid black with zero content visible, no console error - a
+  `QQuickWidget` embedded in a `QToolBar` inside this `QMainWindow`'s real
+  `QDockWidget` layout never got a correctly composited native surface,
+  the exact same bug HYDRA-UMC-SUITE's own deck had. Reverted the deck to
+  plain `QToolBar`/`QLabel`/`QToolButton` widgets - verified via a fresh
+  screenshot: logo, title, navigation buttons and the model/status chips
+  all render correctly now. Separately, the single-line `QMessageBox`
+  About dialog is now a real `AboutDialog` matching
+  HYDRA-UMC-STUDIO's own `About.tsx` (animated logo, colored HYDRA-UM-C
+  wordmark, tagline, description, Version/Author/Email/License rows) -
+  see `ui/about_dialog.py`. The now-orphaned `qtquick_deck.py`/
+  `CommandDeck.qml` were moved out of the repo rather than deleted.
+- The embedded Qt Quick deck now shows live validated DOF, link and joint
+  counts alongside the HYDRA-UMC-STUDIO feasibility verdict. It receives the
+  same model and tree-change signals used by the established dock panels, so
+  a property edit cannot leave the deck displaying stale validation data.
+- The Qt Quick command deck now reads its navigation and Export labels from
+  the established editor language files, rather than maintaining a second,
+  English-only label list in QML.
 - The Qt Quick command deck now keeps Export disabled until a real URDF model
   has been loaded, matching the actual availability of the established export
   action instead of showing an avoidable no-model dialog.

@@ -16,20 +16,30 @@ from __future__ import annotations
 
 from pathlib import Path
 
-from PySide6.QtCore import Qt, QUrl
+from PySide6.QtCore import QSize, Qt
 from PySide6.QtGui import QActionGroup
-from PySide6.QtQuickWidgets import QQuickWidget
-from PySide6.QtWidgets import QDockWidget, QFileDialog, QMainWindow, QMessageBox, QToolBar
+from PySide6.QtSvgWidgets import QSvgWidget
+from PySide6.QtWidgets import (
+    QDockWidget,
+    QFileDialog,
+    QLabel,
+    QMainWindow,
+    QMessageBox,
+    QSizePolicy,
+    QToolBar,
+    QToolButton,
+    QWidget,
+)
 
 from hydra_editor_urdf import __version__
 from hydra_editor_urdf.app import EditorController
 from hydra_editor_urdf.i18n import _, AVAILABLE_LANGUAGES, current_language, save_config, CONFIG_FILE_PATH
+from hydra_editor_urdf.ui.about_dialog import AboutDialog
 from hydra_editor_urdf.ui.panels.dof_panel import DofPanel
 from hydra_editor_urdf.ui.panels.properties_panel import PropertiesPanel
 from hydra_editor_urdf.ui.panels.source_panel import SourcePanel
 from hydra_editor_urdf.ui.panels.upload_panel import UploadPanel
 from hydra_editor_urdf.ui.panels.viewport_panel import ViewportPanel
-from hydra_editor_urdf.ui.qtquick_deck import UrdfDeckBridge
 
 ASSETS_DIR = Path(__file__).resolve().parent.parent.parent / "assets"
 
@@ -57,6 +67,7 @@ class MainWindow(QMainWindow):
         self.controller.load_failed.connect(self._on_status_message)
         self.controller.status_message.connect(self._on_status_message)
         self.controller.robot_loaded.connect(self._on_robot_loaded)
+        self.controller.tree_changed.connect(self._on_tree_changed)
 
     # --- panels ---------------------------------------------------------------
 
@@ -101,26 +112,83 @@ class MainWindow(QMainWindow):
             self._view_menu.addAction(dock.toggleViewAction())
 
     def _build_command_deck(self) -> None:
-        """Embed the shared QML shell without replacing the real editor docks."""
+        """Real QToolBar/QLabel/QToolButton command deck, not a Qt Quick/QML
+        island - a QQuickWidget embedded inside a QToolBar inside this
+        QMainWindow's real QDockWidget layout rendered as a solid black
+        rectangle in practice (its own OpenGL/RHI surface never composited
+        correctly once the toolbar/dock layout settled), the same bug
+        HYDRA-UMC-SUITE's own command deck had and fixed the same way -
+        see that project's own CHANGELOG for the full root-cause account.
+        """
         toolbar = QToolBar("HYDRA-UMC command deck", self)
-        toolbar.setObjectName("urdfQtQuickCommandDeck")
+        toolbar.setObjectName("commandDeck")
         toolbar.setMovable(False)
         toolbar.setFloatable(False)
-        toolbar.setMinimumHeight(76)
+        toolbar.setIconSize(QSize(34, 34))
         self.addToolBar(Qt.ToolBarArea.TopToolBarArea, toolbar)
+        self._command_deck = toolbar
+
         icon_path = ASSETS_DIR / "HYDRA_UMC_ICON.svg"
-        self._deck_bridge = UrdfDeckBridge(__version__, QUrl.fromLocalFile(str(icon_path)).toString())
-        self._deck_bridge.navigateRequested.connect(self._navigate_deck)
-        self._deck_bridge.exportRequested.connect(self._on_export_urdf)
-        self._deck_bridge.aboutRequested.connect(self._show_about)
-        quick_deck = QQuickWidget(toolbar)
-        quick_deck.setResizeMode(QQuickWidget.ResizeMode.SizeRootObjectToView)
-        quick_deck.setClearColor(Qt.GlobalColor.transparent)
-        quick_deck.setMinimumWidth(1120)
-        quick_deck.setMinimumHeight(64)
-        quick_deck.setInitialProperties({"deckBackend": self._deck_bridge})
-        quick_deck.setSource(QUrl.fromLocalFile(str(ASSETS_DIR / "qml" / "CommandDeck.qml")))
-        toolbar.addWidget(quick_deck)
+        if icon_path.is_file():
+            brand = QSvgWidget(str(icon_path), toolbar)
+            brand.renderer().setAnimationEnabled(True)
+        else:
+            brand = QLabel("H", toolbar)
+        brand.setObjectName("suiteBrand")
+        brand.setFixedSize(44, 44)
+        toolbar.addWidget(brand)
+
+        title = QLabel("HYDRA-UMC EDITOR-URDF", toolbar)
+        title.setObjectName("commandDeckTitle")
+        toolbar.addWidget(title)
+        toolbar.addSeparator()
+
+        for label_key, destination in (
+            ("DOCK_SOURCE", "source"),
+            ("DOCK_DOF", "dof"),
+            ("DOCK_VIEWPORT", "viewport"),
+            ("DOCK_PROPERTIES", "properties"),
+            ("DOCK_UPLOAD", "upload"),
+        ):
+            self._add_deck_navigation(label_key, destination)
+
+        export_button = QToolButton(toolbar)
+        export_button.setObjectName("commandDeckNav")
+        export_button.setText(_("MENU_EXPORT_URDF"))
+        export_button.clicked.connect(self._on_export_urdf)
+        toolbar.addWidget(export_button)
+
+        spacer = QWidget(toolbar)
+        spacer.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Preferred)
+        toolbar.addWidget(spacer)
+
+        self._deck_model_chip = QLabel(toolbar)
+        self._deck_model_chip.setObjectName("commandDeckTarget")
+        toolbar.addWidget(self._deck_model_chip)
+
+        self._deck_status_chip = QLabel(toolbar)
+        self._deck_status_chip.setObjectName("commandDeckState")
+        toolbar.addWidget(self._deck_status_chip)
+
+        about = QToolButton(toolbar)
+        about.setObjectName("commandDeckAbout")
+        about.setText(_("MENU_ABOUT"))
+        about.clicked.connect(self._show_about)
+        toolbar.addWidget(about)
+
+        # Set the chip text directly rather than through _on_status_message()
+        # - that also writes to self._status, the QMainWindow status bar
+        # _build_status_bar() creates right after this method returns.
+        self._deck_status_chip.setText(f"{_('DECK_STATUS')}\n{_('STATUS_READY')}")
+        self._on_deck_model_summary(None, None)
+
+    def _add_deck_navigation(self, label_key: str, destination: str) -> None:
+        button = QToolButton(self._command_deck)
+        button.setObjectName("commandDeckNav")
+        button.setText(_(label_key))
+        button.setToolButtonStyle(Qt.ToolButtonStyle.ToolButtonTextOnly)
+        button.clicked.connect(lambda _checked=False, dest=destination: self._navigate_deck(dest))
+        self._command_deck.addWidget(button)
 
     def _navigate_deck(self, destination: str) -> None:
         dock = self._deck_docks.get(destination)
@@ -130,10 +198,24 @@ class MainWindow(QMainWindow):
 
     def _on_status_message(self, message: str) -> None:
         self._status.showMessage(message, 8000)
-        self._deck_bridge.set_status(message.upper()[:64] if message else "READY")
+        self._deck_status_chip.setText(f"{_('DECK_STATUS')}\n{message}" if message else "")
 
     def _on_robot_loaded(self, robot, report) -> None:
-        self._deck_bridge.set_model(robot.name)
+        self._on_deck_model_summary(robot, report)
+
+    def _on_tree_changed(self) -> None:
+        """Keep the deck's summary synchronized with live property edits."""
+        if self.controller.robot is not None and self.controller.dof_report is not None:
+            self._on_deck_model_summary(self.controller.robot, self.controller.dof_report)
+
+    def _on_deck_model_summary(self, robot, report) -> None:
+        if robot is None or report is None:
+            self._deck_model_chip.setText(f"{_('DECK_STUDIO')}\n{_('DECK_NO_MODEL')}")
+            return
+        feasible_text = _("DECK_READY") if report.is_feasible else _("DECK_REVIEW")
+        self._deck_model_chip.setText(
+            f"{robot.name}  •  {_('DECK_DOF')} {report.dof_count}  •  {feasible_text}"
+        )
 
     def _build_menu(self) -> None:
         menu = self.menuBar()
@@ -181,7 +263,8 @@ class MainWindow(QMainWindow):
             QMessageBox.critical(self, _("MENU_EXPORT_URDF"), str(e))
 
     def _show_about(self) -> None:
-        QMessageBox.information(self, _("TITLE_ABOUT"), _("MSG_ABOUT_BODY", version=__version__))
+        logo_path = ASSETS_DIR / "HYDRA_UMC_ICON.svg"
+        AboutDialog(__version__, logo_path, self).exec()
 
     def _on_language_change(self, code: str) -> None:
         if save_config({"language": code}):

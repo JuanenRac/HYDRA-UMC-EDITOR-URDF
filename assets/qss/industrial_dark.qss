@@ -280,3 +280,113 @@ QLabel#statusConnecting {
 QSplitter::handle {
     background-color: #1c232d;
 }
+
+/* Persistent control-deck chrome: a functional quick route to this app's
+   dockable panels, styled in the same deep-navy/cyan language as the
+   rest of this ecosystem's desktop tools (see HYDRA-UMC-SUITE's own QSS). */
+QToolBar#commandDeck {
+    background-color: #0a1a2b;
+    border-top: 1px solid #17354a;
+    border-bottom: 1px solid #294965;
+    padding: 7px 10px;
+    spacing: 7px;
+    min-height: 48px;
+}
+QToolBar#commandDeck::separator {
+    background: #294965;
+    width: 1px;
+    margin: 5px 8px;
+}
+QWidget#suiteBrand {
+    background: #0e3045;
+    border: 1px solid #2d7695;
+    border-radius: 12px;
+    padding: 7px;
+}
+QLabel#commandDeckTitle {
+    color: #edf7ff;
+    font-size: 17px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    padding: 0 7px 0 2px;
+}
+QToolButton#commandDeckNav, QToolButton#commandDeckAbout {
+    background: #10243a;
+    border: 1px solid #294965;
+    border-radius: 10px;
+    color: #c8e5f5;
+    font-weight: 600;
+    padding: 8px 12px;
+}
+QToolButton#commandDeckNav:hover, QToolButton#commandDeckAbout:hover {
+    background: #1a4967;
+    border-color: #38d4e6;
+    color: #ffffff;
+}
+QToolButton#commandDeckNav:pressed, QToolButton#commandDeckAbout:pressed {
+    background: #13364f;
+}
+QLabel#commandDeckState, QLabel#commandDeckTarget {
+    background: #0b1a2a;
+    border-left: 1px solid #294965;
+    color: #91a8bd;
+    font-size: 10px;
+    font-weight: 600;
+    padding: 2px 11px;
+    min-width: 105px;
+}
+QLabel#commandDeckTarget { min-width: 220px; color: #c8e5f5; }
+
+/* About dialog - see ui/about_dialog.py */
+QDialog#aboutDialog {
+    background-color: #0b1a2a;
+    border: 1px solid #294965;
+    border-radius: 12px;
+}
+QLabel#aboutTitle {
+    color: #edf7ff;
+    font-size: 20px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+}
+QLabel#aboutTagline {
+    color: #c8e5f5;
+    font-size: 13px;
+}
+QLabel#aboutDescription {
+    color: #91a8bd;
+    font-size: 11px;
+    padding: 0 8px;
+}
+QWidget#aboutInfoRow {
+    background-color: #07111e;
+    border: 1px solid #1d4056;
+    border-radius: 8px;
+}
+QLabel#aboutInfoLabel {
+    color: #91a8bd;
+    font-size: 9px;
+    font-weight: 700;
+    letter-spacing: 1px;
+}
+QLabel#aboutInfoValue {
+    color: #edf7ff;
+    font-size: 11px;
+}
+QLabel#aboutInfoValue a {
+    color: #38d4e6;
+}
+QPushButton#aboutCloseButton {
+    background-color: #38d4e6;
+    color: #07111e;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    border-radius: 6px;
+    padding: 8px 28px;
+    border: 1px solid #2d9aad;
+}
+QPushButton#aboutCloseButton:hover {
+    background-color: #55e0f0;
+}
