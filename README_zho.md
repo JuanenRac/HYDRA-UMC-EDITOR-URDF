@@ -325,14 +325,3 @@ HYDRA-UMC EDITOR-URDF 版权所有 (c) 2026 JuanenRac（Electro Hobby 3D）。�
 本编辑器是 [HYDRA-UMC STUDIO](https://github.com/JuanenRac/HYDRA-UMC-STUDIO) 目录的模型创作工具——其自身服务端的许可事宜参见该仓库，本仓库自身的许可证并不延伸至该仓库,反之亦然。
 
 如果你基于本项目进行开发，请留意这种许可证划分：这里的代码更改应保持 GPL-3.0，文档衍生品（本 README 及其翻译版本）应保持 CC BY-SA 4.0，任何经过本编辑器（导入、编辑或导出）的网格资产都应保持在其自身原始源仓库所携带的许可证之下，并附带指向该来源的署名。
-
-## 🛠️ BUILD & RUN
-
-请在发布构建前使用不改动版本的构建检查：
-
-| 操作 | Windows | Linux / macOS |
-|---|---|---|
-| 构建检查（不修改版本或 CHANGELOG） | `build-test.bat` | `./build-test.sh` |
-| 运行 / 开发（如提供） | `run*.bat` 或 `dev*.bat` | `./run*.sh` 或 `./dev*.sh` |
-
-`build-test.bat` 和 `build-test.sh` 会编译或验证项目技术栈，但不会递增 `hydra-umc.project.json`，也不会修改 `CHANGELOG.md`。它们仅可能生成正常的编译器输出。现有的 `build*.bat`、`build*.sh`、`run*` 和 `dev*` 脚本保留各自的版本化或运行时行为；需要该行为时请使用它们。

@@ -327,14 +327,3 @@ Cet éditeur est l'outil de création de modèles pour le catalogue [HYDRA-UMC S
 
 Si vous construisez sur ce projet, gardez la séparation des licences à l'esprit : les modifications de code ici devraient rester GPL-3.0, les dérivés de documentation (ce README et ses traductions) devraient rester CC BY-SA 4.0, et tout asset de maillage qui transite par cet éditeur (importé, édité ou exporté) devrait rester sous quelque licence que porte son propre dépôt source original, avec attribution à cette source.
 </content>
-
-## 🛠️ BUILD & RUN
-
-Utilisez la vérification de compilation sans versionnement avant une compilation de publication :
-
-| Action | Windows | Linux / macOS |
-|---|---|---|
-| Vérification de compilation (sans modifier la version ni le CHANGELOG) | `build-test.bat` | `./build-test.sh` |
-| Exécution / développement (si disponible) | `run*.bat` ou `dev*.bat` | `./run*.sh` ou `./dev*.sh` |
-
-`build-test.bat` et `build-test.sh` compilent ou valident la pile du projet sans incrémenter `hydra-umc.project.json` ni modifier `CHANGELOG.md`. Ils peuvent uniquement créer les sorties normales du compilateur. Les scripts existants `build*.bat`, `build*.sh`, `run*` et `dev*` conservent leur comportement spécifique de versionnement ou d'exécution ; utilisez-les lorsque ce comportement est requis.
