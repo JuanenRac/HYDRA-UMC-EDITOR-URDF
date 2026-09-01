@@ -313,15 +313,12 @@ Ce projet fait partie d'un écosystème de robotique plus vaste du même auteur 
 
 ---
 
-## 👤 Auteur
-
+## 👤 AUTEUR
 **JuanenRac** (Electro Hobby 3D)
 📧 electrohobby3d@gmail.com
-📺 youtube.com/@electrohobby3d
+📺 [youtube.com/@electrohobby3d](https://youtube.com/@electrohobby3d)
 
----
-
-## 📜 Licence et Avis de Copyright
+## 📜 LICENCE
 
 HYDRA-UMC EDITOR-URDF est (c) 2026 JuanenRac (Electro Hobby 3D). Cet avis doit être inclus dans toute distribution de ce projet ou de ses travaux dérivés.
 
