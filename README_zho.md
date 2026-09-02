@@ -140,20 +140,26 @@ HYDRA-UMC-EDITOR-URDF/
 ├── main.py                        # 入口点——QApplication、主题、最大化启动、F11 全屏切换
 ├── requirements.txt                # PySide6、PyOpenGL、numpy-stl、numpy（已锁定版本）
 ├── build_exe.bat / build_exe.sh    # Windows/Linux 独立可执行文件构建脚本（PyInstaller）——先递增版本号
+├── build-test.bat / build-test.sh  # 不递增版本号的构建/编译检查
+├── HYDRA-UMC_EDITOR-URDF.spec      # build_exe.bat/.sh 使用的 PyInstaller 构建规格
 ├── bump_version.py                 # 里程表式版本递增，在每次真正构建前由 build_exe.bat/.sh 调用
+├── bump_manifest_version.py        # 将 hydra-umc.project.json 的版本与原生版本同步（--sync）
 ├── CHANGELOG.md                    # 版本历史
 ├── README.md                       # 本文件
 ├── README_spa.md / README_ita.md / README_fra.md / README_deu.md / README_zho.md / README_jpn.md  # <- 翻译
 ├── LICENSE                         # GPL-3.0
 ├── assets/
-│   ├── HYDRA_UMC_ICON.svg          # Qt Quick 命令面板使用的动画 HYDRA-UMC 标志
-│   ├── qml/CommandDeck.qml         # Qt Quick 命令面板；转发到既有部件/操作
+│   ├── HYDRA_UMC_ICON.svg          # 工具栏命令面板使用的动画 HYDRA-UMC 标志
 │   └── qss/industrial_dark.qss     # 原样复用自 HYDRA-UMC-SUITE
+├── images/
+│   └── HYDRA_UMC_BANNER.svg        # 媒体与图示
 ├── language/                       # english/spanish/italian/french/german/chinese/japanese.lng —— 位于 exe 旁边，未打包
 ├── hydra_editor_urdf/
 │   ├── __init__.py                 # __version__ —— 唯一权威来源，由 About 对话框读取，由 bump_version.py 重写
 │   ├── app.py                      # EditorController —— “当前加载了什么”的唯一持有者，每个面板监听的 Qt 信号
 │   ├── models.py                   # 自研的 URDF 对象树（Robot/Link/Joint/Visual/Geometry/Material/…）
+│   ├── gallery.py                  # 经过验证的真实公开机器人描述仓库的初始列表
+│   ├── inertia_calc.py             # 基本几何体的闭式转动惯量公式
 │   ├── i18n.py                     # language/*.lng 加载器、配置持久化——从 HYDRA-UMC-SUITE 自身的 i18n.py 移植
 │   ├── urdf/
 │   │   ├── parser.py               # URDF XML -> models.py 树（ElementTree，检测到 xacro 并以清晰错误拒绝）
@@ -171,7 +177,7 @@ HYDRA-UMC-EDITOR-URDF/
 │   │   └── client.py               # StudioClient —— 针对 HYDRA-UMC-SERVER 的 server.ts（两个仓库拆分前是 STUDIO 自身的后端）进行 login/list_models/push_model/pull_model
 │   └── ui/
 │       ├── main_window.py          # QMainWindow —— 可停靠工作区、菜单栏、语言切换器、状态栏
-│       ├── qtquick_deck.py         # CommandDeck.qml 与既有工作区之间的 QObject 桥接
+│       ├── about_dialog.py         # 真实的 About 对话框，对应 STUDIO 自身的 About.tsx 和 SUITE 自身的 about_dialog.py
 │       ├── theme.py                 # 应用 assets/qss/industrial_dark.qss
 │       └── panels/
 │           ├── source_panel.py     # GitHub URL / 本地文件夹输入，找到的 URDF 列表
@@ -183,8 +189,18 @@ HYDRA-UMC-EDITOR-URDF/
 │   ├── ARCHITECTURE.md
 │   ├── BUILD_AND_RUN.md
 │   └── INTEGRATION_CONTRACT.md
+├── tools/
+│   ├── build_test.py               # 不递增版本号的构建/编译检查
+│   └── ci_validate.py              # CI 使用的 manifest/CHANGELOG/docs 校验
+├── build/                           # 编译后的独立可执行文件（build_exe.bat/.sh 的输出）
 └── work/                            # 已拉取的 GitHub 仓库和已拉取的服务器模型的运行时暂存空间（已加入 gitignore）
 ```
+
+说明：Qt Quick 命令面板（`assets/qml/CommandDeck.qml`、
+`ui/qtquick_deck.py`）已被回退——嵌入此 `QMainWindow` 真实
+`QDockWidget` 布局中的 `QQuickWidget` 始终无法正确合成（纯黑显示，
+控制台无报错）。工具栏命令面板如今由纯粹的
+`QToolBar`/`QLabel`/`QToolButton` 部件组成；完整经过见 `CHANGELOG.md`。
 
 ---
 

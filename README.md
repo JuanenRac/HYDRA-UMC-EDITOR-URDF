@@ -142,20 +142,26 @@ HYDRA-UMC-EDITOR-URDF/
 ├── main.py                        # Entry point - QApplication, theme, maximized start, F11 fullscreen toggle
 ├── requirements.txt                # PySide6, PyOpenGL, numpy-stl, numpy (pinned)
 ├── build_exe.bat / build_exe.sh    # Windows/Linux standalone-executable build scripts (PyInstaller) - bumps the version first
+├── build-test.bat / build-test.sh  # Non-versioning build/compile check
+├── HYDRA-UMC_EDITOR-URDF.spec      # PyInstaller build spec used by build_exe.bat/.sh
 ├── bump_version.py                 # Odometer-style version bump, called by build_exe.bat/.sh before every real build
+├── bump_manifest_version.py        # Syncs hydra-umc.project.json's version to the native one (--sync)
 ├── CHANGELOG.md                    # Version history
 ├── README.md                       # This file
 ├── README_spa.md / README_ita.md / README_fra.md / README_deu.md / README_zho.md / README_jpn.md  # <- translations
 ├── LICENSE                         # GPL-3.0
 ├── assets/
-│   ├── HYDRA_UMC_ICON.svg          # Animated HYDRA-UMC mark used by the Qt Quick command deck
-│   ├── qml/CommandDeck.qml         # Qt Quick command deck; forwards to existing widgets/actions
+│   ├── HYDRA_UMC_ICON.svg          # Animated HYDRA-UMC mark used by the toolbar command deck
 │   └── qss/industrial_dark.qss     # Reused verbatim from HYDRA-UMC-SUITE
-├── language/                       # english/spanish/italian/french/german.lng - sits beside the exe, not bundled
+├── images/
+│   └── HYDRA_UMC_BANNER.svg        # Media and diagrams
+├── language/                       # english/spanish/italian/french/german/japanese/chinese.lng - sits beside the exe, not bundled
 ├── hydra_editor_urdf/
 │   ├── __init__.py                 # __version__ - single source of truth, read by the About dialog and rewritten by bump_version.py
 │   ├── app.py                      # EditorController - single owner of "what's loaded", Qt signals every panel listens to
 │   ├── models.py                   # In-house URDF object tree (Robot/Link/Joint/Visual/Geometry/Material/...)
+│   ├── gallery.py                  # Starter list of real, verified public robot-description repositories
+│   ├── inertia_calc.py             # Closed-form moment-of-inertia formulas for the primitive geometries
 │   ├── i18n.py                     # language/*.lng loader, config persistence - ported from HYDRA-UMC-SUITE's own i18n.py
 │   ├── urdf/
 │   │   ├── parser.py               # URDF XML -> models.py tree (ElementTree, xacro detected and rejected with a clear error)
@@ -173,7 +179,7 @@ HYDRA-UMC-EDITOR-URDF/
 │   │   └── client.py               # StudioClient - login/list_models/push_model/pull_model against HYDRA-UMC-SERVER's server.ts (STUDIO's own backend before the two repos split)
 │   └── ui/
 │       ├── main_window.py          # QMainWindow - dockable workspace, menu bar, language switcher, status bar
-│       ├── qtquick_deck.py         # QObject bridge between CommandDeck.qml and the existing workspace
+│       ├── about_dialog.py         # Real About dialog, matching STUDIO's own About.tsx and SUITE's own about_dialog.py
 │       ├── theme.py                 # Applies assets/qss/industrial_dark.qss
 │       └── panels/
 │           ├── source_panel.py     # GitHub URL / local folder input, found-URDF list
@@ -185,8 +191,18 @@ HYDRA-UMC-EDITOR-URDF/
 │   ├── ARCHITECTURE.md
 │   ├── BUILD_AND_RUN.md
 │   └── INTEGRATION_CONTRACT.md
+├── tools/
+│   ├── build_test.py               # Build/compile check without bumping version
+│   └── ci_validate.py              # Manifest/CHANGELOG/docs validation used by CI
+├── build/                           # Compiled standalone executable (build_exe.bat/.sh output)
 └── work/                            # Runtime scratch space for fetched GitHub repos and pulled server models (gitignored)
 ```
+
+Note: the Qt Quick command deck (`assets/qml/CommandDeck.qml`, `ui/qtquick_deck.py`)
+was reverted - a `QQuickWidget` embedded in this `QMainWindow`'s real
+`QDockWidget` layout never composited correctly (solid black, no console
+error). The toolbar command deck is plain `QToolBar`/`QLabel`/`QToolButton`
+widgets today; see `CHANGELOG.md` for the full story.
 
 ---
 

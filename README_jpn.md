@@ -142,20 +142,26 @@ HYDRA-UMC-EDITOR-URDF/
 ├── main.py                        # エントリポイント——QApplication、テーマ、最大化起動、F11 フルスクリーン切替
 ├── requirements.txt                # PySide6、PyOpenGL、numpy-stl、numpy（バージョン固定）
 ├── build_exe.bat / build_exe.sh    # Windows/Linux 独立実行ファイルビルドスクリプト（PyInstaller）——最初にバージョンを加算
+├── build-test.bat / build-test.sh  # バージョンを更新しないビルド/コンパイル確認
+├── HYDRA-UMC_EDITOR-URDF.spec      # build_exe.bat/.sh が使用する PyInstaller ビルド仕様
 ├── bump_version.py                 # オドメーター方式のバージョン加算、毎回の実際のビルド前に build_exe.bat/.sh から呼び出される
+├── bump_manifest_version.py        # hydra-umc.project.json のバージョンをネイティブ側と同期（--sync）
 ├── CHANGELOG.md                    # バージョン履歴
 ├── README.md                       # 本ファイル
 ├── README_spa.md / README_ita.md / README_fra.md / README_deu.md / README_zho.md / README_jpn.md  # <- 翻訳
 ├── LICENSE                         # GPL-3.0
 ├── assets/
-│   ├── HYDRA_UMC_ICON.svg          # Qt Quick コマンドデッキで使用するアニメーション HYDRA-UMC マーク
-│   ├── qml/CommandDeck.qml         # Qt Quick コマンドデッキ。既存のウィジェット/操作へ転送
+│   ├── HYDRA_UMC_ICON.svg          # ツールバーのコマンドデッキで使用するアニメーション HYDRA-UMC マーク
 │   └── qss/industrial_dark.qss     # HYDRA-UMC-SUITE からそのまま再利用
+├── images/
+│   └── HYDRA_UMC_BANNER.svg        # メディアと図版
 ├── language/                       # english/spanish/italian/french/german/chinese/japanese.lng —— exe の隣に置かれ、バンドルされない
 ├── hydra_editor_urdf/
 │   ├── __init__.py                 # __version__ —— 唯一の権威ある情報源、About ダイアログが読み取り、bump_version.py が書き換える
 │   ├── app.py                      # EditorController —— 「何が読み込まれているか」の唯一の保持者、各パネルがリッスンする Qt シグナル
 │   ├── models.py                   # 自社製の URDF オブジェクトツリー（Robot/Link/Joint/Visual/Geometry/Material/…）
+│   ├── gallery.py                  # 実在が検証済みの公開ロボット記述リポジトリのスターターリスト
+│   ├── inertia_calc.py             # プリミティブ形状に対する慣性モーメントの閉形式公式
 │   ├── i18n.py                     # language/*.lng ローダー、設定の永続化——HYDRA-UMC-SUITE 自身の i18n.py から移植
 │   ├── urdf/
 │   │   ├── parser.py               # URDF XML -> models.py ツリー（ElementTree、xacro を検出して明確なエラーで拒否）
@@ -173,7 +179,7 @@ HYDRA-UMC-EDITOR-URDF/
 │   │   └── client.py               # StudioClient —— HYDRA-UMC-SERVER の server.ts（2 つのリポジトリが分割される前は STUDIO 自身のバックエンド）に対する login/list_models/push_model/pull_model
 │   └── ui/
 │       ├── main_window.py          # QMainWindow —— ドッキング可能なワークスペース、メニューバー、言語切り替え、ステータスバー
-│       ├── qtquick_deck.py         # CommandDeck.qml と既存ワークスペースをつなぐ QObject ブリッジ
+│       ├── about_dialog.py         # STUDIO 自身の About.tsx と SUITE 自身の about_dialog.py に準じた本物の About ダイアログ
 │       ├── theme.py                 # assets/qss/industrial_dark.qss を適用
 │       └── panels/
 │           ├── source_panel.py     # GitHub URL / ローカルフォルダ入力、見つかった URDF の一覧
@@ -185,8 +191,19 @@ HYDRA-UMC-EDITOR-URDF/
 │   ├── ARCHITECTURE.md
 │   ├── BUILD_AND_RUN.md
 │   └── INTEGRATION_CONTRACT.md
+├── tools/
+│   ├── build_test.py               # バージョンを更新しないビルド/コンパイル確認
+│   └── ci_validate.py              # CI が使用する manifest/CHANGELOG/docs の検証
+├── build/                           # コンパイル済み独立実行ファイル（build_exe.bat/.sh の出力）
 └── work/                            # 取得した GitHub リポジトリとプルしたサーバーモデルのランタイム作業領域（gitignore 対象）
 ```
+
+注：Qt Quick コマンドデッキ（`assets/qml/CommandDeck.qml`、
+`ui/qtquick_deck.py`）は撤回されました——この `QMainWindow` の本物の
+`QDockWidget` レイアウトに組み込まれた `QQuickWidget` が正しく
+コンポジットされず（コンソールエラーなしの真っ黒表示）、ツールバーの
+コマンドデッキは現在、素の `QToolBar`/`QLabel`/`QToolButton` ウィジェット
+です。詳細は `CHANGELOG.md` を参照。
 
 ---
 

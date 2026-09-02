@@ -142,20 +142,26 @@ HYDRA-UMC-EDITOR-URDF/
 ├── main.py                        # Punto di ingresso - QApplication, tema, avvio massimizzato, toggle fullscreen F11
 ├── requirements.txt                # PySide6, PyOpenGL, numpy-stl, numpy (con versioni fissate)
 ├── build_exe.bat / build_exe.sh    # Script di build per eseguibile standalone Windows/Linux (PyInstaller) - esegue prima il bump della versione
+├── build-test.bat / build-test.sh  # Controllo build/compilazione senza incremento di versione
+├── HYDRA-UMC_EDITOR-URDF.spec      # Spec PyInstaller usata da build_exe.bat/.sh
 ├── bump_version.py                 # Bump della versione in stile contachilometri, invocato da build_exe.bat/.sh prima di ogni build reale
+├── bump_manifest_version.py        # Sincronizza la versione di hydra-umc.project.json con quella nativa (--sync)
 ├── CHANGELOG.md                    # Cronologia delle versioni
 ├── README.md                       # Questo file
 ├── README_spa.md / README_ita.md / README_fra.md / README_deu.md / README_zho.md / README_jpn.md  # <- traduzioni
 ├── LICENSE                         # GPL-3.0
 ├── assets/
-│   ├── HYDRA_UMC_ICON.svg          # Marchio HYDRA-UMC animato del pannello Qt Quick
-│   ├── qml/CommandDeck.qml         # Pannello Qt Quick; inoltra a widget/azioni esistenti
+│   ├── HYDRA_UMC_ICON.svg          # Marchio HYDRA-UMC animato del pannello della barra strumenti
 │   └── qss/industrial_dark.qss     # Riutilizzato alla lettera da HYDRA-UMC-SUITE
-├── language/                       # english/spanish/italian/french/german.lng - si trova accanto all'exe, non incorporato
+├── images/
+│   └── HYDRA_UMC_BANNER.svg        # Media e diagrammi
+├── language/                       # english/spanish/italian/french/german/japanese/chinese.lng - si trova accanto all'exe, non incorporato
 ├── hydra_editor_urdf/
 │   ├── __init__.py                 # __version__ - unica fonte di verità, letta dalla finestra Informazioni e riscritta da bump_version.py
 │   ├── app.py                      # EditorController - unico proprietario di "cosa è caricato", segnali Qt ascoltati da ogni pannello
 │   ├── models.py                   # Albero oggetti URDF sviluppato in casa (Robot/Link/Joint/Visual/Geometry/Material/...)
+│   ├── gallery.py                  # Elenco iniziale di repository pubblici reali e verificati di descrizioni robot
+│   ├── inertia_calc.py             # Formule chiuse del momento d'inerzia per le geometrie primitive
 │   ├── i18n.py                     # Loader di language/*.lng, persistenza configurazione - portato dal proprio i18n.py di HYDRA-UMC-SUITE
 │   ├── urdf/
 │   │   ├── parser.py               # XML URDF -> albero di models.py (ElementTree, xacro rilevato e rifiutato con un errore chiaro)
@@ -173,7 +179,7 @@ HYDRA-UMC-EDITOR-URDF/
 │   │   └── client.py               # StudioClient - login/list_models/push_model/pull_model contro il server.ts di HYDRA-UMC-SERVER (il backend di STUDIO prima che i due repository si separassero)
 │   └── ui/
 │       ├── main_window.py          # QMainWindow - spazio di lavoro agganciabile, barra dei menu, cambio lingua, barra di stato
-│       ├── qtquick_deck.py         # Ponte QObject fra CommandDeck.qml e lo spazio di lavoro esistente
+│       ├── about_dialog.py         # Finestra Informazioni reale, come About.tsx di STUDIO e about_dialog.py di SUITE
 │       ├── theme.py                 # Applica assets/qss/industrial_dark.qss
 │       └── panels/
 │           ├── source_panel.py     # Inserimento URL GitHub / cartella locale, elenco URDF trovati
@@ -185,8 +191,20 @@ HYDRA-UMC-EDITOR-URDF/
 │   ├── ARCHITECTURE.md
 │   ├── BUILD_AND_RUN.md
 │   └── INTEGRATION_CONTRACT.md
+├── tools/
+│   ├── build_test.py               # Controllo build/compilazione senza incremento di versione
+│   └── ci_validate.py              # Validazione manifest/CHANGELOG/docs usata dalla CI
+├── build/                           # Eseguibile standalone compilato (output di build_exe.bat/.sh)
 └── work/                            # Spazio di lavoro temporaneo runtime per repository GitHub scaricati e modelli server prelevati (in gitignore)
 ```
+
+Nota: il pannello dei comandi Qt Quick (`assets/qml/CommandDeck.qml`,
+`ui/qtquick_deck.py`) è stato revertito - un `QQuickWidget` incorporato nel
+vero layout `QDockWidget` di questo `QMainWindow` non veniva mai
+composto correttamente (nero pieno, nessun errore in console). Il
+pannello della barra strumenti oggi è composto da semplici widget
+`QToolBar`/`QLabel`/`QToolButton`; vedi `CHANGELOG.md` per la storia
+completa.
 
 ---
 

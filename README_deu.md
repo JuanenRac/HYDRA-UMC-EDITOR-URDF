@@ -141,20 +141,26 @@ HYDRA-UMC-EDITOR-URDF/
 ├── main.py                        # Einstiegspunkt - QApplication, Theme, maximierter Start, F11-Vollbild-Umschalter
 ├── requirements.txt                # PySide6, PyOpenGL, numpy-stl, numpy (fest gepinnt)
 ├── build_exe.bat / build_exe.sh    # Build-Skripte für eigenständige Windows-/Linux-Executables (PyInstaller) - erhöht zuerst die Versionsnummer
+├── build-test.bat / build-test.sh  # Build-/Kompilierprüfung ohne Versionserhöhung
+├── HYDRA-UMC_EDITOR-URDF.spec      # PyInstaller-Build-Spec, verwendet von build_exe.bat/.sh
 ├── bump_version.py                 # Erhöhung der Version im Kilometerzähler-Stil, aufgerufen von build_exe.bat/.sh vor jedem echten Build
+├── bump_manifest_version.py        # Synchronisiert die Version von hydra-umc.project.json mit der nativen (--sync)
 ├── CHANGELOG.md                    # Versionshistorie
 ├── README.md                       # Diese Datei
 ├── README_spa.md / README_ita.md / README_fra.md / README_deu.md / README_zho.md / README_jpn.md  # <- Übersetzungen
 ├── LICENSE                         # GPL-3.0
 ├── assets/
-│   ├── HYDRA_UMC_ICON.svg          # Animiertes HYDRA-UMC-Zeichen des Qt-Quick-Bedienfelds
-│   ├── qml/CommandDeck.qml         # Qt-Quick-Bedienfeld; leitet an vorhandene Widgets/Aktionen weiter
+│   ├── HYDRA_UMC_ICON.svg          # Animiertes HYDRA-UMC-Zeichen des Symbolleisten-Bedienfelds
 │   └── qss/industrial_dark.qss     # Wörtlich von HYDRA-UMC-SUITE wiederverwendet
-├── language/                       # english/spanish/italian/french/german.lng - liegt neben der exe, nicht gebündelt
+├── images/
+│   └── HYDRA_UMC_BANNER.svg        # Medien und Diagramme
+├── language/                       # english/spanish/italian/french/german/japanese/chinese.lng - liegt neben der exe, nicht gebündelt
 ├── hydra_editor_urdf/
 │   ├── __init__.py                 # __version__ - einzige Quelle der Wahrheit, gelesen vom Über-Dialog und neu geschrieben von bump_version.py
 │   ├── app.py                      # EditorController - alleiniger Besitzer von „was geladen ist", Qt-Signale, denen jedes Panel zuhört
 │   ├── models.py                   # Hausgemachter URDF-Objektbaum (Robot/Link/Joint/Visual/Geometry/Material/...)
+│   ├── gallery.py                  # Startliste echter, verifizierter öffentlicher Robotermodell-Repositories
+│   ├── inertia_calc.py             # Geschlossene Trägheitsmoment-Formeln für die primitiven Geometrien
 │   ├── i18n.py                     # Loader für language/*.lng, Persistenz der Konfiguration - portiert aus der eigenen i18n.py von HYDRA-UMC-SUITE
 │   ├── urdf/
 │   │   ├── parser.py               # URDF-XML -> models.py-Baum (ElementTree, xacro wird erkannt und mit klarer Fehlermeldung abgelehnt)
@@ -172,7 +178,7 @@ HYDRA-UMC-EDITOR-URDF/
 │   │   └── client.py               # StudioClient - login/list_models/push_model/pull_model gegen die server.ts von HYDRA-UMC-SERVER (das Backend von STUDIO, bevor sich die beiden Repos trennten)
 │   └── ui/
 │       ├── main_window.py          # QMainWindow - andockbarer Arbeitsbereich, Menüleiste, Sprachumschalter, Statusleiste
-│       ├── qtquick_deck.py         # QObject-Brücke zwischen CommandDeck.qml und vorhandenem Arbeitsbereich
+│       ├── about_dialog.py         # Echter Über-Dialog, wie STUDIOs eigenes About.tsx und SUITEs eigenes about_dialog.py
 │       ├── theme.py                 # Wendet assets/qss/industrial_dark.qss an
 │       └── panels/
 │           ├── source_panel.py     # Eingabe von GitHub-URL / lokalem Ordner, Liste gefundener URDFs
@@ -184,8 +190,20 @@ HYDRA-UMC-EDITOR-URDF/
 │   ├── ARCHITECTURE.md
 │   ├── BUILD_AND_RUN.md
 │   └── INTEGRATION_CONTRACT.md
+├── tools/
+│   ├── build_test.py               # Build-/Kompilierprüfung ohne Versionserhöhung
+│   └── ci_validate.py              # Manifest-/CHANGELOG-/Doku-Validierung, von der CI genutzt
+├── build/                           # Kompiliertes eigenständiges Executable (Ausgabe von build_exe.bat/.sh)
 └── work/                            # Laufzeit-Arbeitsbereich für abgerufene GitHub-Repositories und heruntergeladene Server-Modelle (per gitignore ausgeschlossen)
 ```
+
+Hinweis: Das Qt-Quick-Bedienfeld (`assets/qml/CommandDeck.qml`,
+`ui/qtquick_deck.py`) wurde zurückgerollt - ein `QQuickWidget`, eingebettet
+im echten `QDockWidget`-Layout dieses `QMainWindow`, wurde nie korrekt
+kompositiert (durchgehend schwarz, keine Konsolenfehler). Das
+Symbolleisten-Bedienfeld besteht heute aus reinen
+`QToolBar`/`QLabel`/`QToolButton`-Widgets; siehe `CHANGELOG.md` für die
+vollständige Geschichte.
 
 ---
 
