@@ -300,6 +300,8 @@ Linux では、コンパイル済みバイナリの実行に、システム自�
 - **[URTC Web Studio](https://github.com/JuanenRac/URTC-WEB-STUDIO)** —— 上記 2 つのデスクトップツールに代わるブラウザベースの選択肢（Web Serial API + SLCAN）、ローカルインストール不要。
 
 **本リポジトリと直接関連**
+- **[HYDRA-UMC-STUDIO](https://github.com/JuanenRac/HYDRA-UMC-STUDIO)** —— 本エディターが埋めるために存在するモデルカタログ。完成した結果は、稼働中のSTUDIOサーバーに直接プッシュされます。
+- **[HYDRA-UMC-SERVER](https://github.com/JuanenRac/HYDRA-UMC-SERVER)** —— 本エディターが完成モデルをプッシュする、実際の `POST /api/models/submit` エンドポイントを保有しています。
 - **[HYDRA-UMC-TWIN](https://github.com/JuanenRac/HYDRA-UMC-TWIN)** —— ここで作成された URDF モデルを消費して、その物理シミュレーションを駆動します。
 - **[HYDRA-UMC-PHYSICS-REPLICA](https://github.com/JuanenRac/HYDRA-UMC-PHYSICS-REPLICA)** —— ここで作成された URDF モデルを消費して、その物理シミュレーションを駆動します。
 - **[HYDRA-UMC-SYNTHETIC-DATA-GEN](https://github.com/JuanenRac/HYDRA-UMC-SYNTHETIC-DATA-GEN)** —— ここで作成されたモデルから学習データを生成します。

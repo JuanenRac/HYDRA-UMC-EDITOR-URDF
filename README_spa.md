@@ -298,6 +298,8 @@ Este proyecto forma parte de un ecosistema de robótica más amplio del mismo au
 - **[URTC Web Studio](https://github.com/JuanenRac/URTC-WEB-STUDIO)** — alternativa basada en navegador a las 2 herramientas de escritorio de arriba (Web Serial API + SLCAN), sin necesidad de instalación local.
 
 **Directamente relacionados con este repositorio**
+- **[HYDRA-UMC-STUDIO](https://github.com/JuanenRac/HYDRA-UMC-STUDIO)** — el catálogo de modelos que este editor existe para poblar; el resultado terminado se publica directamente a un servidor STUDIO en marcha.
+- **[HYDRA-UMC-SERVER](https://github.com/JuanenRac/HYDRA-UMC-SERVER)** — posee el endpoint real `POST /api/models/submit` al que este editor publica los modelos terminados.
 - **[HYDRA-UMC-TWIN](https://github.com/JuanenRac/HYDRA-UMC-TWIN)** — consume los modelos URDF creados aquí para alimentar su simulación física.
 - **[HYDRA-UMC-PHYSICS-REPLICA](https://github.com/JuanenRac/HYDRA-UMC-PHYSICS-REPLICA)** — consume los modelos URDF creados aquí para alimentar su simulación física.
 - **[HYDRA-UMC-SYNTHETIC-DATA-GEN](https://github.com/JuanenRac/HYDRA-UMC-SYNTHETIC-DATA-GEN)** — genera datos de entrenamiento a partir de los modelos creados aquí.

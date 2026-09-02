@@ -295,6 +295,8 @@ cp -r language dist/language
 - **[URTC Web Studio](https://github.com/JuanenRac/URTC-WEB-STUDIO)** —— 上述两款桌面工具的浏览器端替代方案（Web Serial API + SLCAN），无需本地安装。
 
 **与本仓库直接相关**
+- **[HYDRA-UMC-STUDIO](https://github.com/JuanenRac/HYDRA-UMC-STUDIO)** —— 本编辑器存在的目的正是填充这个模型目录;完成的结果会直接推送到正在运行的 STUDIO 服务器。
+- **[HYDRA-UMC-SERVER](https://github.com/JuanenRac/HYDRA-UMC-SERVER)** —— 拥有本编辑器推送完成模型所用的真实 `POST /api/models/submit` 端点。
 - **[HYDRA-UMC-TWIN](https://github.com/JuanenRac/HYDRA-UMC-TWIN)** —— 消费这里创建的 URDF 模型来驱动其物理仿真。
 - **[HYDRA-UMC-PHYSICS-REPLICA](https://github.com/JuanenRac/HYDRA-UMC-PHYSICS-REPLICA)** —— 消费这里创建的 URDF 模型来驱动其物理仿真。
 - **[HYDRA-UMC-SYNTHETIC-DATA-GEN](https://github.com/JuanenRac/HYDRA-UMC-SYNTHETIC-DATA-GEN)** —— 从这里创建的模型生成训练数据。
