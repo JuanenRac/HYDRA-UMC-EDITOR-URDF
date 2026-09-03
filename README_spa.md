@@ -332,6 +332,14 @@ Este proyecto forma parte de un ecosistema de robótica más amplio del mismo au
 
 ---
 
+## 📚 Documentación y Comunidad
+
+- **[CONTRIBUTING.md](CONTRIBUTING.md)** — stack tecnológico y pautas de codificación para un pull request.
+- **[CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md)** — los estándares de comportamiento esperados en esta comunidad.
+- **[SECURITY.md](SECURITY.md)** — cómo reportar una vulnerabilidad, y las áreas reales de enfoque en seguridad de este proyecto.
+- **[SUPPORT.md](SUPPORT.md)** — dónde hacer preguntas y reportar errores.
+- **[LICENSE.md](LICENSE.md)** — la licencia propia de este proyecto.
+
 ## 👤 AUTOR
 **JuanenRac** (Electro Hobby 3D)
 📧 electrohobby3d@gmail.com
