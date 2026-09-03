@@ -44,6 +44,7 @@ Dos formas de apuntar la aplicación a los archivos fuente de un robot, ambas te
 
 - **Desde una URL de GitHub** - acepta una URL completa `https://github.com/owner/repo` (con o sin `/tree/<branch>`), un formato estilo SSH `git@github.com:owner/repo.git`, o el atajo simple `owner/repo`. Deliberadamente **no** invoca `git clone`, lo cual convertiría una instalación de `git` en una dependencia dura en tiempo de ejecución tanto en Windows como en Linux para algo que una simple descarga HTTPS ya resuelve: GitHub sirve un zipball de cualquier rama/tag/commit desde `codeload.github.com` sin necesidad de autenticación para un repositorio público, así que esto usa el propio `urllib.request` + `zipfile` de la biblioteca estándar y nada más. Solo se soportan repositorios públicos - no hay manejo de tokens/credenciales, y el zipball de un repositorio privado da un 404 igual que uno inexistente.
 - **Desde una carpeta local** - para un repositorio ya descargado a mano, o una copia de trabajo que el operador está editando activamente fuera de esta aplicación.
+- **Desde la Galería** - un desplegable "Gallery" encima del campo de URL de GitHub (`hydra_editor_urdf/gallery.py`) lista un pequeño conjunto inicial de repositorios de descripción de robots reales y verificados a mano (`universal_robot` de ROS-Industrial, `open_manipulator` de ROBOTIS). Elegir una entrada solo rellena la URL y muestra su descripción - nunca descarga por sí sola, el operador sigue pulsando Fetch, igual que si escribiera la URL a mano.
 
 De cualquier forma, la aplicación después busca recursivamente cada archivo `*.urdf`/`*.xacro` bajo la carpeta elegida, los lista todos (un repositorio real de descripción de robot a menudo trae más de uno - un brazo desnudo más una variante "con pinza" es un emparejamiento habitual), y elige automáticamente el de mayor tamaño de archivo como valor por defecto razonable para "el principal" - cambiar a otro candidato después es un doble clic en el panel Source, no una nueva descarga.
 
@@ -71,6 +72,7 @@ El panel Properties edita el enlace que esté seleccionado en el árbol de enlac
 - **Recolorear** - el material visual de un enlace, elegido mediante un diálogo de color estándar. Un material compartido por nombre entre varios enlaces (una declaración `<material name="...">` de nivel superior de un URDF real, referenciada por más de un `<visual>`) recolorea juntos a todos los enlaces que lo comparten, respetando lo que esa sintaxis de material compartido realmente significa en la especificación.
 - **Reescalar** - factor de escala por eje (X/Y/Z) sobre la propia transformación `<mesh scale="...">` de una geometría de malla, no una reescritura destructiva de los propios datos de triángulos de la malla - la misma edición vuelta a aplicar más tarde parte siempre de la malla original, sin modificar.
 - **Retipar y re-limitar una junta** - cambiar el tipo de una junta (cualquiera de los 6 que define la especificación URDF) y su límite inferior/superior, con el veredicto del panel DOF actualizándose de inmediato ya que un retipado puede cambiar el recuento de DOF o introducir un tipo no soportado.
+- **Masa e inercia** - "Auto-calculate" rellena masa/Ixx/Iyy/Izz a partir de la geometría del enlace seleccionado usando las fórmulas de forma cerrada de densidad uniforme de `inertia_calc.py` (exactas para Caja/Cilindro/Esfera, una aproximación por caja envolvente para Malla); una masa introducida a mano siempre gana sobre la estimación por densidad, y si aún no hay masa introducida asume una densidad genérica de aluminio (2700 kg/m³) y lo indica en una nota. "Apply" confirma los campos en `Link.inertial` - el mismo patrón de dos pasos calcular-y-aplicar que Scale/Joint arriba.
 
 El **panel Viewport** aloja la propia vista 3D OpenGL más un control deslizante de jog por cada junta móvil, para que el operador pueda previsualizar el URDF moviéndose por su propio rango real antes de tocar STUDIO. La cinemática directa (`render/kinematics.py`) es genérica sobre cualquier árbol que se acabe de importar - a diferencia del propio módulo de cinemática de HYDRA-UMC SUITE, que maneja un registro fijo de unas pocas docenas de modelos de robot conocidos y verificados a mano, esta aplicación tiene que posar un URDF arbitrario, nunca antes visto, así que compone el propio `<origin>`/`<axis>` real de cada junta (fórmula de rotación de Rodrigues para un eje revolute arbitrario, no solo el atajo de dirección cardinal en el que podría apoyarse un registro fijo) recorriendo el propio grafo padre/hijo.
 
@@ -148,6 +150,7 @@ Reutiliza el propio `assets/qss/industrial_dark.qss` de HYDRA-UMC SUITE tal cual
 ```text
 HYDRA-UMC-EDITOR-URDF/
 ├── main.py                        # Punto de entrada - QApplication, tema, arranque maximizado, alternancia F11 de pantalla completa
+├── run.bat / run.sh                # Script de conveniencia - activa .venv si existe, ejecuta main.py, no se autocierra
 ├── requirements.txt                # PySide6, PyOpenGL, numpy-stl, numpy (con versiones fijadas)
 ├── build_exe.bat / build_exe.sh    # Scripts de compilación de ejecutable independiente para Windows/Linux (PyInstaller) - primero sube la versión
 ├── build-test.bat / build-test.sh  # Comprobación de build/compilación sin subir versión
@@ -202,7 +205,8 @@ HYDRA-UMC-EDITOR-URDF/
 ├── tools/
 │   ├── build_test.py               # Comprobación de build/compilación sin subir versión
 │   └── ci_validate.py              # Validación de manifest/CHANGELOG/docs usada por la CI
-├── build/                           # Ejecutable independiente compilado (salida de build_exe.bat/.sh)
+├── build/                           # Directorio intermedio propio de PyInstaller (ignorado por git)
+├── dist/                            # Ejecutable independiente compilado (salida de build_exe.bat/.sh, ignorado por git)
 └── work/                            # Espacio de trabajo temporal en tiempo de ejecución para repositorios de GitHub extraídos y modelos descargados del servidor (ignorado por git)
 ```
 
@@ -234,6 +238,8 @@ Esto trae el conjunto de dependencias con versiones fijadas: **PySide6** (interf
 ```bash
 python main.py
 ```
+
+O usa el script de conveniencia - `run.bat` (Windows) / `run.sh` (Linux/Mac), que activa `.venv` si existe junto a él y reenvía los argumentos a `main.py`; ninguno de los dos cierra su ventana de terminal por sí solo al hacer doble clic.
 
 Arranca maximizado (no pantalla completa real a nivel de sistema operativo, así que la barra de título y los controles nativos de la ventana siguen visibles) - pulsa **F11** para alternar la pantalla completa real sin bordes y volver.
 

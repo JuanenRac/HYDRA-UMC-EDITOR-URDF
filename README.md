@@ -44,6 +44,7 @@ Two ways to point the app at a robot's source files, both landing in the same im
 
 - **From a GitHub URL** - accepts a full `https://github.com/owner/repo` URL (with or without `/tree/<branch>`), an SSH-style `git@github.com:owner/repo.git`, or the bare `owner/repo` shorthand. Deliberately does **not** shell out to `git clone`, which would make a `git` install a hard runtime dependency on both Windows and Linux for something a plain HTTPS download already does: GitHub serves a zipball of any branch/tag/commit from `codeload.github.com` with no authentication needed for a public repo, so this uses the standard library's own `urllib.request` + `zipfile` and nothing else. Only public repos are supported - there's no token/credential handling, and a private repo's zipball 404s the same as a nonexistent one.
 - **From a local folder** - for a repo already downloaded by hand, or a working copy the operator is actively editing outside this app.
+- **From the Gallery** - a small "Gallery" dropdown above the GitHub URL field (`hydra_editor_urdf/gallery.py`) lists a short, hand-checked starter set of real, currently-active robot-description repos (ROS-Industrial's `universal_robot`, ROBOTIS' `open_manipulator`). Picking an entry only fills the URL field and shows its description - it never fetches on its own, the operator still presses Fetch, same as typing a URL by hand. A deliberately short, hand-picked list rather than an auto-scraped one: a gallery entry pointing at a dead or malicious repo would be worse than no gallery at all.
 
 Either way, the app then recursively finds every `*.urdf`/`*.xacro` file under the chosen folder, lists all of them (a real robot description repo often ships more than one - a bare arm plus a "with gripper" variant is a common pairing), and auto-picks the largest by file size as a reasonable default for "the main one" - switching to a different candidate afterward is one double-click in the Source panel, not a re-fetch.
 
@@ -71,6 +72,7 @@ The Properties panel edits whichever link is selected in the Viewport panel's li
 - **Recolor** - a link's visual material, picked through a standard color dialog. A material shared by name across several links (a real URDF's top-level `<material name="...">` declaration referenced by more than one `<visual>`) recolors every link sharing it together, matching what that shared-material syntax actually means in the spec.
 - **Rescale** - per-axis (X/Y/Z) scale factor on a mesh geometry's own `<mesh scale="...">` transform, not a destructive rewrite of the mesh's triangle data itself - the same edit re-applied later starts from the original, unmodified mesh every time.
 - **Retype and re-limit a joint** - change a joint's type (any of the 6 the URDF spec defines) and its lower/upper limit, with the DOF panel's verdict updating immediately since a retype can change the DOF count or introduce an unsupported type.
+- **Mass & inertia** - "Auto-calculate" fills mass/Ixx/Iyy/Izz from the selected link's own geometry using `inertia_calc.py`'s closed-form uniform-density formulas (Box/Cylinder/Sphere exact, Mesh a bounding-box approximation - said so explicitly, since there's no per-triangle mesh integrator here); an operator-entered mass always wins over the density-based guess, and with no mass entered yet it assumes a generic aluminum density (2700 kg/m³) and notes that it did. "Apply" commits the fields to `Link.inertial` - the same calculate-then-apply two-step pattern as Scale/Joint above, so a computed value can be eyeballed or hand-tweaked before it's written to the model.
 
 The **Viewport panel** hosts the actual OpenGL 3D view plus a jog slider per movable joint, so the operator can preview the URDF moving through its own real range before ever touching STUDIO. Forward kinematics (`render/kinematics.py`) is generic over whatever tree was just imported - unlike HYDRA-UMC SUITE's own kinematics module, which drives a fixed registry of a few dozen known, hand-verified robot models, this app has to pose an arbitrary, previously-unseen URDF, so it composes each joint's real `<origin>`/`<axis>` (Rodrigues' rotation formula for an arbitrary revolute axis, not just the cardinal-direction shortcut a fixed registry could rely on) walking the actual parent/child graph.
 
@@ -146,6 +148,7 @@ Reuses HYDRA-UMC SUITE's own `assets/qss/industrial_dark.qss` verbatim (same rel
 ```text
 HYDRA-UMC-EDITOR-URDF/
 ├── main.py                        # Entry point - QApplication, theme, maximized start, F11 fullscreen toggle
+├── run.bat / run.sh                # Convenience wrapper - activates .venv if present, runs main.py, no auto-close
 ├── requirements.txt                # PySide6, PyOpenGL, numpy-stl, numpy (pinned)
 ├── build_exe.bat / build_exe.sh    # Windows/Linux standalone-executable build scripts (PyInstaller) - bumps the version first
 ├── build-test.bat / build-test.sh  # Non-versioning build/compile check
@@ -200,7 +203,8 @@ HYDRA-UMC-EDITOR-URDF/
 ├── tools/
 │   ├── build_test.py               # Build/compile check without bumping version
 │   └── ci_validate.py              # Manifest/CHANGELOG/docs validation used by CI
-├── build/                           # Compiled standalone executable (build_exe.bat/.sh output)
+├── build/                           # PyInstaller's own intermediate work directory (gitignored)
+├── dist/                            # Compiled standalone executable (build_exe.bat/.sh output, gitignored)
 └── work/                            # Runtime scratch space for fetched GitHub repos and pulled server models (gitignored)
 ```
 
@@ -231,6 +235,8 @@ This pulls in the pinned dependency set: **PySide6** (Qt6 UI), **PyOpenGL** (3D 
 ```bash
 python main.py
 ```
+
+Or use the convenience wrapper - `run.bat` (Windows) / `run.sh` (Linux/Mac), which activates `.venv` if one exists next to it and forwards any arguments to `main.py`; neither script closes its terminal window on its own when double-clicked.
 
 Starts maximized (not true OS-level fullscreen, so the native window title bar and controls stay visible) - press **F11** to toggle real borderless fullscreen and back.
 

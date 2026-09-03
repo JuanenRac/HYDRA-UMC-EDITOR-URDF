@@ -44,6 +44,7 @@
 
 - **从 GitHub URL** —— 接受完整的 `https://github.com/owner/repo` URL（带或不带 `/tree/<branch>`）、SSH 风格的 `git@github.com:owner/repo.git`，或简写的 `owner/repo`。刻意**不**调用外部的 `git clone`，那会让 `git` 安装成为 Windows 和 Linux 上一个硬性的运行时依赖，而这本可以通过纯 HTTPS 下载完成：GitHub 会从 `codeload.github.com` 提供任意分支/标签/提交的 zip 压缩包，对公开仓库无需任何身份验证，因此本应用只使用标准库自身的 `urllib.request` + `zipfile`，别无其他。仅支持公开仓库——没有令牌/凭证处理，私有仓库的 zip 包会像不存在的仓库一样返回 404。
 - **从本地文件夹** —— 适用于已经手动下载的仓库，或操作员正在此应用之外主动编辑的工作副本。
+- **从 Gallery** —— GitHub URL 输入框上方的 "Gallery" 下拉菜单（`hydra_editor_urdf/gallery.py`）列出了一小份经人工核实的真实机器人描述仓库起始清单（ROS-Industrial 的 `universal_robot`、ROBOTIS 的 `open_manipulator`）。选择一项只会填入 URL 并显示其描述——不会自行发起下载，操作员仍需自己点击 Fetch，与手动输入 URL 一样。
 
 无论哪种方式，本应用随后都会递归查找所选文件夹下的每一个 `*.urdf`/`*.xacro` 文件，列出全部（一个真实的机器人描述仓库通常不止一个文件——一个裸机械臂加上一个“带夹爪”变体是常见组合），并按文件大小自动选取最大的一个作为“主文件”的合理默认值——之后切换到另一个候选文件只需在源面板中双击一次，无需重新拉取。
 
@@ -71,6 +72,7 @@
 - **重新着色** —— 通过标准颜色对话框选择的连杆视觉材质。一个按名称在多个连杆间共享的材质（一个真实 URDF 顶层的 `<material name="...">` 声明被多个 `<visual>` 引用）会一起重新着色所有共享它的连杆，与该共享材质语法在规范中的真实含义一致。
 - **重新缩放** —— 对网格几何体自身的 `<mesh scale="...">` 变换按轴（X/Y/Z）应用缩放因子，而非破坏性地重写网格的三角面数据本身——同一次编辑之后再次应用时，每次都从原始未修改的网格开始。
 - **重新指定关节类型与限位** —— 更改一个关节的类型（URDF 规范定义的 6 种之一）及其上/下限，自由度面板的判定会立即更新，因为重新指定类型可能改变自由度数量或引入不受支持的类型。
+- **质量与惯量** —— "Auto-calculate" 使用 `inertia_calc.py` 中均匀密度的闭式公式，根据所选连杆自身的几何体填入质量/Ixx/Iyy/Izz（对 Box/Cylinder/Sphere 精确，对 Mesh 则是包围盒近似值）；手动输入的质量始终优先于基于密度的估算，若尚未输入质量，则假定为通用铝密度（2700 kg/m³）并在提示中说明。"Apply" 将这些字段提交到 `Link.inertial`——与上面 Scale/Joint 相同的“先计算后应用”两步模式。
 
 **视口面板**托管着真正的 OpenGL 3D 视图，以及每个可移动关节对应的一个点动滑块，让操作员可以在触碰 STUDIO 之前，预览 URDF 在其自身真实范围内的运动。正向运动学（`render/kinematics.py`）对刚刚导入的任意树都是通用的——与 HYDRA-UMC SUITE 自身的运动学模块（驱动一个固定的、包含数十个已知、经手工验证的机器人型号的注册表）不同，本应用必须为一个任意的、此前从未见过的 URDF 摆姿，因此它通过遍历实际的父/子关节图，组合每个关节的真实 `<origin>`/`<axis>`（对任意旋转轴使用罗德里格斯旋转公式，而不仅仅是固定注册表可以依赖的基本方向捷径）。
 
@@ -143,6 +145,7 @@ Viewport、Properties 和 Upload 按钮只会显示既有停靠面板；Export �
 ```text
 HYDRA-UMC-EDITOR-URDF/
 ├── main.py                        # 入口点——QApplication、主题、最大化启动、F11 全屏切换
+├── run.bat / run.sh                # 便捷启动脚本——若存在 .venv 则激活，运行 main.py，不会自行关闭窗口
 ├── requirements.txt                # PySide6、PyOpenGL、numpy-stl、numpy（已锁定版本）
 ├── build_exe.bat / build_exe.sh    # Windows/Linux 独立可执行文件构建脚本（PyInstaller）——先递增版本号
 ├── build-test.bat / build-test.sh  # 不递增版本号的构建/编译检查
@@ -197,7 +200,8 @@ HYDRA-UMC-EDITOR-URDF/
 ├── tools/
 │   ├── build_test.py               # 不递增版本号的构建/编译检查
 │   └── ci_validate.py              # CI 使用的 manifest/CHANGELOG/docs 校验
-├── build/                           # 编译后的独立可执行文件（build_exe.bat/.sh 的输出）
+├── build/                           # PyInstaller 自身的中间构建目录（已加入 gitignore）
+├── dist/                            # 编译后的独立可执行文件（build_exe.bat/.sh 的输出，已加入 gitignore）
 └── work/                            # 已拉取的 GitHub 仓库和已拉取的服务器模型的运行时暂存空间（已加入 gitignore）
 ```
 
@@ -228,6 +232,8 @@ pip install -r requirements.txt
 ```bash
 python main.py
 ```
+
+或者使用便捷脚本——`run.bat`（Windows）/ `run.sh`（Linux/Mac），若旁边存在 `.venv` 则会激活它，并将参数转发给 `main.py`；双击运行时两者都不会自行关闭终端窗口。
 
 以最大化方式启动（并非真正的操作系统级全屏，因此原生窗口标题栏和控件保持可见）——按 **F11** 切换真正的无边框全屏及返回。
 

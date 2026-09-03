@@ -43,6 +43,7 @@ Zwei Wege, um die App auf die Quelldateien eines Roboters zeigen zu lassen, die 
 
 - **Von einer GitHub-URL** - akzeptiert eine vollständige `https://github.com/owner/repo`-URL (mit oder ohne `/tree/<branch>`), eine SSH-artige `git@github.com:owner/repo.git`, oder die bloße `owner/repo`-Kurzform. Führt bewusst **keinen** `git clone` über die Shell aus, was auf Windows und Linux gleichermaßen eine `git`-Installation zu einer harten Laufzeitabhängigkeit für etwas machen würde, das ein einfacher HTTPS-Download bereits leistet: GitHub liefert eine Zip-Datei jedes Branches/Tags/Commits von `codeload.github.com` aus, ohne dass für ein öffentliches Repository eine Authentifizierung nötig wäre - daher wird ausschließlich `urllib.request` + `zipfile` aus der Standardbibliothek verwendet, sonst nichts. Nur öffentliche Repositories werden unterstützt - es gibt keine Token-/Anmeldedaten-Behandlung, und die Zip-Datei eines privaten Repositorys liefert einen 404, genau wie bei einem nicht existierenden.
 - **Von einem lokalen Ordner** - für ein Repository, das bereits von Hand heruntergeladen wurde, oder eine Arbeitskopie, die der Bediener gerade außerhalb dieser App aktiv bearbeitet.
+- **Aus der Gallery** - ein "Gallery"-Dropdown oberhalb des GitHub-URL-Felds (`hydra_editor_urdf/gallery.py`) listet eine kleine, von Hand geprüfte Startauswahl echter Roboterbeschreibungs-Repositories (`universal_robot` von ROS-Industrial, `open_manipulator` von ROBOTIS). Eine Auswahl füllt nur die URL und zeigt deren Beschreibung - sie löst nie von sich aus einen Download aus, der Bediener muss weiterhin Fetch drücken, genau wie bei einer von Hand eingegebenen URL.
 
 In beiden Fällen durchsucht die App anschließend rekursiv jede `*.urdf`/`*.xacro`-Datei unter dem gewählten Ordner, listet sie alle auf (ein reales Roboter-Beschreibungs-Repository liefert oft mehr als eine - ein nackter Arm plus eine „mit Greifer"-Variante ist eine gängige Paarung) und wählt automatisch die größte nach Dateigröße als vernünftigen Standardwert für „die Hauptdatei" aus - danach zu einem anderen Kandidaten zu wechseln ist ein Doppelklick im Source-Panel, kein erneutes Abrufen.
 
@@ -70,6 +71,7 @@ Das Properties-Panel bearbeitet jeweils den im Link-Baum des Viewport-Panels aus
 - **Umfärben** - das visuelle Material eines Links, ausgewählt über einen Standard-Farbdialog. Ein Material, das über den Namen von mehreren Links gemeinsam genutzt wird (eine übergeordnete `<material name="...">`-Deklaration in einer echten URDF, auf die mehr als ein `<visual>` verweist), färbt jeden Link, der es teilt, gemeinsam um - passend zu dem, was diese gemeinsame Material-Syntax laut Spezifikation tatsächlich bedeutet.
 - **Neu skalieren** - Skalierungsfaktor pro Achse (X/Y/Z) auf der eigenen `<mesh scale="...">`-Transformation der Mesh-Geometrie, keine destruktive Neuschreibung der Dreiecksdaten des Meshes selbst - dieselbe Bearbeitung, später erneut angewendet, startet jedes Mal wieder vom ursprünglichen, unveränderten Mesh.
 - **Gelenktyp und Grenzen neu setzen** - den Typ eines Gelenks ändern (jeden der 6, die die URDF-Spezifikation definiert) sowie dessen untere/obere Grenze, wobei sich das Urteil im DOF-Panel sofort aktualisiert, da ein Typwechsel die DOF-Anzahl ändern oder einen nicht unterstützten Typ einführen kann.
+- **Masse und Trägheit** - "Auto-calculate" füllt Masse/Ixx/Iyy/Izz aus der Geometrie des ausgewählten Links mit den geschlossenen Formeln gleichmäßiger Dichte aus `inertia_calc.py` (exakt für Box/Zylinder/Kugel, eine Bounding-Box-Näherung für Mesh); eine von Hand eingegebene Masse hat immer Vorrang vor der dichtebasierten Schätzung, und ohne eingegebene Masse nimmt die App eine generische Aluminiumdichte an (2700 kg/m³) und weist in einer Notiz darauf hin. "Apply" überträgt die Felder nach `Link.inertial` - dasselbe zweistufige Berechnen-dann-Anwenden-Muster wie bei Scale/Joint oben.
 
 Das **Viewport-Panel** beherbergt die eigentliche OpenGL-3D-Ansicht sowie einen Jog-Schieberegler pro beweglichem Gelenk, sodass der Bediener eine Vorschau darauf bekommt, wie sich die URDF durch ihren eigenen realen Bewegungsbereich bewegt, noch bevor STUDIO überhaupt berührt wird. Die Vorwärtskinematik (`render/kinematics.py`) ist generisch gegenüber jedem gerade importierten Baum - anders als das eigene Kinematikmodul von HYDRA-UMC SUITE, das eine feste Registry von einigen Dutzend bekannter, von Hand verifizierter Robotermodelle ansteuert, muss diese App ein beliebiges, zuvor unbekanntes URDF posieren, weshalb sie den echten `<origin>`/`<axis>`-Wert jedes Gelenks zusammensetzt (Rodrigues-Rotationsformel für eine beliebige Rotationsachse, nicht nur die Abkürzung über Kardinalrichtungen, auf die sich eine feste Registry verlassen könnte), indem sie den tatsächlichen Eltern-/Kind-Graphen durchläuft.
 
@@ -147,6 +149,7 @@ Verwendet die eigene `assets/qss/industrial_dark.qss` von HYDRA-UMC SUITE wörtl
 ```text
 HYDRA-UMC-EDITOR-URDF/
 ├── main.py                        # Einstiegspunkt - QApplication, Theme, maximierter Start, F11-Vollbild-Umschalter
+├── run.bat / run.sh                # Komfort-Skript - aktiviert .venv falls vorhanden, startet main.py, schliesst sich nicht selbst
 ├── requirements.txt                # PySide6, PyOpenGL, numpy-stl, numpy (fest gepinnt)
 ├── build_exe.bat / build_exe.sh    # Build-Skripte für eigenständige Windows-/Linux-Executables (PyInstaller) - erhöht zuerst die Versionsnummer
 ├── build-test.bat / build-test.sh  # Build-/Kompilierprüfung ohne Versionserhöhung
@@ -201,7 +204,8 @@ HYDRA-UMC-EDITOR-URDF/
 ├── tools/
 │   ├── build_test.py               # Build-/Kompilierprüfung ohne Versionserhöhung
 │   └── ci_validate.py              # Manifest-/CHANGELOG-/Doku-Validierung, von der CI genutzt
-├── build/                           # Kompiliertes eigenständiges Executable (Ausgabe von build_exe.bat/.sh)
+├── build/                           # PyInstaller-eigenes Zwischenverzeichnis (per gitignore ausgeschlossen)
+├── dist/                            # Kompiliertes eigenständiges Executable (Ausgabe von build_exe.bat/.sh, per gitignore ausgeschlossen)
 └── work/                            # Laufzeit-Arbeitsbereich für abgerufene GitHub-Repositories und heruntergeladene Server-Modelle (per gitignore ausgeschlossen)
 ```
 
@@ -234,6 +238,8 @@ Dies zieht den festgelegten Abhängigkeitssatz nach: **PySide6** (Qt6-UI), **PyO
 ```bash
 python main.py
 ```
+
+Oder das Komfort-Skript nutzen - `run.bat` (Windows) / `run.sh` (Linux/Mac), das `.venv` aktiviert, falls es daneben liegt, und Argumente an `main.py` weiterreicht; keines der beiden schließt sein Terminalfenster von selbst bei Doppelklick.
 
 Startet maximiert (kein echtes Vollbild auf Betriebssystemebene, sodass die native Fenstertitelleiste und ihre Steuerelemente sichtbar bleiben) - drücken Sie **F11**, um zwischen echtem randlosem Vollbild und diesem Zustand umzuschalten.
 

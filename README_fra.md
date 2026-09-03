@@ -43,6 +43,7 @@ Deux façons de pointer l'application vers les fichiers source d'un robot, toute
 
 - **Depuis une URL GitHub** - accepte une URL complète `https://github.com/owner/repo` (avec ou sans `/tree/<branch>`), une URL de style SSH `git@github.com:owner/repo.git`, ou le raccourci brut `owner/repo`. Ne lance délibérément **pas** de sous-processus `git clone`, ce qui rendrait une installation `git` une dépendance d'exécution obligatoire sous Windows comme sous Linux pour quelque chose qu'un simple téléchargement HTTPS accomplit déjà : GitHub sert une archive zip de n'importe quelle branche/tag/commit depuis `codeload.github.com` sans authentification nécessaire pour un dépôt public, donc ceci utilise uniquement les modules `urllib.request` + `zipfile` de la bibliothèque standard et rien d'autre. Seuls les dépôts publics sont pris en charge - il n'y a aucune gestion de token/identifiants, et l'archive zip d'un dépôt privé renvoie un 404 comme celle d'un dépôt inexistant.
 - **Depuis un dossier local** - pour un dépôt déjà téléchargé à la main, ou une copie de travail que l'opérateur est en train de modifier en dehors de cette application.
+- **Depuis la Galerie** - un menu déroulant "Gallery" au-dessus du champ URL GitHub (`hydra_editor_urdf/gallery.py`) liste un petit ensemble de départ de dépôts de description de robots réels, vérifiés à la main (`universal_robot` de ROS-Industrial, `open_manipulator` de ROBOTIS). Choisir une entrée ne fait que remplir l'URL et afficher sa description - elle ne lance jamais de téléchargement seule, l'opérateur doit toujours cliquer sur Fetch, comme s'il avait saisi l'URL à la main.
 
 Dans les deux cas, l'application trouve ensuite récursivement chaque fichier `*.urdf`/`*.xacro` sous le dossier choisi, les liste tous (un dépôt de description de robot réel en fournit souvent plus d'un - un bras nu plus une variante « avec pince » est un appariement courant), et sélectionne automatiquement le plus volumineux par taille de fichier comme choix par défaut raisonnable pour « le principal » - passer à un autre candidat ensuite se fait en un double-clic dans le panneau Source, sans nouveau téléchargement.
 
@@ -70,6 +71,7 @@ Le panneau Properties modifie le lien actuellement sélectionné dans l'arbre de
 - **Recoloration** - le matériau visuel d'un lien, choisi via une boîte de dialogue de couleur standard. Un matériau partagé par nom entre plusieurs liens (une déclaration `<material name="...">` de premier niveau d'un véritable URDF, référencée par plus d'un `<visual>`) recolore ensemble tous les liens qui le partagent, conformément à ce que cette syntaxe de matériau partagé signifie réellement dans la spécification.
 - **Redimensionnement** - un facteur d'échelle par axe (X/Y/Z) sur la propre transformation `<mesh scale="...">` de la géométrie d'un maillage, pas une réécriture destructrice des données de triangles du maillage lui-même - la même édition réappliquée plus tard repart à chaque fois du maillage original, non modifié.
 - **Retyper et re-limiter un joint** - changer le type d'un joint (l'un quelconque des 6 que définit la spécification URDF) et sa limite inférieure/supérieure, avec le verdict du panneau DOF se mettant à jour immédiatement, puisqu'un retypage peut changer le nombre de DDL ou introduire un type non pris en charge.
+- **Masse et inertie** - "Auto-calculate" remplit masse/Ixx/Iyy/Izz à partir de la géométrie du lien sélectionné avec les formules fermées à densité uniforme de `inertia_calc.py` (exactes pour Boîte/Cylindre/Sphère, une approximation par boîte englobante pour un Maillage); une masse saisie à la main l'emporte toujours sur l'estimation par densité, et sans masse saisie l'application suppose une densité générique d'aluminium (2700 kg/m³) et le signale dans une note. "Apply" applique les champs à `Link.inertial` - le même schéma en deux temps calculer-puis-appliquer que Scale/Joint ci-dessus.
 
 Le **panneau Viewport** héberge la vraie vue 3D OpenGL ainsi qu'un curseur de mouvement (« jog ») par joint mobile, de sorte que l'opérateur puisse prévisualiser le URDF se déplaçant à travers sa propre plage réelle avant même de toucher à STUDIO. La cinématique directe (`render/kinematics.py`) est générique quel que soit l'arbre qui vient d'être importé - contrairement au propre module de cinématique de HYDRA-UMC SUITE, qui pilote un registre fixe de quelques dizaines de modèles de robots connus, vérifiés à la main, cette application doit poser un URDF arbitraire, jamais vu auparavant, elle compose donc le véritable `<origin>`/`<axis>` de chaque joint (formule de rotation de Rodrigues pour un axe revolute arbitraire, pas seulement le raccourci de direction cardinale sur lequel un registre fixe pourrait s'appuyer) en parcourant le véritable graphe parent/enfant.
 
@@ -147,6 +149,7 @@ Réutilise verbatim le propre `assets/qss/industrial_dark.qss` de HYDRA-UMC SUIT
 ```text
 HYDRA-UMC-EDITOR-URDF/
 ├── main.py                        # Point d'entree - QApplication, theme, demarrage maximise, bascule plein ecran F11
+├── run.bat / run.sh                # Script pratique - active .venv si present, lance main.py, ne se ferme pas seul
 ├── requirements.txt                # PySide6, PyOpenGL, numpy-stl, numpy (versions figees)
 ├── build_exe.bat / build_exe.sh    # Scripts de build d'executable autonome Windows/Linux (PyInstaller) - fait d'abord monter le numero de version
 ├── build-test.bat / build-test.sh  # Controle build/compilation sans gestion de version
@@ -201,7 +204,8 @@ HYDRA-UMC-EDITOR-URDF/
 ├── tools/
 │   ├── build_test.py               # Controle build/compilation sans gestion de version
 │   └── ci_validate.py              # Validation manifest/CHANGELOG/docs utilisee par la CI
-├── build/                           # Executable autonome compile (sortie de build_exe.bat/.sh)
+├── build/                           # Repertoire intermediaire propre a PyInstaller (ignore par git)
+├── dist/                            # Executable autonome compile (sortie de build_exe.bat/.sh, ignore par git)
 └── work/                            # Espace de travail temporaire d'execution pour les depots GitHub recuperes et les modeles serveur telecharges (ignore par git)
 ```
 
@@ -234,6 +238,8 @@ Ceci récupère le jeu de dépendances figé : **PySide6** (interface Qt6), **Py
 ```bash
 python main.py
 ```
+
+Ou utilisez le script pratique - `run.bat` (Windows) / `run.sh` (Linux/Mac), qui active `.venv` s'il existe à côté et transmet les arguments à `main.py`; aucun des deux ne ferme sa fenêtre de terminal tout seul en double-clic.
 
 Démarre maximisé (pas un plein écran véritablement natif au niveau du système d'exploitation, de sorte que la barre de titre native et les contrôles de la fenêtre restent visibles) - appuyez sur **F11** pour basculer vers un véritable plein écran sans bordure et inversement.
 

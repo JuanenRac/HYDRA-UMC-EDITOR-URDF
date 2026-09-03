@@ -44,6 +44,7 @@ Due modi per indirizzare l'app verso i file sorgente di un robot, entrambi confl
 
 - **Da un URL GitHub** - accetta un URL completo `https://github.com/owner/repo` (con o senza `/tree/<branch>`), uno stile SSH `git@github.com:owner/repo.git`, o la forma breve nuda `owner/repo`. Deliberatamente **non** invoca `git clone` come sottoprocesso, il che renderebbe un'installazione di `git` una dipendenza runtime obbligatoria sia su Windows che su Linux per qualcosa che un semplice download HTTPS già fa: GitHub serve uno zipball di qualsiasi branch/tag/commit da `codeload.github.com` senza bisogno di autenticazione per un repository pubblico, quindi questo usa esclusivamente `urllib.request` + `zipfile` della libreria standard, nient'altro. Sono supportati solo i repository pubblici - non c'è gestione di token/credenziali, e lo zipball di un repository privato restituisce 404 come uno inesistente.
 - **Da una cartella locale** - per un repository già scaricato a mano, o una copia di lavoro che l'operatore sta modificando attivamente al di fuori di questa app.
+- **Dalla Gallery** - un menu a tendina "Gallery" sopra il campo URL GitHub (`hydra_editor_urdf/gallery.py`) elenca un piccolo set iniziale di repository di descrizione robot reali, verificati a mano (`universal_robot` di ROS-Industrial, `open_manipulator` di ROBOTIS). Scegliere una voce compila solo l'URL e mostra la sua descrizione - non avvia mai da sola un download, l'operatore deve comunque premere Fetch, come se avesse digitato l'URL a mano.
 
 In entrambi i casi, l'app trova poi ricorsivamente ogni file `*.urdf`/`*.xacro` sotto la cartella scelta, li elenca tutti (un vero repository di descrizione robot spesso ne distribuisce più di uno - un braccio nudo più una variante "con pinza" è un abbinamento comune), e seleziona automaticamente il più grande per dimensione del file come default ragionevole per "quello principale" - passare a un candidato diverso in seguito è un doppio clic nel pannello Source, non un nuovo recupero.
 
@@ -71,6 +72,7 @@ Il pannello Properties modifica qualsiasi link sia selezionato nell'albero dei l
 - **Ricolorazione** - il materiale visivo di un link, scelto tramite una finestra di dialogo colore standard. Un materiale condiviso per nome tra più link (una dichiarazione `<material name="...">` di primo livello di un vero URDF, referenziata da più di un `<visual>`) ricolora insieme tutti i link che lo condividono, coerentemente con ciò che quella sintassi di materiale condiviso significa realmente nella specifica.
 - **Riscalatura** - un fattore di scala per asse (X/Y/Z) sulla trasformazione `<mesh scale="...">` propria della geometria mesh, non una riscrittura distruttiva dei dati dei triangoli della mesh stessa - la stessa modifica riapplicata in seguito riparte sempre dalla mesh originale, non modificata.
 - **Ricambio tipo e nuovi limiti di un giunto** - cambia il tipo di un giunto (uno qualsiasi dei 6 definiti dalla specifica URDF) e il suo limite inferiore/superiore, con il verdetto del pannello DOF che si aggiorna immediatamente, poiché un cambio di tipo può modificare il conteggio DOF o introdurre un tipo non supportato.
+- **Massa e inerzia** - "Auto-calculate" compila massa/Ixx/Iyy/Izz dalla geometria del link selezionato usando le formule chiuse a densità uniforme di `inertia_calc.py` (esatte per Box/Cilindro/Sfera, un'approssimazione a bounding-box per Mesh); una massa inserita a mano prevale sempre sulla stima basata sulla densità, e senza una massa inserita l'app assume una densità generica dell'alluminio (2700 kg/m³) e lo segnala in una nota. "Apply" applica i campi a `Link.inertial` - lo stesso schema in due passi calcola-poi-applica di Scale/Joint sopra.
 
 Il pannello **Viewport** ospita la vera vista 3D OpenGL più uno slider di jog per ogni giunto mobile, così l'operatore può visualizzare in anteprima l'URDF che si muove nel suo vero range prima ancora di toccare STUDIO. La cinematica diretta (`render/kinematics.py`) è generica rispetto a qualsiasi albero appena importato - a differenza del modulo di cinematica proprio di HYDRA-UMC SUITE, che pilota un registro fisso di poche decine di modelli di robot noti e verificati a mano, questa app deve posare un URDF arbitrario, mai visto prima, quindi compone il vero `<origin>`/`<axis>` di ogni giunto (formula di rotazione di Rodrigues per un asse revolute arbitrario, non solo la scorciatoia delle direzioni cardinali su cui un registro fisso potrebbe basarsi) percorrendo il vero grafo genitore/figlio.
 
@@ -148,6 +150,7 @@ Riutilizza alla lettera il file `assets/qss/industrial_dark.qss` proprio di HYDR
 ```text
 HYDRA-UMC-EDITOR-URDF/
 ├── main.py                        # Punto di ingresso - QApplication, tema, avvio massimizzato, toggle fullscreen F11
+├── run.bat / run.sh                # Script di comodo - attiva .venv se presente, esegue main.py, non si chiude da solo
 ├── requirements.txt                # PySide6, PyOpenGL, numpy-stl, numpy (con versioni fissate)
 ├── build_exe.bat / build_exe.sh    # Script di build per eseguibile standalone Windows/Linux (PyInstaller) - esegue prima il bump della versione
 ├── build-test.bat / build-test.sh  # Controllo build/compilazione senza incremento di versione
@@ -202,7 +205,8 @@ HYDRA-UMC-EDITOR-URDF/
 ├── tools/
 │   ├── build_test.py               # Controllo build/compilazione senza incremento di versione
 │   └── ci_validate.py              # Validazione manifest/CHANGELOG/docs usata dalla CI
-├── build/                           # Eseguibile standalone compilato (output di build_exe.bat/.sh)
+├── build/                           # Directory intermedia propria di PyInstaller (in gitignore)
+├── dist/                            # Eseguibile standalone compilato (output di build_exe.bat/.sh, in gitignore)
 └── work/                            # Spazio di lavoro temporaneo runtime per repository GitHub scaricati e modelli server prelevati (in gitignore)
 ```
 
@@ -235,6 +239,8 @@ Questo installa l'insieme di dipendenze con versioni fissate: **PySide6** (inter
 ```bash
 python main.py
 ```
+
+Oppure usa lo script di comodo - `run.bat` (Windows) / `run.sh` (Linux/Mac), che attiva `.venv` se presente accanto e inoltra gli argomenti a `main.py`; nessuno dei due chiude la finestra del terminale da solo con un doppio clic.
 
 Si avvia massimizzata (non un vero fullscreen a livello di sistema operativo, quindi la barra del titolo e i controlli nativi della finestra restano visibili) - premi **F11** per attivare/disattivare il vero fullscreen senza bordi.
 
