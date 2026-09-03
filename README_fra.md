@@ -117,18 +117,26 @@ Communique avec le propre contrat de soumission de modèles de HYDRA-UMC-SERVER 
 
 ## 🌐 Interface multilingue
 
-Traduction complète de l'interface en **anglais, espagnol, italien, français et allemand** (`language/*.lng`), en utilisant exactement le même mécanisme de fichier `CLÉ=Valeur` simple que tout autre outil Python de cet écosystème (URTC Flasher, URTC Tester, HYDRA-UMC SUITE) - pas réinventé ici, puisque le mécanisme lui-même ne porte aucune logique propre au projet. Un changement de langue prend effet après un redémarrage de l'application plutôt que de retraduire chaque widget déjà construit en direct, conformément à cette même convention. `language/` se trouve **à côté** de l'exécutable plutôt que d'être intégré à l'intérieur via le `--add-data` de PyInstaller, de sorte qu'un traducteur puisse modifier ou ajouter un fichier `.lng` sans reconstruction.
+Traduction complète de l'interface en **anglais, espagnol, italien, français, allemand, chinois simplifié et japonais** (`language/*.lng`), en utilisant exactement le même mécanisme de fichier `CLÉ=Valeur` simple que tout autre outil Python de cet écosystème (URTC Flasher, URTC Tester, HYDRA-UMC SUITE) - pas réinventé ici, puisque le mécanisme lui-même ne porte aucune logique propre au projet. Un changement de langue prend effet après un redémarrage de l'application plutôt que de retraduire chaque widget déjà construit en direct, conformément à cette même convention. `language/` se trouve **à côté** de l'exécutable plutôt que d'être intégré à l'intérieur via le `--add-data` de PyInstaller, de sorte qu'un traducteur puisse modifier ou ajouter un fichier `.lng` sans reconstruction.
 
 ---
 
 ## 🎛️ Thème
 
-L'espace de travail ancrable intègre aussi un **pupitre de commandes Qt
-Quick/QML** via QQuickWidget, avec le même moteur visuel que
-HYDRA-UMC-UPDATER et HYDRA-UMC-SUITE. Ses boutons Source, DOF, Viewport,
-Properties et Upload ne font qu'afficher les docks existants ; Export et About
-réutilisent les actions existantes. Il ne remplace ni le viewport OpenGL, ni
-l'éditeur, le parseur ou l'envoi au serveur.
+La barre d'outils supérieure de l'espace de travail ancrable est un vrai
+pupitre de commandes `QToolBar`/`QLabel`/`QToolButton`, pas une UI Qt
+Quick/QML séparée - une version antérieure intégrée via QQuickWidget (même
+moteur visuel que HYDRA-UMC-UPDATER et HYDRA-UMC-SUITE) s'affichait comme une
+barre noire uniforme sans aucune erreur console une fois placée dans le vrai
+`QDockWidget` de ce `QMainWindow`, elle a donc été remplacée par des widgets
+classiques ; voir `CHANGELOG.md` pour l'histoire complète. Ses boutons
+Source, DOF, Viewport, Properties et Upload ne font qu'afficher les docks
+existants ; Export et About réutilisent les actions existantes, et Export
+reste désactivé tant qu'aucun modèle n'est chargé. Après le chargement d'un
+URDF (et après chaque modification de propriété en direct), sa puce de
+statut affiche le nom du modèle chargé, le nombre de DOF et le verdict de
+faisabilité actuel. Il ne remplace ni le viewport OpenGL, ni l'éditeur, le
+parseur ou l'envoi au serveur.
 
 Réutilise verbatim le propre `assets/qss/industrial_dark.qss` de HYDRA-UMC SUITE (même chemin relatif, même fichier) plutôt que de concevoir un nouveau thème visuel pour un outil de bureau frère du même écosystème.
 
@@ -335,6 +343,9 @@ Ce projet fait partie d'un écosystème de robotique plus vaste du même auteur 
 
 ## 📚 Documentation & Communauté
 
+- **[docs/ARCHITECTURE.md](docs/ARCHITECTURE.md)** — la structure interne propre de l'éditeur : pourquoi le parsing, la validation de faisabilité, la résolution des maillages et l'aperçu 3D sont des voies séparées, et ce que cette app ne fait délibérément **pas** (se connecter à un robot, envoyer un URDF ou commander un mouvement de son propre chef).
+- **[docs/BUILD_AND_RUN.md](docs/BUILD_AND_RUN.md)** — le chemin de validation non destructif `build-test.bat`/`.sh` par rapport à un vrai paquet `build_exe.bat`/`.sh`, et ce qu'est réellement le pupitre de commandes aujourd'hui (`QToolBar`, pas Qt Quick/QML - voir la section **Thème** ci-dessus).
+- **[docs/INTEGRATION_CONTRACT.md](docs/INTEGRATION_CONTRACT.md)** — ce qu'un consommateur en aval d'un fichier URDF exporté doit valider par lui-même ; ce projet ne fournit aucun point de terminaison réseau ni autorité de contrôle matériel qui lui soit propre.
 - **[CONTRIBUTING.md](CONTRIBUTING.md)** — pile technologique et lignes directrices de codage pour une pull request.
 - **[CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md)** — les normes de comportement attendues dans cette communauté.
 - **[SECURITY.md](SECURITY.md)** — comment signaler une vulnérabilité, et les véritables axes de sécurité de ce projet.

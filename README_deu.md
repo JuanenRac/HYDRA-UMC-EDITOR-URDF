@@ -117,18 +117,26 @@ Spricht mit dem eigenen Modell-Übermittlungsvertrag von HYDRA-UMC-SERVER (`POST
 
 ## 🌐 Mehrsprachige Oberfläche
 
-Vollständige Übersetzung der Oberfläche in **Englisch, Spanisch, Italienisch, Französisch und Deutsch** (`language/*.lng`), unter Verwendung genau desselben einfachen `SCHLÜSSEL=Wert`-Dateimechanismus wie jedes andere Python-Tool in diesem Ökosystem (URTC Flasher, URTC Tester, HYDRA-UMC SUITE) - hier nicht neu erfunden, da der Mechanismus selbst keine projektspezifische Logik trägt. Ein Sprachwechsel wird erst nach einem Neustart der App wirksam, statt jedes bereits erstellte Widget live neu zu übersetzen, entsprechend derselben Konvention. `language/` liegt **neben** der ausführbaren Datei, statt über `--add-data` von PyInstaller darin gebündelt zu sein, sodass ein Übersetzer eine `.lng`-Datei bearbeiten oder hinzufügen kann, ohne einen Neubau durchzuführen.
+Vollständige Übersetzung der Oberfläche in **Englisch, Spanisch, Italienisch, Französisch, Deutsch, vereinfachtem Chinesisch und Japanisch** (`language/*.lng`), unter Verwendung genau desselben einfachen `SCHLÜSSEL=Wert`-Dateimechanismus wie jedes andere Python-Tool in diesem Ökosystem (URTC Flasher, URTC Tester, HYDRA-UMC SUITE) - hier nicht neu erfunden, da der Mechanismus selbst keine projektspezifische Logik trägt. Ein Sprachwechsel wird erst nach einem Neustart der App wirksam, statt jedes bereits erstellte Widget live neu zu übersetzen, entsprechend derselben Konvention. `language/` liegt **neben** der ausführbaren Datei, statt über `--add-data` von PyInstaller darin gebündelt zu sein, sodass ein Übersetzer eine `.lng`-Datei bearbeiten oder hinzufügen kann, ohne einen Neubau durchzuführen.
 
 ---
 
 ## 🎛️ Theme
 
-Der andockbare Arbeitsbereich enthält auch ein **Qt-Quick/QML-Kommandopult**
-über QQuickWidget mit derselben visuellen Engine wie HYDRA-UMC-UPDATER und
-HYDRA-UMC-SUITE. Die Schaltflächen Source, DOF, Viewport, Properties und
-Upload heben nur die vorhandenen Docks hervor; Export und About verwenden
-vorhandene Aktionen wieder. OpenGL-Viewport, Editor, Parser und Server-Upload
-werden nicht ersetzt.
+Die obere Symbolleiste des andockbaren Arbeitsbereichs ist ein echtes
+`QToolBar`/`QLabel`/`QToolButton`-Kommandopult, keine separate Qt-Quick/QML-UI
+- eine frühere, über QQuickWidget eingebettete Version (gleiche visuelle
+Engine wie HYDRA-UMC-UPDATER und HYDRA-UMC-SUITE) wurde innerhalb des echten
+`QDockWidget`-Layouts dieses `QMainWindow` als durchgehend schwarzer Balken
+ohne Konsolenfehler dargestellt und wurde deshalb auf einfache Widgets
+zurückgesetzt; die vollständige Geschichte steht in `CHANGELOG.md`. Die
+Schaltflächen Source, DOF, Viewport, Properties und Upload heben nur die
+vorhandenen Docks hervor; Export und About verwenden vorhandene Aktionen
+wieder, und Export bleibt deaktiviert, bis ein Modell geladen ist. Nach dem
+Laden eines URDF (und nach jeder Live-Eigenschaftsänderung) zeigt sein
+Status-Chip den Namen des geladenen Modells, die DOF-Anzahl und das aktuelle
+Machbarkeits-Urteil. OpenGL-Viewport, Editor, Parser und Server-Upload werden
+nicht ersetzt.
 
 Verwendet die eigene `assets/qss/industrial_dark.qss` von HYDRA-UMC SUITE wörtlich wieder (gleicher relativer Pfad, gleiche Datei), statt für ein Schwester-Desktop-Tool im selben Ökosystem ein neues visuelles Theme zu entwerfen.
 
@@ -334,6 +342,9 @@ Dieses Projekt ist Teil eines größeren Robotik-Ökosystems desselben Autors (J
 
 ## 📚 Dokumentation & Community
 
+- **[docs/ARCHITECTURE.md](docs/ARCHITECTURE.md)** — der eigene interne Aufbau des Editors: warum Parsing, Machbarkeitsprüfung, Mesh-Auflösung und 3D-Vorschau getrennte Bahnen sind, und was diese App bewusst **nicht** tut (sich mit einem Roboter verbinden, ein URDF hochladen oder eigenständig eine Bewegung befehligen).
+- **[docs/BUILD_AND_RUN.md](docs/BUILD_AND_RUN.md)** — der nicht-verändernde Validierungspfad `build-test.bat`/`.sh` im Vergleich zu einem echten Paket via `build_exe.bat`/`.sh`, und was das Kommandopult heute tatsächlich ist (`QToolBar`, kein Qt Quick/QML - siehe Abschnitt **Theme** oben).
+- **[docs/INTEGRATION_CONTRACT.md](docs/INTEGRATION_CONTRACT.md)** — was ein nachgelagerter Konsument einer exportierten URDF-Datei selbst prüfen muss; dieses Projekt stellt selbst keinen Netzwerk-Endpunkt und keine Hardware-Steuerungsautorität bereit.
 - **[CONTRIBUTING.md](CONTRIBUTING.md)** — Technologie-Stack und Coding-Richtlinien für einen Pull Request.
 - **[CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md)** — die in dieser Community erwarteten Verhaltensstandards.
 - **[SECURITY.md](SECURITY.md)** — wie man eine Schwachstelle meldet, und die echten Sicherheitsschwerpunkte dieses Projekts.

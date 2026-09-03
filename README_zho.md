@@ -124,9 +124,14 @@
 
 ## 🎛️ 主题
 
-可停靠工作区还通过 QQuickWidget 嵌入了 **Qt Quick/QML 命令控制台**，使用与
-HYDRA-UMC-UPDATER 和 HYDRA-UMC-SUITE 相同的渲染引擎。Source、DOF、Viewport、
-Properties 和 Upload 按钮只会显示既有停靠面板；Export 与 About 复用既有操作。
+可停靠工作区顶部工具栏是一个真正的 `QToolBar`/`QLabel`/`QToolButton` 命令控制台，
+而不是独立的 Qt Quick/QML 界面——早期通过 QQuickWidget 嵌入的版本（与
+HYDRA-UMC-UPDATER 和 HYDRA-UMC-SUITE 相同的渲染引擎）一旦放入这个
+`QMainWindow` 真正的 `QDockWidget` 布局中，就会渲染成一整块黑色、且控制台没有
+任何报错，因此被还原为普通控件；完整经过见 `CHANGELOG.md`。Source、DOF、
+Viewport、Properties 和 Upload 按钮只会显示既有停靠面板；Export 与 About 复用
+既有操作，且 Export 在模型真正加载之前保持禁用。加载 URDF 后（以及每次实时属性
+编辑后），其状态标签会显示已加载模型的名称、DOF 数量和当前可行性判定结果。
 它不替代 OpenGL 视口、编辑器、解析器或服务器上传实现。
 
 原样复用 HYDRA-UMC SUITE 自身的 `assets/qss/industrial_dark.qss`（相同的相对路径，相同的文件），而不是为本生态系统中的同类桌面工具设计一套新的视觉主题。
@@ -330,6 +335,9 @@ cp -r language dist/language
 
 ## 📚 文档与社区
 
+- **[docs/ARCHITECTURE.md](docs/ARCHITECTURE.md)** —— 编辑器自身的内部结构：为什么解析、可行性校验、网格解析和 3D 预览是相互独立的通路，以及本应用刻意**不**做的事情（不会自行连接机器人、上传 URDF 或下达运动指令）。
+- **[docs/BUILD_AND_RUN.md](docs/BUILD_AND_RUN.md)** —— 非破坏性的 `build-test.bat`/`.sh` 校验流程与真正打包的 `build_exe.bat`/`.sh` 之间的区别，以及命令控制台如今究竟是什么（`QToolBar`，而非 Qt Quick/QML —— 参见上方**主题**一节）。
+- **[docs/INTEGRATION_CONTRACT.md](docs/INTEGRATION_CONTRACT.md)** —— 下游消费一个已导出 URDF 文件的一方必须自行校验的内容；本项目自身不提供任何网络端点或硬件控制权限。
 - **[CONTRIBUTING.md](CONTRIBUTING.md)** —— 提交 Pull Request 所需的技术栈和编码规范。
 - **[CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md)** —— 本社区所期望的行为准则。
 - **[SECURITY.md](SECURITY.md)** —— 如何报告漏洞，以及本项目真实的安全关注重点。

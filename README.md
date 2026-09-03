@@ -118,18 +118,24 @@ Talks to HYDRA-UMC-SERVER's own model-submission contract (`POST /api/models/sub
 
 ## 🌐 Multi-Language UI
 
-Full interface translation across **English, Spanish, Italian, French, and German** (`language/*.lng`), using the exact same plain `KEY=Value` file mechanism as every other Python tool in this ecosystem (URTC Flasher, URTC Tester, HYDRA-UMC SUITE) - not reinvented here, since the mechanism itself carries no project-specific logic. A language switch takes effect after an app restart rather than retranslating every already-built widget live, matching that same convention. `language/` sits **next to** the executable rather than bundled inside it via PyInstaller's `--add-data`, so a translator can edit or add a `.lng` file without a rebuild.
+Full interface translation across **English, Spanish, Italian, French, German, Chinese (simplified), and Japanese** (`language/*.lng`), using the exact same plain `KEY=Value` file mechanism as every other Python tool in this ecosystem (URTC Flasher, URTC Tester, HYDRA-UMC SUITE) - not reinvented here, since the mechanism itself carries no project-specific logic. A language switch takes effect after an app restart rather than retranslating every already-built widget live, matching that same convention. `language/` sits **next to** the executable rather than bundled inside it via PyInstaller's `--add-data`, so a translator can edit or add a `.lng` file without a rebuild.
 
 ---
 
 ## 🎛️ Theme
 
-The dock workspace also embeds a **Qt Quick/QML command deck** through
-QQuickWidget, using the same renderer and visual language as
-HYDRA-UMC-UPDATER and HYDRA-UMC-SUITE. Its Source, DOF, Viewport, Properties
-and Upload buttons only raise the existing docks; Export and About forward to
-the existing actions. It does not replace the OpenGL viewport, editor, parser
-or server-upload implementation.
+The dock workspace's top toolbar is a real `QToolBar`/`QLabel`/`QToolButton`
+command deck, not a separate Qt Quick/QML UI - an earlier version embedded
+through QQuickWidget (same renderer as HYDRA-UMC-UPDATER and HYDRA-UMC-SUITE)
+rendered as a solid black bar with no console error once placed inside this
+`QMainWindow`'s real `QDockWidget` layout, so it was reverted to plain
+widgets; see `CHANGELOG.md` for the full story. Its Source, DOF, Viewport,
+Properties and Upload buttons only raise the existing docks; Export and About
+forward to the existing actions, and Export stays disabled until a model is
+actually loaded. After a URDF load (and after every live property edit), its
+status chip shows the loaded model's name, DOF count, and current feasibility
+verdict. It does not replace the OpenGL viewport, editor, parser or
+server-upload implementation.
 
 Reuses HYDRA-UMC SUITE's own `assets/qss/industrial_dark.qss` verbatim (same relative path, same file) rather than designing a new visual theme for a sibling desktop tool in the same ecosystem.
 
@@ -333,6 +339,9 @@ This project is part of a larger robotics ecosystem by the same author (JuanenRa
 
 ## 📚 Documentation & Community
 
+- **[docs/ARCHITECTURE.md](docs/ARCHITECTURE.md)** — the editor's own internal shape: why parsing, feasibility validation, mesh resolution and 3D preview are separate lanes, and what this app deliberately does *not* do (connect to a robot, upload a URDF, or command motion on its own).
+- **[docs/BUILD_AND_RUN.md](docs/BUILD_AND_RUN.md)** — the non-mutating `build-test.bat`/`.sh` validation path versus a real `build_exe.bat`/`.sh` package, plus what the command deck actually is today (`QToolBar`, not Qt Quick/QML - see the **Theme** section above).
+- **[docs/INTEGRATION_CONTRACT.md](docs/INTEGRATION_CONTRACT.md)** — what a downstream consumer of an exported URDF file must validate on its own; this project provides no network endpoint or hardware-control authority of its own.
 - **[CONTRIBUTING.md](CONTRIBUTING.md)** — tech stack and coding guidelines for a pull request.
 - **[CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md)** — the standards of behavior expected in this community.
 - **[SECURITY.md](SECURITY.md)** — how to report a vulnerability, and this project's own real security focus areas.

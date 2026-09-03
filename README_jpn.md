@@ -124,12 +124,19 @@
 
 ## 🎛️ テーマ
 
-ドッキング可能なワークスペースには、HYDRA-UMC-UPDATER と
-HYDRA-UMC-SUITE と同じ描画エンジンを使う **Qt Quick/QML コマンドデッキ**も
-QQuickWidget 経由で組み込まれています。Source、DOF、Viewport、Properties、
+ドッキング可能なワークスペースの上部ツールバーは、独立した Qt Quick/QML UI
+ではなく、実体のある `QToolBar`/`QLabel`/`QToolButton` コマンドデッキです -
+以前 QQuickWidget 経由で組み込んでいたバージョン(HYDRA-UMC-UPDATER や
+HYDRA-UMC-SUITE と同じ描画エンジン)は、この `QMainWindow` の実際の
+`QDockWidget` レイアウト内に置くと、コンソールエラーが一切出ないまま真っ黒な
+バーとして描画されてしまったため、通常のウィジェットに戻されました。詳しい
+経緯は `CHANGELOG.md` を参照してください。Source、DOF、Viewport、Properties、
 Upload は既存のドックを表示するだけで、Export と About も既存のアクションを
-再利用します。OpenGL ビューポート、エディター、パーサー、サーバーアップロードの
-実装を置き換えるものではありません。
+再利用し、Export はモデルが実際に読み込まれるまで無効のままです。URDF の
+読み込み後(およびライブでのプロパティ編集のたび)、ステータスチップには
+読み込まれたモデル名、DOF 数、現在の実現可能性判定が表示されます。OpenGL
+ビューポート、エディター、パーサー、サーバーアップロードの実装を置き換える
+ものではありません。
 
 同一エコシステム内の姉妹デスクトップツール向けに新しい視覚テーマを設計するのではなく、HYDRA-UMC SUITE 自身の `assets/qss/industrial_dark.qss` をそのまま（同じ相対パス、同じファイル）再利用しています。
 
@@ -336,6 +343,9 @@ Linux では、コンパイル済みバイナリの実行に、システム自�
 
 ## 📚 ドキュメント & コミュニティ
 
+- **[docs/ARCHITECTURE.md](docs/ARCHITECTURE.md)** —— エディター自身の内部構造: パース、実現可能性検証、メッシュ解決、3D プレビューがなぜ別々の経路になっているか、そしてこのアプリが意図的に**行わない**こと(ロボットへの接続、URDF のアップロード、自発的な動作指示)。
+- **[docs/BUILD_AND_RUN.md](docs/BUILD_AND_RUN.md)** —— 非破壊的な `build-test.bat`/`.sh` 検証パスと、実際にパッケージ化する `build_exe.bat`/`.sh` との違い、そしてコマンドデッキが実際には何であるか(`QToolBar` であり Qt Quick/QML ではない —— 上記の**テーマ**セクションを参照)。
+- **[docs/INTEGRATION_CONTRACT.md](docs/INTEGRATION_CONTRACT.md)** —— エクスポートされた URDF ファイルの下流の利用者が自分で検証すべき内容。本プロジェクト自体はネットワークエンドポイントやハードウェア制御権限を一切提供しません。
 - **[CONTRIBUTING.md](CONTRIBUTING.md)** —— プルリクエストのための技術スタックとコーディング指針。
 - **[CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md)** —— このコミュニティで期待される行動規範。
 - **[SECURITY.md](SECURITY.md)** —— 脆弱性の報告方法と、このプロジェクトの実際のセキュリティ重点領域。
