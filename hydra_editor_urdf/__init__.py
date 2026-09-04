@@ -17,4 +17,4 @@
 # __version__/bump script in a sibling project to port from, so this file
 # and bump_version.py are the first real implementation of it).
 # =============================================================================
-__version__ = "0.0.2"
+__version__ = "0.0.3"

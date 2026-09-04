@@ -63,6 +63,10 @@ bumped by hand, as a deliberate decision.
   project's own versioning convention only advances it on a real
   `build_exe.bat`/`build_exe.sh` packaged build.
 
+## [0.0.3]
+
+- **Fixed a real, silent drift in `assets/qss/industrial_dark.qss`.** `ui/theme.py`'s own header comment claims this file "reuses HYDRA-UMC-SUITE's own... verbatim", but real user feedback ("no tiene ese toque visual que tiene updater y os_rebuilder") plus a direct screenshot comparison found it had quietly diverged to an older, flatter palette (`#0b0e13`/`#11151c`/teal `#1e94a8`) missing the entire command-deck gradient/border-glow treatment SUITE's own copy has picked up since. Re-synced from SUITE's current file, keeping the one real selector SUITE no longer needs but this app still does (`QToolButton#commandDeckNav` - SUITE's own nav moved into a new left sidebar; this app's command deck still uses real nav buttons for Source/DOF Validation/3D Viewport/Properties/Export URDF), styled identically to `#commandDeckAbout`. Verified with a real before/after screenshot of the running app, not just a code diff.
+
 ## [0.0.2] - Gallery of verified robot description repositories
 
 - New `gallery.py` - a short, hand-checked starter list of real, public,

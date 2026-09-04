@@ -1,5 +1,5 @@
 /* =============================================================================
-HYDRA-UMC SUITE - industrial_dark.qss
+HYDRA-UMC EDITOR-URDF - industrial_dark.qss
 Copyright (C) 2026 JuanenRac (Electro Hobby 3D) <electrohobby3d@gmail.com>
 GPL-3.0 - see LICENSE
 
@@ -7,16 +7,29 @@ GPL-3.0 - see LICENSE
 same visual language HYDRA-UMC-STUDIO's own web UI already established
 (same family of dark-panel/cyan-highlight industrial dashboards) rather
 than inventing an unrelated look for this sibling project.
+
+A real, deliberate sync from HYDRA-UMC-SUITE's own copy of this file
+(see ui/theme.py's own header comment) - real user feedback found this
+copy had quietly drifted to an older, flatter palette (no command-deck
+gradient/border-glow rules at all), the opposite of what "reuses ...
+verbatim" was supposed to mean. One real addition on top of SUITE's own
+current file: `QToolButton#commandDeckNav`, styled identically to
+`#commandDeckAbout` right below it - SUITE dropped that selector when
+its own command deck's flat nav buttons moved into a new left sidebar,
+but this app's own command deck still uses real `commandDeckNav`
+buttons for Source/DOF Validation/3D Viewport/Properties/Export URDF
+(see ui/main_window.py's own `_add_deck_navigation`) - it has no
+sidebar to move them into instead.
 ============================================================================= */
 
 * {
-    font-family: "Segoe UI", "Inter", sans-serif;
+    font-family: "Bahnschrift", "Segoe UI", "Inter", sans-serif;
     font-size: 13px;
-    color: #d6dee6;
+    color: #edf7ff;
 }
 
 QMainWindow, QDialog {
-    background-color: #0b0e13;
+    background-color: #07111e;
 }
 
 QWidget#centralWorkspace {
@@ -24,58 +37,171 @@ QWidget#centralWorkspace {
 }
 
 QMenuBar {
-    background-color: #11151c;
-    border-bottom: 1px solid #1c232d;
-    padding: 2px;
+    background-color: #091827;
+    border-bottom: 1px solid #1d4056;
+    padding: 3px 8px;
 }
 QMenuBar::item {
     background: transparent;
     padding: 4px 10px;
 }
 QMenuBar::item:selected {
-    background-color: #1a2129;
-    border-radius: 3px;
+    background-color: #17334d;
+    border-radius: 5px;
 }
 QMenu {
-    background-color: #12161d;
-    border: 1px solid #232b36;
+    background-color: #10243a;
+    border: 1px solid #315773;
 }
 QMenu::item {
     padding: 6px 22px;
 }
 QMenu::item:selected {
-    background-color: #1e94a8;
-    color: #0b0e13;
+    background-color: #397dff;
+    color: #f5fbff;
 }
 
 QToolBar {
-    background-color: #11151c;
-    border-bottom: 1px solid #1c232d;
+    background-color: #091827;
+    border-bottom: 1px solid #1d4056;
     spacing: 6px;
     padding: 4px;
 }
 
+/* Persistent control-deck chrome: a functional quick route to Suite's
+   dockable panels, styled in the same deep-navy/cyan language as Updater. */
+QToolBar#commandDeck {
+    background-color: #0a1a2b;
+    border-top: 1px solid #17354a;
+    border-bottom: 1px solid #294965;
+    padding: 7px 10px;
+    spacing: 7px;
+    min-height: 48px;
+}
+QToolBar#commandDeck::separator {
+    background: #294965;
+    width: 1px;
+    margin: 5px 8px;
+}
+QWidget#suiteBrand {
+    background: #0e3045;
+    border: 1px solid #2d7695;
+    border-radius: 12px;
+    padding: 7px;
+}
+QLabel#commandDeckTitle {
+    color: #edf7ff;
+    font-size: 17px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    padding: 0 7px 0 2px;
+}
+QToolButton#commandDeckNav, QToolButton#commandDeckAbout {
+    background: #10243a;
+    border: 1px solid #294965;
+    border-radius: 10px;
+    color: #c8e5f5;
+    font-weight: 600;
+    padding: 8px 12px;
+}
+QToolButton#commandDeckNav:hover, QToolButton#commandDeckAbout:hover {
+    background: #1a4967;
+    border-color: #38d4e6;
+    color: #ffffff;
+}
+QToolButton#commandDeckNav:pressed, QToolButton#commandDeckAbout:pressed {
+    background: #13364f;
+}
+
+/* Real left navigation panel - see ui/nav_sidebar.py's own header for
+   why this replaced the command deck's own flat nav buttons above (real
+   user feedback: SUITE didn't match STUDIO's own left-panel menu/submenu
+   scheme). Same deep-navy/cyan language as the rest of this stylesheet. */
+QDockWidget#dock_nav_sidebar {
+    border: none;
+    border-right: 1px solid #17354a;
+}
+QWidget#navSidebar {
+    background-color: #0a1a2b;
+}
+QPushButton#navSidebarItem, QPushButton#navSidebarCategory, QPushButton#navSidebarBack {
+    background: transparent;
+    border: none;
+    border-radius: 9px;
+    color: #c8e5f5;
+    font-weight: 600;
+    font-size: 12px;
+    text-align: left;
+    padding: 9px 12px;
+}
+QPushButton#navSidebarItem:hover, QPushButton#navSidebarCategory:hover, QPushButton#navSidebarBack:hover {
+    background: #142b43;
+    color: #ffffff;
+}
+QPushButton#navSidebarItem:pressed, QPushButton#navSidebarCategory:pressed, QPushButton#navSidebarBack:pressed {
+    background: #173a56;
+}
+QPushButton#navSidebarCategory {
+    color: #91a8bd;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    font-size: 10px;
+    font-weight: 700;
+}
+QPushButton#navSidebarBack {
+    color: #38d4e6;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    padding-bottom: 12px;
+}
+QLabel#navSidebarSection {
+    color: #4a6379;
+    font-size: 9px;
+    font-weight: 700;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    padding: 4px 12px 5px 12px;
+    border-bottom: 1px solid rgba(41, 73, 101, 0.5);
+}
+QLabel#commandDeckState, QLabel#commandDeckTarget, QLabel#commandDeckClock {
+    background: #0b1a2a;
+    border-left: 1px solid #294965;
+    color: #91a8bd;
+    font-size: 10px;
+    font-weight: 600;
+    padding: 2px 11px;
+    min-width: 105px;
+}
+QLabel#commandDeckTarget { min-width: 145px; color: #c8e5f5; }
+QLabel#commandDeckClock { min-width: 88px; color: #91a8bd; }
+
 QStatusBar {
-    background-color: #11151c;
-    border-top: 1px solid #1c232d;
-    color: #7f8ea1;
+    background-color: #091827;
+    border-top: 1px solid #1d4056;
+    color: #91a8bd;
 }
 
 /* Dock widgets - the Photoshop-style panel system's own chrome */
 QDockWidget {
     titlebar-close-icon: none;
-    color: #d6dee6;
-    border: 1px solid #1c232d;
+    color: #edf7ff;
+    border: 1px solid #294965;
+    border-radius: 16px;
+    background: #101d30;
 }
 QDockWidget::title {
-    background-color: #151b23;
-    padding: 6px 8px;
-    border-bottom: 1px solid #222b36;
+    background-color: #101d30;
+    padding: 10px 13px;
+    border-bottom: 1px solid #294965;
+    border-top-left-radius: 15px;
+    border-top-right-radius: 15px;
     text-transform: uppercase;
     letter-spacing: 1px;
     font-weight: 600;
-    font-size: 11px;
-    color: #21c6de;
+    font-size: 12px;
+    color: #38d4e6;
 }
 QDockWidget::close-button, QDockWidget::float-button {
     background: transparent;
@@ -88,49 +214,52 @@ QDockWidget::close-button:hover, QDockWidget::float-button:hover {
 }
 
 QTabBar::tab {
-    background-color: #11151c;
-    color: #8b98a8;
-    padding: 6px 14px;
-    border: 1px solid #1c232d;
+    background-color: #0b1a2a;
+    color: #91a8bd;
+    padding: 9px 16px;
+    border: 1px solid #1d4056;
     border-bottom: none;
+    border-top-left-radius: 9px;
+    border-top-right-radius: 9px;
 }
 QTabBar::tab:selected {
-    background-color: #182029;
-    color: #21c6de;
-    border-bottom: 2px solid #21c6de;
+    background-color: #142b43;
+    color: #38d4e6;
+    border-bottom: 2px solid #38d4e6;
 }
 QTabWidget::pane {
-    border: 1px solid #1c232d;
-    background-color: #0f131a;
+    border: 1px solid #294965;
+    border-radius: 14px;
+    background-color: #101d30;
 }
 
 QGroupBox {
-    border: 1px solid #1c232d;
-    border-radius: 4px;
-    margin-top: 12px;
-    padding-top: 8px;
-    background-color: #0f131a;
+    border: 1px solid #294965;
+    border-radius: 16px;
+    margin-top: 18px;
+    padding: 15px 12px 12px 12px;
+    background-color: #101d30;
 }
 QGroupBox::title {
     subcontrol-origin: margin;
-    left: 8px;
-    padding: 0 4px;
-    color: #7f8ea1;
+    left: 14px;
+    padding: 0 7px;
+    color: #38d4e6;
     text-transform: uppercase;
     font-size: 11px;
     letter-spacing: 1px;
 }
 
 QPushButton {
-    background-color: #182029;
-    border: 1px solid #263140;
-    border-radius: 4px;
-    padding: 6px 14px;
-    color: #d6dee6;
+    background-color: #10243a;
+    border: 1px solid #294965;
+    border-radius: 10px;
+    padding: 9px 15px;
+    color: #edf7ff;
 }
 QPushButton:hover {
-    background-color: #1f2a36;
-    border-color: #21c6de;
+    background-color: #173a56;
+    border-color: #38d4e6;
 }
 QPushButton:pressed {
     background-color: #14313a;
@@ -140,13 +269,13 @@ QPushButton:disabled {
     border-color: #1c232d;
 }
 QPushButton#primaryAction {
-    background-color: #14818f;
-    border-color: #1ba4b6;
-    color: #06141a;
+    background-color: #397dff;
+    border-color: #65a1ff;
+    color: #f5fbff;
     font-weight: 600;
 }
 QPushButton#primaryAction:hover {
-    background-color: #17a0b1;
+    background-color: #518dff;
 }
 QPushButton#dangerAction {
     background-color: #3a1620;
@@ -158,14 +287,14 @@ QPushButton#dangerAction:hover {
 }
 
 QLineEdit, QSpinBox, QDoubleSpinBox, QComboBox {
-    background-color: #0f131a;
-    border: 1px solid #232b36;
-    border-radius: 3px;
-    padding: 4px 6px;
-    selection-background-color: #1e94a8;
+    background-color: #081623;
+    border: 1px solid #294965;
+    border-radius: 10px;
+    padding: 8px 10px;
+    selection-background-color: #397dff;
 }
 QLineEdit:focus, QSpinBox:focus, QDoubleSpinBox:focus, QComboBox:focus {
-    border-color: #21c6de;
+    border-color: #38d4e6;
 }
 QComboBox::drop-down {
     border: none;
@@ -173,7 +302,8 @@ QComboBox::drop-down {
 }
 QComboBox QAbstractItemView {
     background-color: #12161d;
-    border: 1px solid #232b36;
+    border: 1px solid #315773;
+    border-radius: 10px;
     selection-background-color: #1e94a8;
     selection-color: #0b0e13;
 }
@@ -181,6 +311,24 @@ QComboBox QAbstractItemView {
 QSlider::groove:horizontal {
     height: 4px;
     background: #1c232d;
+    border-radius: 2px;
+}
+
+/* Updater-equivalent card treatment for the central work surfaces.  Widgets
+   that set their object name to ``deckPanel`` inherit the same 16px shell
+   used by Updater's QML SectionPanel component. */
+QWidget#deckPanel, QFrame#deckPanel {
+    background-color: #101d30;
+    border: 1px solid #294965;
+    border-radius: 16px;
+}
+QFrame#metricCard {
+    background-color: #14253b;
+    border: 1px solid #316077;
+    border-radius: 11px;
+}
+QLabel#metricAccent {
+    background-color: #38d4e6;
     border-radius: 2px;
 }
 QSlider::sub-page:horizontal {
@@ -281,62 +429,6 @@ QSplitter::handle {
     background-color: #1c232d;
 }
 
-/* Persistent control-deck chrome: a functional quick route to this app's
-   dockable panels, styled in the same deep-navy/cyan language as the
-   rest of this ecosystem's desktop tools (see HYDRA-UMC-SUITE's own QSS). */
-QToolBar#commandDeck {
-    background-color: #0a1a2b;
-    border-top: 1px solid #17354a;
-    border-bottom: 1px solid #294965;
-    padding: 7px 10px;
-    spacing: 7px;
-    min-height: 48px;
-}
-QToolBar#commandDeck::separator {
-    background: #294965;
-    width: 1px;
-    margin: 5px 8px;
-}
-QWidget#suiteBrand {
-    background: #0e3045;
-    border: 1px solid #2d7695;
-    border-radius: 12px;
-    padding: 7px;
-}
-QLabel#commandDeckTitle {
-    color: #edf7ff;
-    font-size: 17px;
-    font-weight: 700;
-    letter-spacing: 1px;
-    padding: 0 7px 0 2px;
-}
-QToolButton#commandDeckNav, QToolButton#commandDeckAbout {
-    background: #10243a;
-    border: 1px solid #294965;
-    border-radius: 10px;
-    color: #c8e5f5;
-    font-weight: 600;
-    padding: 8px 12px;
-}
-QToolButton#commandDeckNav:hover, QToolButton#commandDeckAbout:hover {
-    background: #1a4967;
-    border-color: #38d4e6;
-    color: #ffffff;
-}
-QToolButton#commandDeckNav:pressed, QToolButton#commandDeckAbout:pressed {
-    background: #13364f;
-}
-QLabel#commandDeckState, QLabel#commandDeckTarget {
-    background: #0b1a2a;
-    border-left: 1px solid #294965;
-    color: #91a8bd;
-    font-size: 10px;
-    font-weight: 600;
-    padding: 2px 11px;
-    min-width: 105px;
-}
-QLabel#commandDeckTarget { min-width: 220px; color: #c8e5f5; }
-
 /* About dialog - see ui/about_dialog.py */
 QDialog#aboutDialog {
     background-color: #0b1a2a;
@@ -345,9 +437,9 @@ QDialog#aboutDialog {
 }
 QLabel#aboutTitle {
     color: #edf7ff;
-    font-size: 20px;
+    font-size: 22px;
     font-weight: 700;
-    letter-spacing: 1px;
+    letter-spacing: 2px;
     text-transform: uppercase;
 }
 QLabel#aboutTagline {
