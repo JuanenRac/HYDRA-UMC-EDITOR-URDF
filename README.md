@@ -141,13 +141,43 @@ server-upload implementation.
 
 Reuses HYDRA-UMC SUITE's own `assets/qss/industrial_dark.qss` verbatim (same relative path, same file) rather than designing a new visual theme for a sibling desktop tool in the same ecosystem.
 
+### Visual command deck (`--qtquick`)
+
+That embed attempt is a different, separate thing from the real Qt Quick
+command deck this app now has:
+
+~~~
+python main.py --qtquick
+~~~
+
+A genuinely standalone QML `ApplicationWindow` (`qt_editor_urdf.py` +
+`assets/qml/EditorDeck.qml`), never embedded inside the classic
+`QMainWindow` - the same proven pattern HYDRA-UMC-OS-REBUILDER,
+HYDRA-UMC-UPDATER, URTC-TESTER, URTC-FLASHER and HYDRA-UMC-SUITE already
+use, launched alongside the unchanged classic entry point rather than
+replacing it. It mirrors the classic dockable workspace's own real
+layout (Source and DOF tabbed on the left, Viewport and Properties side
+by side, Upload across the bottom) and every one of its 5 panels' real
+features - GitHub/gallery/local-folder loading, live DOF validation, an
+orbit/pan/zoom 3D preview with a clickable link tree and per-joint jog
+sliders, color/scale/joint-limit/mass-and-inertia editing, and the
+STUDIO server connect/push/pull round-trip - through the same
+`EditorController`, without a second implementation of any of it. The
+3D preview reuses the classic viewport's own real rendering code
+(`render/viewport.py`'s `UrdfGLRenderer`) through a dedicated
+`OffscreenUrdfRenderer`, the same real `QOpenGLContext`/
+`QOffscreenSurface`/framebuffer approach HYDRA-UMC-SUITE's own Qt Quick
+Viewport panel already uses, fed into QML through a
+`QQuickImageProvider`.
+
 ---
 
 ## 📂 Repository Structure
 
 ```text
 HYDRA-UMC-EDITOR-URDF/
-├── main.py                        # Entry point - QApplication, theme, maximized start, F11 fullscreen toggle
+├── main.py                        # Entry point - QApplication, theme, maximized start, F11 fullscreen toggle; --qtquick switches to the deck below
+├── qt_editor_urdf.py               # Qt Quick front end - standalone `--qtquick` command deck, bridges the unchanged EditorController to QML
 ├── run.bat / run.sh                # Convenience wrapper - activates .venv if present, runs main.py, no auto-close
 ├── requirements.txt                # PySide6, PyOpenGL, numpy-stl, numpy (pinned)
 ├── build_exe.bat / build_exe.sh    # Windows/Linux standalone-executable build scripts (PyInstaller) - bumps the version first
@@ -161,7 +191,8 @@ HYDRA-UMC-EDITOR-URDF/
 ├── LICENSE                         # GPL-3.0
 ├── assets/
 │   ├── HYDRA_UMC_ICON.svg          # Animated HYDRA-UMC mark used by the toolbar command deck
-│   └── qss/industrial_dark.qss     # Reused verbatim from HYDRA-UMC-SUITE
+│   ├── qss/industrial_dark.qss     # Reused verbatim from HYDRA-UMC-SUITE
+│   └── qml/EditorDeck.qml          # Qt Quick UI for the `--qtquick` command deck
 ├── images/
 │   └── HYDRA_UMC_BANNER.svg        # Media and diagrams
 ├── language/                       # english/spanish/italian/french/german/japanese/chinese.lng - sits beside the exe, not bundled
@@ -179,7 +210,7 @@ HYDRA-UMC-EDITOR-URDF/
 │   ├── render/
 │   │   ├── mesh.py                 # STL/OBJ loading, box/cylinder/sphere primitive generation, mm-vs-m guard
 │   │   ├── kinematics.py           # Generic forward kinematics over an arbitrary imported tree (Z-up, URDF's own convention)
-│   │   └── viewport.py             # QOpenGLWidget - GLSL 3.3 core shader, orbit camera, per-link GPU buffers
+│   │   └── viewport.py             # UrdfGLRenderer (GLSL 3.3 core shader, orbit camera, per-link GPU buffers) + the classic QOpenGLWidget wrapper + OffscreenUrdfRenderer for the `--qtquick` deck
 │   ├── source/
 │   │   ├── scan.py                 # Finds .urdf/.xacro files, builds the package://-aware mesh filename resolver
 │   │   ├── github_fetcher.py       # GitHub zipball download + extraction (urllib + zipfile, no git dependency)
@@ -208,11 +239,15 @@ HYDRA-UMC-EDITOR-URDF/
 └── work/                            # Runtime scratch space for fetched GitHub repos and pulled server models (gitignored)
 ```
 
-Note: the Qt Quick command deck (`assets/qml/CommandDeck.qml`, `ui/qtquick_deck.py`)
-was reverted - a `QQuickWidget` embedded in this `QMainWindow`'s real
-`QDockWidget` layout never composited correctly (solid black, no console
-error). The toolbar command deck is plain `QToolBar`/`QLabel`/`QToolButton`
-widgets today; see `CHANGELOG.md` for the full story.
+Note: an earlier attempt embedded a Qt Quick/QML command deck
+(`assets/qml/CommandDeck.qml`, `ui/qtquick_deck.py`) directly inside this
+`QMainWindow`'s real `QDockWidget` layout via `QQuickWidget` - that never
+composited correctly (solid black, no console error) and was reverted;
+the toolbar command deck above is plain `QToolBar`/`QLabel`/`QToolButton`
+widgets. The real Qt Quick command deck this app has today
+(`qt_editor_urdf.py` / `assets/qml/EditorDeck.qml`, listed above) is a
+different, later, standalone `--qtquick` window instead - see
+**🎛️ Theme** above and `CHANGELOG.md` for the full story.
 
 ---
 

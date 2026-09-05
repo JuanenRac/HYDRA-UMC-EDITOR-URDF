@@ -138,13 +138,24 @@ Viewport、Properties 和 Upload 按钮只会显示既有停靠面板；Export �
 
 原样复用 HYDRA-UMC SUITE 自身的 `assets/qss/industrial_dark.qss`（相同的相对路径，相同的文件），而不是为本生态系统中的同类桌面工具设计一套新的视觉主题。
 
+### 可视化命令控制台（`--qtquick`）
+
+那次嵌入尝试与这个应用现在拥有的真正 Qt Quick 命令控制台是完全不同、彼此独立的两回事：
+
+~~~
+python main.py --qtquick
+~~~
+
+一个完全独立的 QML `ApplicationWindow`（`qt_editor_urdf.py` + `assets/qml/EditorDeck.qml`），从未嵌入经典的 `QMainWindow` 中——与 HYDRA-UMC-OS-REBUILDER、HYDRA-UMC-UPDATER、URTC-TESTER、URTC-FLASHER 和 HYDRA-UMC-SUITE 已经使用的、经过验证的同一种模式一致，与经典入口点并行启动，而不是取代它。它忠实还原了经典可停靠工作区的真实空间布局（左侧 Source 和 DOF 以标签页形式呈现，Viewport 和 Properties 并排，Upload 横跨底部）以及其 5 个面板的每一项真实功能——从 GitHub/图库/本地文件夹加载、实时 DOF 校验、带可点击链接树和每关节点动滑块的可旋转/平移/缩放 3D 预览、颜色/缩放/关节限位/质量与惯量编辑，以及与 STUDIO 服务器之间真正的连接/推送/拉取往返——全部通过同一个 `EditorController`，没有任何一项被重复实现。3D 预览通过一个专用的 `OffscreenUrdfRenderer` 复用经典视口自身真实的渲染代码（`render/viewport.py` 的 `UrdfGLRenderer`），采用与 HYDRA-UMC-SUITE 自身 Qt Quick Viewport 面板相同的真实 `QOpenGLContext`/`QOffscreenSurface`/帧缓冲方案，通过 `QQuickImageProvider` 传入 QML。
+
 ---
 
 ## 📂 仓库结构
 
 ```text
 HYDRA-UMC-EDITOR-URDF/
-├── main.py                        # 入口点——QApplication、主题、最大化启动、F11 全屏切换
+├── main.py                        # 入口点——QApplication、主题、最大化启动、F11 全屏切换；--qtquick 切换到下方面板
+├── qt_editor_urdf.py               # Qt Quick 前端 —— 独立的 `--qtquick` 命令面板，将未改动的 EditorController 接入 QML
 ├── run.bat / run.sh                # 便捷启动脚本——若存在 .venv 则激活，运行 main.py，不会自行关闭窗口
 ├── requirements.txt                # PySide6、PyOpenGL、numpy-stl、numpy（已锁定版本）
 ├── build_exe.bat / build_exe.sh    # Windows/Linux 独立可执行文件构建脚本（PyInstaller）——先递增版本号
@@ -158,6 +169,8 @@ HYDRA-UMC-EDITOR-URDF/
 ├── LICENSE                         # GPL-3.0
 ├── assets/
 │   ├── HYDRA_UMC_ICON.svg          # 工具栏命令面板使用的动画 HYDRA-UMC 标志
+│   ├── qss/industrial_dark.qss     # 原样复用自 HYDRA-UMC-SUITE
+│   └── qml/EditorDeck.qml          # `--qtquick` 命令面板的 Qt Quick 界面
 │   └── qss/industrial_dark.qss     # 原样复用自 HYDRA-UMC-SUITE
 ├── images/
 │   └── HYDRA_UMC_BANNER.svg        # 媒体与图示
@@ -176,7 +189,7 @@ HYDRA-UMC-EDITOR-URDF/
 │   ├── render/
 │   │   ├── mesh.py                 # STL/OBJ 加载、盒体/圆柱体/球体基本几何体生成、毫米/米判断
 │   │   ├── kinematics.py           # 针对任意已导入树的通用正向运动学（Z 轴朝上，URDF 自身的惯例）
-│   │   └── viewport.py             # QOpenGLWidget —— GLSL 3.3 核心着色器、环绕相机、逐连杆 GPU 缓冲区
+│   │   └── viewport.py             # UrdfGLRenderer（GLSL 3.3 核心着色器、环绕相机、逐连杆 GPU 缓冲区）+ 经典 QOpenGLWidget 包装 + 供 `--qtquick` 面板使用的 OffscreenUrdfRenderer
 │   ├── source/
 │   │   ├── scan.py                 # 查找 .urdf/.xacro 文件，构建感知 package:// 的网格文件名解析器
 │   │   ├── github_fetcher.py       # GitHub zip 包下载与解压（urllib + zipfile，无 git 依赖）
@@ -205,11 +218,14 @@ HYDRA-UMC-EDITOR-URDF/
 └── work/                            # 已拉取的 GitHub 仓库和已拉取的服务器模型的运行时暂存空间（已加入 gitignore）
 ```
 
-说明：Qt Quick 命令面板（`assets/qml/CommandDeck.qml`、
-`ui/qtquick_deck.py`）已被回退——嵌入此 `QMainWindow` 真实
-`QDockWidget` 布局中的 `QQuickWidget` 始终无法正确合成（纯黑显示，
-控制台无报错）。工具栏命令面板如今由纯粹的
-`QToolBar`/`QLabel`/`QToolButton` 部件组成；完整经过见 `CHANGELOG.md`。
+说明：早期曾尝试通过 `QQuickWidget` 将一个 Qt Quick/QML 命令面板
+（`assets/qml/CommandDeck.qml`、`ui/qtquick_deck.py`）直接嵌入此
+`QMainWindow` 真实的 `QDockWidget` 布局中——始终无法正确合成（纯黑
+显示，控制台无报错），因此被回退；上文的工具栏命令面板由纯粹的
+`QToolBar`/`QLabel`/`QToolButton` 部件组成。这个应用今天真正拥有的
+Qt Quick 命令面板（上文列出的 `qt_editor_urdf.py` /
+`assets/qml/EditorDeck.qml`）是另一个更晚出现的独立 `--qtquick` 窗口——
+完整经过见上文的 **🎛️ 主题** 和 `CHANGELOG.md`。
 
 ---
 

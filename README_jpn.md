@@ -142,13 +142,24 @@ Upload は既存のドックを表示するだけで、Export と About も既�
 
 同一エコシステム内の姉妹デスクトップツール向けに新しい視覚テーマを設計するのではなく、HYDRA-UMC SUITE 自身の `assets/qss/industrial_dark.qss` をそのまま（同じ相対パス、同じファイル）再利用しています。
 
+### ビジュアルコマンドデッキ（`--qtquick`）
+
+その組み込みの試みは、このアプリが今持っている本物の Qt Quick コマンドデッキとは別の、切り離されたものです：
+
+~~~
+python main.py --qtquick
+~~~
+
+完全に独立した QML `ApplicationWindow`（`qt_editor_urdf.py` + `assets/qml/EditorDeck.qml`）で、従来の `QMainWindow` に組み込まれることは一切ありません——HYDRA-UMC-OS-REBUILDER、HYDRA-UMC-UPDATER、URTC-TESTER、URTC-FLASHER、HYDRA-UMC-SUITE がすでに使っている、実証済みの同じパターンで、従来のエントリポイントを置き換えるのではなく、その隣で起動します。従来のドッキング可能なワークスペースの実際の空間配置(左側に Source と DOF をタブ表示、Viewport と Properties を並べて表示、Upload を下部に全幅表示)と、その 5 つのパネルすべての実際の機能——GitHub/ギャラリー/ローカルフォルダからの読み込み、ライブ DOF 検証、クリック可能なリンクツリーと関節ごとのジョグスライダーを備えたオービット/パン/ズーム 3D プレビュー、色/スケール/関節限界/質量と慣性の編集、STUDIO サーバーとの接続/送信/取得の実際の往復——を、同じ `EditorController` を通じて忠実に再現しており、そのどれも二重実装されていません。3D プレビューは、専用の `OffscreenUrdfRenderer` を介して従来のビューポート自身の実際の描画コード(`render/viewport.py` の `UrdfGLRenderer`)を再利用しており、これは HYDRA-UMC-SUITE 自身の Qt Quick Viewport パネルがすでに使っているのと同じ本物の `QOpenGLContext`/`QOffscreenSurface`/フレームバッファ方式で、`QQuickImageProvider` を介して QML に渡されます。
+
 ---
 
 ## 📂 リポジトリ構成
 
 ```text
 HYDRA-UMC-EDITOR-URDF/
-├── main.py                        # エントリポイント——QApplication、テーマ、最大化起動、F11 フルスクリーン切替
+├── main.py                        # エントリポイント——QApplication、テーマ、最大化起動、F11 フルスクリーン切替。--qtquick で下記のデッキに切り替え
+├── qt_editor_urdf.py               # Qt Quick フロントエンド —— 独立した `--qtquick` コマンドデッキ、変更を加えていない EditorController を QML に接続
 ├── run.bat / run.sh                # 簡易起動スクリプト——.venv があれば有効化し main.py を実行、自動では閉じない
 ├── requirements.txt                # PySide6、PyOpenGL、numpy-stl、numpy（バージョン固定）
 ├── build_exe.bat / build_exe.sh    # Windows/Linux 独立実行ファイルビルドスクリプト（PyInstaller）——最初にバージョンを加算
@@ -162,6 +173,8 @@ HYDRA-UMC-EDITOR-URDF/
 ├── LICENSE                         # GPL-3.0
 ├── assets/
 │   ├── HYDRA_UMC_ICON.svg          # ツールバーのコマンドデッキで使用するアニメーション HYDRA-UMC マーク
+│   ├── qss/industrial_dark.qss     # HYDRA-UMC-SUITE からそのまま再利用
+│   └── qml/EditorDeck.qml          # `--qtquick` コマンドデッキの Qt Quick UI
 │   └── qss/industrial_dark.qss     # HYDRA-UMC-SUITE からそのまま再利用
 ├── images/
 │   └── HYDRA_UMC_BANNER.svg        # メディアと図版
@@ -180,7 +193,7 @@ HYDRA-UMC-EDITOR-URDF/
 │   ├── render/
 │   │   ├── mesh.py                 # STL/OBJ 読み込み、ボックス/円柱/球のプリミティブ生成、mm 対 m ガード
 │   │   ├── kinematics.py           # 任意のインポート済みツリーに対する汎用正運動学（Z 軸上、URDF 自身の規約）
-│   │   └── viewport.py             # QOpenGLWidget —— GLSL 3.3 コアシェーダー、オービットカメラ、リンクごとの GPU バッファ
+│   │   └── viewport.py             # UrdfGLRenderer(GLSL 3.3 コアシェーダー、オービットカメラ、リンクごとの GPU バッファ)+ 従来の QOpenGLWidget ラッパー + `--qtquick` デッキ向けの OffscreenUrdfRenderer
 │   ├── source/
 │   │   ├── scan.py                 # .urdf/.xacro ファイルを検索、package:// を認識するメッシュファイル名リゾルバーを構築
 │   │   ├── github_fetcher.py       # GitHub zip アーカイブのダウンロードと展開（urllib + zipfile、git 依存なし）
@@ -209,12 +222,16 @@ HYDRA-UMC-EDITOR-URDF/
 └── work/                            # 取得した GitHub リポジトリとプルしたサーバーモデルのランタイム作業領域（gitignore 対象）
 ```
 
-注：Qt Quick コマンドデッキ（`assets/qml/CommandDeck.qml`、
-`ui/qtquick_deck.py`）は撤回されました——この `QMainWindow` の本物の
-`QDockWidget` レイアウトに組み込まれた `QQuickWidget` が正しく
-コンポジットされず（コンソールエラーなしの真っ黒表示）、ツールバーの
-コマンドデッキは現在、素の `QToolBar`/`QLabel`/`QToolButton` ウィジェット
-です。詳細は `CHANGELOG.md` を参照。
+注：以前、`QQuickWidget` を使って Qt Quick/QML コマンドデッキ
+（`assets/qml/CommandDeck.qml`、`ui/qtquick_deck.py`）をこの
+`QMainWindow` の本物の `QDockWidget` レイアウトに直接組み込む試みが
+ありましたが、正しくコンポジットされず（コンソールエラーなしの真っ黒
+表示)、撤回されました。上記のツールバーのコマンドデッキは、素の
+`QToolBar`/`QLabel`/`QToolButton` ウィジェットです。このアプリが今日
+実際に持っている Qt Quick コマンドデッキ(上記に挙げた
+`qt_editor_urdf.py` / `assets/qml/EditorDeck.qml`)は、それとは別の、
+より新しい独立した `--qtquick` ウィンドウです——詳細は上記の
+**🎛️ テーマ** と `CHANGELOG.md` を参照。
 
 ---
 

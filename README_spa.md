@@ -143,13 +143,24 @@ servidor.
 
 Reutiliza el propio `assets/qss/industrial_dark.qss` de HYDRA-UMC SUITE tal cual (misma ruta relativa, mismo archivo) en vez de diseñar un tema visual nuevo para una herramienta de escritorio hermana en el mismo ecosistema.
 
+### Panel de comandos visual (`--qtquick`)
+
+Ese intento de integración es algo distinto y separado del panel de comandos Qt Quick real que esta app tiene ahora:
+
+~~~
+python main.py --qtquick
+~~~
+
+Una `ApplicationWindow` QML totalmente independiente (`qt_editor_urdf.py` + `assets/qml/EditorDeck.qml`), nunca embebida dentro del `QMainWindow` clásico - el mismo patrón ya probado que usan HYDRA-UMC-OS-REBUILDER, HYDRA-UMC-UPDATER, URTC-TESTER, URTC-FLASHER y HYDRA-UMC-SUITE, lanzada junto al punto de entrada clásico sin reemplazarlo. Reproduce fielmente la disposición real del espacio de trabajo acoplable clásico (Source y DOF en pestañas a la izquierda, Viewport y Properties lado a lado, Upload abajo del todo) y las 5 funciones reales de cada panel - carga desde GitHub/galería/carpeta local, validación DOF en vivo, un preview 3D con orbit/pan/zoom con árbol de enlaces clicable y controles deslizantes de jog por articulación, edición de color/escala/límites de joint/masa e inercia, y el ciclo real de conectar/subir/descargar con el servidor STUDIO - a través del mismo `EditorController`, sin una segunda implementación de nada de esto. El preview 3D reutiliza el propio renderizado real del viewport clásico (`UrdfGLRenderer` de `render/viewport.py`) mediante un `OffscreenUrdfRenderer` dedicado, el mismo enfoque real de `QOpenGLContext`/`QOffscreenSurface`/framebuffer que ya usa el propio panel Viewport de Qt Quick de HYDRA-UMC-SUITE, alimentado a QML mediante un `QQuickImageProvider`.
+
 ---
 
 ## 📂 Estructura del Repositorio
 
 ```text
 HYDRA-UMC-EDITOR-URDF/
-├── main.py                        # Punto de entrada - QApplication, tema, arranque maximizado, alternancia F11 de pantalla completa
+├── main.py                        # Punto de entrada - QApplication, tema, arranque maximizado, alternancia F11 de pantalla completa; --qtquick cambia al panel de abajo
+├── qt_editor_urdf.py               # Interfaz Qt Quick - panel de comandos `--qtquick` independiente, conecta el EditorController sin tocar con QML
 ├── run.bat / run.sh                # Script de conveniencia - activa .venv si existe, ejecuta main.py, no se autocierra
 ├── requirements.txt                # PySide6, PyOpenGL, numpy-stl, numpy (con versiones fijadas)
 ├── build_exe.bat / build_exe.sh    # Scripts de compilación de ejecutable independiente para Windows/Linux (PyInstaller) - primero sube la versión
@@ -163,7 +174,8 @@ HYDRA-UMC-EDITOR-URDF/
 ├── LICENSE                         # GPL-3.0
 ├── assets/
 │   ├── HYDRA_UMC_ICON.svg          # Marca animada HYDRA-UMC usada por el panel de la barra de herramientas
-│   └── qss/industrial_dark.qss     # Reutilizado tal cual desde HYDRA-UMC-SUITE
+│   ├── qss/industrial_dark.qss     # Reutilizado tal cual desde HYDRA-UMC-SUITE
+│   └── qml/EditorDeck.qml          # UI Qt Quick del panel de comandos `--qtquick`
 ├── images/
 │   └── HYDRA_UMC_BANNER.svg        # Medios y diagramas
 ├── language/                       # english/spanish/italian/french/german/japanese/chinese.lng - junto al exe, no empaquetado dentro
@@ -181,7 +193,7 @@ HYDRA-UMC-EDITOR-URDF/
 │   ├── render/
 │   │   ├── mesh.py                 # Carga de STL/OBJ, generación de primitivas caja/cilindro/esfera, protección mm-contra-m
 │   │   ├── kinematics.py           # Cinemática directa genérica sobre un árbol importado arbitrario (Z-arriba, la propia convención de URDF)
-│   │   └── viewport.py             # QOpenGLWidget - shader core GLSL 3.3, cámara orbital, buffers de GPU por enlace
+│   │   └── viewport.py             # UrdfGLRenderer (shader core GLSL 3.3, cámara orbital, buffers de GPU por enlace) + el wrapper QOpenGLWidget clásico + OffscreenUrdfRenderer para el panel `--qtquick`
 │   ├── source/
 │   │   ├── scan.py                 # Encuentra archivos .urdf/.xacro, construye el resolvedor de nombres de malla consciente de package://
 │   │   ├── github_fetcher.py       # Descarga y extracción de zipball de GitHub (urllib + zipfile, sin dependencia de git)
@@ -210,12 +222,16 @@ HYDRA-UMC-EDITOR-URDF/
 └── work/                            # Espacio de trabajo temporal en tiempo de ejecución para repositorios de GitHub extraídos y modelos descargados del servidor (ignorado por git)
 ```
 
-Nota: el panel de comandos Qt Quick (`assets/qml/CommandDeck.qml`,
-`ui/qtquick_deck.py`) fue revertido - un `QQuickWidget` embebido en el
-`QDockWidget` real de este `QMainWindow` nunca se componía correctamente
-(negro sólido, sin error en consola). El panel de la barra de herramientas
-hoy es `QToolBar`/`QLabel`/`QToolButton` planos; ver `CHANGELOG.md` para
-la historia completa.
+Nota: un intento anterior embebió un panel de comandos Qt Quick/QML
+(`assets/qml/CommandDeck.qml`, `ui/qtquick_deck.py`) directamente dentro
+del `QDockWidget` real de este `QMainWindow` vía `QQuickWidget` - nunca
+se componía correctamente (negro sólido, sin error en consola) y se
+revirtió; el panel de la barra de herramientas de arriba es
+`QToolBar`/`QLabel`/`QToolButton` planos. El panel Qt Quick real que
+esta app tiene hoy (`qt_editor_urdf.py` / `assets/qml/EditorDeck.qml`,
+listado arriba) es una ventana `--qtquick` independiente distinta y
+posterior - ver **🎛️ Tema** arriba y `CHANGELOG.md` para la historia
+completa.
 
 ---
 
