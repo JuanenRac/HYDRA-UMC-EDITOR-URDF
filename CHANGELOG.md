@@ -11,6 +11,28 @@ bumped by hand, as a deliberate decision.
 
 ## [Unreleased] - Chinese and Japanese added to the language menu
 
+- **Fixed real overlapping-text layout bugs in the `--qtquick` deck.**
+  Found from a direct user report of wide elements sitting on top of
+  other controls, hiding their functions. Root cause, confirmed with a
+  real on-screen check (not a theory): a `RowLayout` doesn't reserve
+  real height for a wrapped `Text` sibling sharing its row with another
+  control - the row sizes itself off that Text's un-wrapped single-line
+  height, and the wrapped second line spills down over whatever comes
+  next. Hit twice in the Upload panel: the "Models already on this
+  server" label spilled over the Refresh button/models list below it,
+  and a `CheckBox` with its own custom `contentItem`/`indicator` (itself
+  a real, already-documented gotcha - it misplaces the indicator box)
+  made the same mistake with its own wrapped label. Both replaced with
+  a plain `CheckBox` plus a separate label `Text` on its own full-width
+  row - the proven pattern HYDRA-UMC-SUITE's own short-label checkboxes
+  already use, extended here to survive a genuinely long, wrapping
+  label too. Separately, the 3D Viewport panel's own "unavailable"
+  message used `anchors.centerIn` plus an arithmetic
+  `width: parent.width * 0.8` that froze at `0.8px` wide (confirmed by
+  walking the real live QML object tree, not guessed) and never
+  re-evaluated afterward, wrapping the message one word per line in a
+  sliver a few pixels wide - switched to `anchors.fill` + margins,
+  which doesn't have that failure mode.
 - **New: real Qt Quick "command deck" (`python main.py --qtquick`), the
   same standalone-shell pattern HYDRA-UMC-OS-REBUILDER/HYDRA-UMC-UPDATER/
   URTC-TESTER/URTC-FLASHER/HYDRA-UMC-SUITE already use.** The bullet just

@@ -384,13 +384,27 @@ ApplicationWindow {
                                 fillMode: Image.PreserveAspectFit
                             }
                             Text {
-                                anchors.centerIn: parent
+                                // anchors.fill + margins, not anchors.centerIn
+                                // plus an arithmetic `width: parent.width *
+                                // 0.8` - a real on-screen check showed that
+                                // expression freezing at whatever
+                                // viewportHost's own width happened to be at
+                                // component-completion (before the RowLayout
+                                // it lives in ever assigned it a real
+                                // fillWidth value) and never re-evaluating
+                                // afterward, wrapping this entire message one
+                                // word per line in a sliver a few pixels
+                                // wide. Anchoring directly to the real,
+                                // continuously-updated parent geometry
+                                // doesn't have that failure mode.
+                                anchors.fill: parent
+                                anchors.margins: 20
                                 visible: !editorBackend.viewportSupported
                                 text: editorBackend.viewportUnsupportedMessage
                                 color: muted
                                 wrapMode: Text.WordWrap
-                                width: parent.width * 0.8
                                 horizontalAlignment: Text.AlignHCenter
+                                verticalAlignment: Text.AlignVCenter
                             }
                             MouseArea {
                                 anchors.fill: parent
@@ -609,14 +623,38 @@ ApplicationWindow {
                     spacing: 6
                     SectionLabel { text: editorBackend.uiText("UPLOAD_CATEGORY_LABEL") }
                     ComboBox { id: categoryCombo; Layout.fillWidth: true; model: editorBackend.uploadCategories }
-                    CheckBox {
-                        id: overwriteCheck
+                    // A CheckBox with its OWN custom contentItem/indicator
+                    // (the previous version of this row) is a real, already
+                    // -documented gotcha in this ecosystem's own Qt Quick
+                    // decks: it misplaces the indicator box. The proven fix
+                    // (already used by HYDRA-UMC-SUITE's own equivalent
+                    // checkboxes) is a plain, un-styled CheckBox plus a
+                    // separate label - but SUITE's own real labels there are
+                    // short, single-line text, which sidesteps a second real
+                    // issue this one's own long label actually hits: a
+                    // RowLayout still doesn't reserve real height for a
+                    // wrapped Text sibling, even with the fillWidth fix
+                    // pattern used above (the row's own height, the fillWidth
+                    // Text's width, and that Text's own wrapped implicitHeight
+                    // form a real ordering problem a plain Math.max() binding
+                    // doesn't reliably resolve - confirmed with a real
+                    // on-screen check, not just a theory). Putting the label
+                    // on its OWN full-width row below the checkbox instead -
+                    // a direct ColumnLayout child, never sharing a row's width
+                    // with another sibling - sidesteps the ordering problem
+                    // entirely, the same way every OTHER real wrapped label in
+                    // this deck already does.
+                    RowLayout {
+                        spacing: 6
+                        CheckBox { id: overwriteCheck }
+                    }
+                    Text {
+                        text: editorBackend.uiText("UPLOAD_OVERWRITE_CHECKBOX")
+                        color: muted
+                        font.pixelSize: 10
+                        wrapMode: Text.WordWrap
                         Layout.fillWidth: true
-                        indicator: Rectangle {
-                            implicitWidth: 18; implicitHeight: 18; radius: 4; x: overwriteCheck.leftPadding; y: overwriteCheck.topPadding + (overwriteCheck.height - height) / 2
-                            color: overwriteCheck.checked ? window.cyan : panelAlt; border.width: 1; border.color: panelBorder
-                        }
-                        contentItem: Text { text: editorBackend.uiText("UPLOAD_OVERWRITE_CHECKBOX"); color: muted; font.pixelSize: 10; wrapMode: Text.WordWrap; leftPadding: overwriteCheck.indicator.width + 8; verticalAlignment: Text.AlignVCenter }
+                        MouseArea { anchors.fill: parent; onClicked: overwriteCheck.toggle() }
                     }
                     GameButton { text: editorBackend.uiText("UPLOAD_PUSH_BUTTON"); enabled: editorBackend.uploadCanPush; Layout.fillWidth: true; onClicked: editorBackend.pushToServer(categoryCombo.currentIndex, overwriteCheck.checked) }
                 }
@@ -629,8 +667,20 @@ ApplicationWindow {
                     spacing: 6
                     RowLayout {
                         Layout.fillWidth: true
-                        SectionLabel { text: editorBackend.uiText("UPLOAD_SERVER_MODELS_LABEL"); wrapMode: Text.WordWrap; Layout.fillWidth: true }
-                        GameButton { text: editorBackend.uiText("UPLOAD_REFRESH_BUTTON"); accent: "#24465e"; enabled: editorBackend.uploadConnected; onClicked: editorBackend.refreshModels() }
+                        // Explicit, not left implicit - a real on-screen check
+                        // showed this row's own wrapped 2-line label
+                        // overflowing past the RowLayout's own implicit
+                        // height (a Text's wrapped implicitHeight isn't known
+                        // until AFTER the layout has already assigned it a
+                        // fillWidth-stretched width, so the row sizes itself
+                        // off the label's un-wrapped single-line height) and
+                        // spilling down over the GameButton/ListView below
+                        // it. Binding the row's own height to the label's
+                        // real implicitHeight keeps the row - and everything
+                        // below it - correctly out of the way.
+                        Layout.preferredHeight: Math.max(modelsLabel.implicitHeight, refreshButton.implicitHeight)
+                        SectionLabel { id: modelsLabel; text: editorBackend.uiText("UPLOAD_SERVER_MODELS_LABEL"); wrapMode: Text.WordWrap; Layout.fillWidth: true }
+                        GameButton { id: refreshButton; text: editorBackend.uiText("UPLOAD_REFRESH_BUTTON"); accent: "#24465e"; enabled: editorBackend.uploadConnected; onClicked: editorBackend.refreshModels() }
                     }
                     ListView {
                         Layout.fillWidth: true
