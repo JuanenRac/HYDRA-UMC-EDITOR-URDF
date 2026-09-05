@@ -11,6 +11,46 @@ bumped by hand, as a deliberate decision.
 
 ## [Unreleased] - Chinese and Japanese added to the language menu
 
+- **New: real Qt Quick "command deck" (`python main.py --qtquick`), the
+  same standalone-shell pattern HYDRA-UMC-OS-REBUILDER/HYDRA-UMC-UPDATER/
+  URTC-TESTER/URTC-FLASHER/HYDRA-UMC-SUITE already use.** The bullet just
+  below this one documents this app's OWN earlier, different attempt -
+  embedding a `QQuickWidget` inside the classic `QToolBar`, which painted
+  solid black and was reverted. This is not that: a genuinely standalone
+  QML `ApplicationWindow` (`qt_editor_urdf.py` + `assets/qml/
+  EditorDeck.qml`), never embedded in the classic `QMainWindow`, so the
+  compositing bug that sank the embed attempt doesn't apply here at all.
+  Faithfully reproduces the classic dockable workspace's own real spatial
+  arrangement (Source+DOF tabbed left, Viewport+Properties side by side,
+  Upload docked across the bottom - see `ui/main_window.py`'s own
+  `_build_panels()`) and every one of its 5 panels' own real features:
+  GitHub/gallery/local-folder loading with found-URDF picking, live DOF
+  validation, an orbit/pan/zoom 3D preview with a clickable link tree and
+  per-joint jog sliders, color/scale/joint-limit/mass-and-inertia editing,
+  and the STUDIO server connect/push/pull round-trip - reusing
+  `EditorController`, the background fetch/server-call threads, and every
+  real i18n key unchanged, not a second implementation of any of it.
+  `render/viewport.py`'s own `UrdfViewport(QOpenGLWidget)` was split into
+  a context-agnostic `UrdfGLRenderer` plus a thin `UrdfViewport` wrapper
+  (identical real behavior) and a new `OffscreenUrdfRenderer` - a genuine
+  separate `QOpenGLContext`/`QOffscreenSurface`/FBO, deliberately not Qt
+  Quick's own `QQuickFramebufferObject` - so the deck's 3D preview reuses
+  the exact same real rendering code the classic viewport already uses,
+  fed into QML through a `QQuickImageProvider`, the same real split
+  HYDRA-UMC-SUITE's own `RobotGLRenderer`/`OffscreenRobotRenderer` already
+  proved (including that class's own real reentrancy-counter fix for a
+  nested make/done-current segfault, reused here rather than
+  re-discovered). Verified end-to-end with real PySide6 instantiation (no
+  display needed for the logic/render path): loading a real test URDF
+  through the bridge produced the correct DOF verdict, link tree, joint
+  ranges, and a real rendered frame (saved to a PNG and visually confirmed
+  correct, including a visible joint rotation after a jog); color/scale/
+  joint/inertia edits and URDF export all round-tripped correctly. The
+  classic `QMainWindow` app was re-instantiated after the same refactor to
+  confirm zero regressions. Adds no new user-facing strings beyond 3 short
+  deck-only chrome labels (tagline, Export button, empty-viewport message),
+  translated in all 7 language files alongside the existing 82 keys this
+  deck otherwise reuses unchanged.
 - **Fixed: command deck rendered as a blank black bar; real About dialog
   added.** Real per-project screenshots (not just code reading) confirmed
   the Qt Quick/QML command deck described in the bullets below painted

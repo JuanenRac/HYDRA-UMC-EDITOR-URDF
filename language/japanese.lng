@@ -99,3 +99,6 @@ DECK_READY=準備完了
 DECK_REVIEW=要確認
 DECK_NO_MODEL=URDF 未読み込み
 DECK_STATUS=ステータス
+QT_TAGLINE=URDFエディタ • リアルタイム3Dプレビュー
+QT_EXPORT=URDFをエクスポート
+QT_NO_URDF_YET=まだURDFが読み込まれていません。

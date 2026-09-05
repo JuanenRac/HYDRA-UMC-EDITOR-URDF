@@ -31,6 +31,30 @@ from hydra_editor_urdf.ui.theme import apply_theme
 
 
 def main() -> int:
+    if "--qtquick" in sys.argv:
+        # The real standalone Qt Quick "command deck" this app's own
+        # CHANGELOG.md history shows was already attempted once by
+        # EMBEDDING a QQuickWidget inside the classic QToolBar - that
+        # painted solid black and was reverted (see
+        # ui/main_window.py's own _build_command_deck() docstring). This
+        # is the OTHER, proven-safe shape instead: a standalone QML
+        # ApplicationWindow, never embedded in the classic
+        # QMainWindow - the same real pattern URTC-TESTER/URTC-FLASHER/
+        # HYDRA-UMC-SUITE/HYDRA-UMC-UPDATER/HYDRA-UMC-OS-REBUILDER already
+        # use. The classic QMainWindow+QDockWidget app below remains the
+        # default entry point either way.
+        try:
+            from qt_editor_urdf import run_qtquick
+        except ImportError as exc:
+            print(
+                "ERROR: Qt Quick mode requires PySide6. "
+                "Install this repository's requirements.txt first. "
+                f"Details: {exc}",
+                file=sys.stderr,
+            )
+            return 2
+        return run_qtquick()
+
     # Qt Quick's portable Basic style honors the deck's custom rounded
     # backgrounds on every desktop. The native Windows style can discard
     # those QML backgrounds, making the shared Updater visual language vanish.
