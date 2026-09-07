@@ -1,0 +1,15 @@
+# =============================================================================
+# HYDRA-UMC EDITOR-URDF - requirements-dev.txt
+# Copyright (C) 2026 JuanenRac (Electro Hobby 3D) <electrohobby3d@gmail.com>
+# GPL-3.0 - see LICENSE
+#
+# What tests/ actually needs to run - NOT the full requirements.txt.
+# Every test file in tests/ only imports pure-logic modules
+# (models.py/urdf/*.py/inertia_calc.py/source/*.py/i18n.py/gallery.py/
+# render/kinematics.py) that never touch PySide6/PyOpenGL/numpy-stl, so
+# CI installs this short list instead of the full GUI dependency set -
+# faster, and doesn't need a real display/Qt platform plugin to run a
+# suite that never imports Qt in the first place.
+# =============================================================================
+numpy==2.5.2
+pytest==9.1.1

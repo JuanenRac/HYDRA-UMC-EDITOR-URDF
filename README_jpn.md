@@ -1,0 +1,467 @@
+<p align="center">
+  <img src="images/HYDRA_UMC_BANNER.svg" alt="HYDRA-UMC-EDITOR-URDF banner" width="100%">
+</p>
+# 🦾 HYDRA-UMC EDITOR-URDF
+
+<p align="center">
+  <a href="README.md">🇺🇸 English</a> |
+  <a href="README_spa.md">🇪🇸 Español</a> |
+  <a href="README_fra.md">🇫🇷 Français</a> |
+  <a href="README_ita.md">🇮🇹 Italiano</a> |
+  <a href="README_deu.md">🇩🇪 Deutsch</a> |
+  <a href="README_zho.md">🇨🇳 简体中文</a> |
+  🇯🇵 <b>日本語</b>
+</p>
+
+
+<p align="center">
+  <img src="https://img.shields.io/badge/License-GPL%203.0-blue.svg" alt="GPL 3.0">
+  <img src="https://img.shields.io/badge/Language-Python%203.11-3776AB.svg" alt="Python">
+  <img src="https://img.shields.io/badge/Framework-PySide6-41CD52.svg" alt="PySide6">
+  <img src="https://img.shields.io/badge/Format-URDF-red.svg" alt="URDF">
+</p>
+
+
+### 🖌️ HYDRA-UMC-STUDIO モデルカタログ向けグラフィカル URDF 作成/編集ツール
+
+**現在のバージョン：** 0.0.5（`MAJOR.MINOR.PATCH` —— この番号がどう変化するかは下記「プロダクションビルド」セクションを参照）
+
+---
+
+## 🎯 概要
+
+**HYDRA-UMC EDITOR-URDF** は、「新しいロボットを [HYDRA-UMC STUDIO](https://github.com/JuanenRac/HYDRA-UMC-STUDIO) のモデルカタログへ移植する」という作業を、手作業でロボットごとに調査する一回限りの作業から、再現可能なグラフィカルワークフローへと変えるデスクトップツールです。STUDIO のカタログにあるすべての実在するロボットモデルは、これまで同じ方法でそこにたどり着きました：GitHub 上で記述リポジトリを見つけ、そのメッシュ参照がどう解決されるかを把握し、その運動学チェーンの自由度を数え、STUDIO が実際にそれだけの数を駆動できるかを確認し、結果を手作業で `public/models/` に配置する、というものです。本アプリはそのプロセス全体を自動化します——GitHub の URL またはすでにダウンロード済みのローカルフォルダからソースファイルを取得し、ディスク上の実際のファイルに対してすべての `<mesh filename="...">` 参照（`package://` URI を含む）を解決し、STUDIO の現在の運動学がサポートする範囲に対してそのチェーンの自由度数を検証し、リアルタイム 3D プレビューで色/スケール/関節限位/関節タイプを編集し、完成した結果を稼働中の STUDIO サーバーへ直接プッシュします。
+
+**Python** と **PySide6/Qt6** で構築されており、本エコシステムの他のデスクトップツールである [HYDRA-UMC SUITE](https://github.com/JuanenRac/HYDRA-UMC-SUITE) ですでに検証済みの同じアーキテクチャパターンを使用しています：Photoshop/Fusion 360 風のドッキング可能なワークスペース（`QDockWidget`）、手書きの OpenGL 3D ビューポート（`QOpenGLWidget` + GLSL 3.3 コアプロファイルシェーダー、`glBegin`/`glEnd` のレガシーパスなし）、そして状態を保持し各 UI パネルが Qt シグナル経由でリッスンする 1 つの中心的なコントローラーオブジェクト。同一エコシステム内の姉妹ツール向けに新しい UI/レンダースタックを模索するのではなく、ここでこのパターンを再利用することは、見落としではなく意図的な選択です。
+
+**本エコシステムの他のドキュメントと同じ慣例に従った正直な注記：** 本アプリは [xacro](http://wiki.ros.org/xacro) マクロを展開せず、COLLADA（`.dae`）メッシュも読み込みません。どちらも明示的に名前を挙げた制限事項です（半端な試みではなく、明確なエラーメッセージであり、サイレントな解析ミスやビューポートでのリンク欠落ではありません）——具体的な理由は下記「URDF パース」および「メッシュ読み込み」セクションを参照してください。
+
+---
+
+## 📥 ソースの読み込み——GitHub またはローカルフォルダ
+
+本アプリをロボットのソースファイルに向ける方法は 2 通りあり、どちらも同じインポートパスに行き着きます：
+
+- **GitHub URL から** —— 完全な `https://github.com/owner/repo` URL（`/tree/<branch>` の有無いずれも）、SSH 形式の `git@github.com:owner/repo.git`、または短縮形の `owner/repo` を受け付けます。意図的に外部の `git clone` は呼び出しません——それは、プレーンな HTTPS ダウンロードですでに実現できることのために、Windows と Linux の両方で `git` のインストールをハードな実行時依存にしてしまうからです。GitHub は公開リポジトリであれば認証不要で `codeload.github.com` から任意のブランチ/タグ/コミットの zip アーカイブを提供するため、本アプリは標準ライブラリ自身の `urllib.request` + `zipfile` のみを使用します。サポートされるのは公開リポジトリのみです——トークン/資格情報の処理はなく、プライベートリポジトリの zip アーカイブは、存在しないリポジトリと同様に 404 を返します。
+- **ローカルフォルダから** —— すでに手動でダウンロード済みのリポジトリ、またはオペレーターが本アプリの外で積極的に編集している作業コピー向けです。
+- **Gallery から** —— GitHub URL 入力欄の上にある「Gallery」ドロップダウン（`hydra_editor_urdf/gallery.py`）は、手作業で確認済みの実在するロボット記述リポジトリの短い初期リスト（ROS-Industrial の `universal_robot`、ROBOTIS の `open_manipulator`）を表示します。項目を選択しても URL と説明が入力されるだけで、自動的にダウンロードが始まることはありません——手入力の場合と同様、オペレーターが自分で Fetch を押す必要があります。
+
+いずれの場合も、本アプリはその後選択されたフォルダ下にあるすべての `*.urdf`/`*.xacro` ファイルを再帰的に検索し、それらすべてを一覧表示し（実際のロボット記述リポジトリはしばしば複数のファイルを同梱しています——裸のアームと「グリッパー付き」バリアントの組み合わせがよくあるパターンです）、「メインのもの」の妥当なデフォルトとしてファイルサイズが最大のものを自動選択します——後で別の候補に切り替えるのは、ソースパネルでのダブルクリック 1 回で済み、再取得は不要です。
+
+**メッシュ参照解決**は、本エコシステムの過去のすべての手作業によるロボット移植セッションが実際に行ってきた、地味だが本質的な作業です：URDF の `<mesh filename="package://some_pkg/meshes/link1.stl"/>` は、`package://` が ROS パッケージインデックスを通じて解決されるライブな ROS ワークスペースではなく、単なるダウンロード済みフォルダにファイルが置かれている場合、事実上ほぼ確実に直接開けるパスではなくなります。リゾルバーは順に：（1）URDF 自身のフォルダに対する相対パスとしてその参照、（2）先頭の `package://` 形式のパッケージ名セグメントを取り除いた同じ参照、（3）それがすでに絶対パスであった場合はそのまま絶対パスとして、（4）ソースフォルダ下の任意の場所での裸のベース名一致、を試みます——これが実際に本物の `package://` URI を処理する方法です。スキームとパッケージ名はライブな ROS ワークスペースの外では意味を持ちませんが、メッシュ自身のファイル名は依然として見つけられるためです。
+
+---
+
+## ✅ 自由度実現可能性検証
+
+これは、STUDIO のカタログに追加されたすべてのロボットに対して本エコシステムの過去のセッションが手作業で下していたのと同じ判断の自動化版です：**STUDIO 自身の運動学は現在、3、4、5、6 自由度のシリアルチェーンをサポートしています**（その `RobotState.joints` は固定の `j1..j6` マップです）——過去に調査された実在の、ライセンスが明確な候補アームのうち、いくつかは 7、8、あるいは 9 自由度であることが判明し、まさにこの理由で仮の話ではなく実際に破棄されました。インポートのたびに（そして自由度数を変え得るすべてのライブ編集の後——例えば関節のタイプを打ち直した後）、本アプリは実際の親/子関節グラフを走査し、以下を報告します：
+
+- **自由度数** —— `revolute`/`continuous`/`prismatic` の関節のみが実際の制御可能な自由度としてカウントされます。`fixed` は一切貢献しません。
+- **サポートされない関節タイプ** —— チェーン内のどこか 1 か所にでも `floating` または `planar` 関節があると、自由度数にかかわらずロボット全体が実現不可能になります。STUDIO の関節モデルはどちらの表現も持たないためです。
+- **ツリーの整合性** —— ちょうど 1 つのルートリンクが必要です（森でも循環でもない、正しいツリー）。そのルートから関節チェーンで到達できないリンクは切断されているとフラグが立てられ、どの関節からも参照されていないリンクは孤立としてフラグが立てられます。
+- **`<limit>` の欠落** —— `continuous` 関節以外のあらゆる関節に対して URDF 仕様が必須としているもので、存在しない場合は関節ごとにフラグが立てられます。
+
+判定結果とその背後にあるすべての理由は DOF パネルにリアルタイムで表示され、アップロードパネルは実現不可能なロボットをサーバーへプッシュすることを拒否します。
+
+---
+
+## 🎨 実際の 3D プレビューによるライブ編集
+
+プロパティパネルは、ビューポートパネルのリンクツリーで選択されているリンクを編集し、すべての編集は読み込み済みのモデルをその場で変更し、1 つのシグナル（`EditorController.notify_tree_changed`）を通じて再検証/再レンダリングを行います——どのパネルも、ビューポートや自由度レポートが自分自身の編集にどう反応するかを知る必要はありません：
+
+- **色の変更** —— 標準のカラーダイアログで選択されるリンクのビジュアルマテリアル。複数のリンク間で名前によって共有されるマテリアル（実際の URDF のトップレベルの `<material name="...">` 宣言が複数の `<visual>` から参照されている場合）は、それを共有するすべてのリンクをまとめて再着色します。これは、その共有マテリアル構文が仕様上実際に意味するところと一致しています。
+- **スケール変更** —— メッシュの三角形データ自体を破壊的に書き換えるのではなく、メッシュジオメトリ自身の `<mesh scale="...">` 変換に対する軸ごと（X/Y/Z）のスケール係数。同じ編集を後で再適用しても、毎回元の未変更のメッシュから開始します。
+- **関節タイプと限位の再設定** —— 関節のタイプ（URDF 仕様が定義する 6 種類のいずれか）とその上限/下限を変更でき、タイプの再設定は自由度数を変えたりサポートされないタイプを導入したりする可能性があるため、DOF パネルの判定は即座に更新されます。
+- **質量と慣性** —— 「Auto-calculate」は、`inertia_calc.py` の等密度前提の閉形式公式を使って、選択中のリンクのジオメトリから質量/Ixx/Iyy/Izz を自動入力します（Box/Cylinder/Sphere は正確な値、Mesh はバウンディングボックスによる近似値）。手入力された質量は常に密度ベースの推定より優先され、質量が未入力の場合は一般的なアルミニウム密度（2700 kg/m³）を仮定し、その旨をノートで示します。「Apply」はこれらの値を `Link.inertial` に反映します——上記の Scale/Joint と同じ「計算してから適用」という 2 段階の流れです。
+
+**ビューポートパネル**は、実際の OpenGL 3D ビューと、可動関節ごとのジョグスライダーをホストしており、オペレーターは STUDIO に触れる前に、URDF がその実際の可動範囲を通じてどう動くかをプレビューできます。正運動学（`render/kinematics.py`）は、たった今インポートされたどのようなツリーに対しても汎用的です——数十の既知の、手作業で検証済みのロボットモデルの固定レジストリを駆動する HYDRA-UMC SUITE 自身の運動学モジュールとは異なり、本アプリは任意の、これまで見たことのない URDF にポーズを取らせなければならないため、実際の親/子グラフを走査しながら各関節の実際の `<origin>`/`<axis>` を合成します（固定レジストリが頼れるような基本方向のショートカットだけでなく、任意の回転軸に対するロドリゲスの回転公式）。
+
+**Y 軸上ではなく Z 軸上**——HYDRA-UMC SUITE 自身のビューポート規約からの唯一の意図的な相違点です：URDF そのものが Z 軸上のフォーマットであり（重力は `-Z`、ソースファイル内のすべての `<origin>`/`<axis>` はそれを前提として記述されています）、本アプリの仕事は URDF をその自身の規約に忠実に表示・編集することであり、下流のビューア（STUDIO の Three.js シーン、SUITE 自身の OpenGL シーン）がたまたま好む向きに再配向することではありません。
+
+---
+
+## 🗂️ メッシュの読み込み
+
+`.stl`（`numpy-stl` 経由）と `.obj`（小さな手作りの Wavefront ローダー——`v`/`vn`/`f` のみ、n 角形の面はファン三角形分割）は両方とも第一級のサポートです。**COLLADA（`.dae`）はサポートされていません**——これは、骨格アニメーション、複数の座標系、埋め込みマテリアル/テクスチャを持つ、はるかに大規模な XML シーングラフフォーマットであり、正直に扱うには、ある「シンプルな」`.dae` がたまたま使用しているタグへのベストエフォートの推測ではなく、本物のパーサーが必要になります。これを参照するリンクは、ビューポートからサイレントに欠落したりインポート全体をクラッシュさせたりするのではなく、明確で具体的なエラーを受け取ります。読み込まれたすべてのメッシュにも、HYDRA-UMC STUDIO 自身の `useRealScaleSTL()` と HYDRA-UMC SUITE 自身のメッシュローダーが適用しているのと同じ防御的なミリメートル対メートルのガードが適用されます：いずれかの軸で実世界の 5 メートルを超えるリンクは、実際の巨大なロボット部品であるよりも、単位メタデータのないミリメートルスケールのエクスポートである可能性がはるかに高く、自動的に 0.001 倍で再スケールされます。
+
+---
+
+## 📜 URDF のパースとエクスポート
+
+標準ライブラリ自身の `xml.etree.ElementTree` によるプレーンな XML 処理——これほどシンプルなフォーマットには `lxml` 依存は不要です。メモリ内モデル（`hydra_editor_urdf/models.py`）は、`urdfpy` や `yourdfpy` のような既存の Python URDF ライブラリのラッパーではなく、意図的にシンプルで可変な自社製のデータクラスツリーです：本アプリはそのツリーをインタラクティブに*編集*し、すべての変更をライブで再レンダリングする必要があり、読み取り中心のパースライブラリはそのような用途には向いていません。モデルを完全に自前で持つことで、それを小さく、検査可能で、サードパーティ依存関係自身のリリースサイクルから自由な状態に保てます。フィールド名とデフォルト値は実際の [URDF XML スキーマ](http://wiki.ros.org/urdf/XML) に忠実に従っているため、パーサー/ライターのペアは薄く自明な XML↔オブジェクトのマッピングであり続けます。
+
+**xacro は展開されません。** [xacro](http://wiki.ros.org/xacro) は、独自の ROS パッケージと依存関係チェーンを持つ Python/XML マクロプリプロセッサであり、実際の xacro ファイルは、それが作成された同じ ROS パッケージ環境の内部でしか確実に解決できません（マクロ引数、`$(find pkg)` 形式のインクルードなど）——これは本アプリが正直に再現する方法を持たないものです。`<xacro:...>` タグを使用しているか xacro 名前空間を宣言しているファイルは、サイレントな解析ミスではなく、その制限を説明し、まずそれを前処理するための ROS の `xacro` コマンドラインツールを指し示す明確なエラーを受け取ります。
+
+エクスポート（`urdf/writer.py`）は、元のソース XML テキストにパッチを当てるのではなく、現在のメモリ内ツリーをゼロから再シリアライズします。そのため、どのパネルによって行われたかにかかわらず、すべてのライブ編集は、「URDF をエクスポート」メニューアクションと STUDIO サーバーへ送信されるペイロードの両方に、1 つのコードパスを通じて正確に 1 回反映されます。
+
+---
+
+## 🖥️ ドッキング可能なワークスペース
+
+本物の `QDockWidget` パネル——ドラッグして浮遊させる、ドラッグして戻してドッキングする、タブに統合する、ワークスペースを分割する——これは、HYDRA-UMC SUITE 自身のメインウィンドウがすでに適用しているのと同じ仕組みと理由です：Qt 自身のドッキングシステムは、Photoshop/Fusion 360 風のワークスペースが必要とすることをまさに実現しており、手作りのものはそれをより多くのバグとともに再発明するだけです。5 つのパネルが、後から完全に再配置可能な、妥当なデフォルトレイアウトで配置されています：
+
+- **ソース** —— GitHub URL / ローカルフォルダの入力、見つかった `.urdf` の一覧。
+- **DOF** —— 実現可能性の判定とその背後にあるすべての理由。
+- **ビューポート** —— ライブ 3D ビュー、リンクツリー、ジョグスライダー。
+- **プロパティ** —— 選択されたリンクの色変更/スケール変更/タイプと限位の再設定。
+- **アップロード** —— STUDIO サーバーへの接続、プッシュ、またはプル。
+
+---
+
+## ☁️ サーバーとの往復
+
+標準ライブラリ自身の `urllib.request` を使用して、HYDRA-UMC-SERVER 自身のモデル提出契約（同プロジェクト自身の `server.ts` にある `POST /api/models/submit`、`GET /api/models`、`GET /api/models/:category/:slug/download`、その自身の **Config > Models > "Accept model submissions"** トグルの背後にゲートされています）と通信します——4 つのエンドポイントしか必要とせず、永続的なライブ接続を必要としないプロジェクトのために、もう 1 つの HTTP 呼び出しのために `httpx`/`requests` を導入する正当性はありませんでした。すべての呼び出しはバックグラウンドの `QThread` 上で実行されるため、遅い、あるいは到達不能なサーバーが UI をフリーズさせることは決してありません。この契約は、そのプロジェクトが純粋なフロントエンド（STUDIO）と別個のヘッドレスバックエンド（HYDRA-UMC-SERVER、下記「関連プロジェクト」参照）に分割される前は、HYDRA-UMC-STUDIO 自身のプロセス内部にありました——本アプリはどちらの名前もハードコードしておらず、オペレーターは**アップロード**パネルのホスト/ポートフィールドを、実際のバックエンドが実際に稼働している場所へ向けるだけです。
+
+- **ログイン** —— `POST /api/login`；`admin` ロールのトークンのみが実際にサーバー側の `POST /api/models/submit` に到達できるため、本アプリは実質的に管理者アカウントに対してのみ使用可能です。他のすべての管理者専用 STUDIO 機能と同様です。
+- **プッシュ** —— 現在のロボットを URDF XML へ再シリアライズし、そのビジュアルが参照するすべてのメッシュファイル（インポート時に構築された同じメッシュリゾルバーで解決）をリクエストボディにインラインで base64 エンコードし、オペレーターが選んだカテゴリでタグ付けします（STUDIO 自身の Config > UI > Module Visibility のカテゴリ——Robot 3-6DOF、CNC、Pick & Place、Laser、Vacuum Table、XY Table、Heated Bed、ATC Tools——をミラーリングしています。URDF 自体にはこれらのどれに該当するかを示す固有のフィールドはありません）。名前の衝突はサーバー自身の 409 レスポンスとして返され、**上書き**にチェックを入れて再送信するか、名前を変更するかはオペレーターが判断します。本アプリは決して推測しません。
+- **プル** —— すでに提出されたモデルの URDF + メッシュをローカルの作業フォルダへダウンロードし直し、エディターへ直接読み込みます——「取り出し、編集し、再送信する」という往復の半分は、本アプリ自身の目的そのものであり、既存のカタログエントリを、元のソースリポジトリから再度始めることなく手直しできるようにします。
+
+---
+
+## 🌐 多言語インターフェース
+
+**英語、スペイン語、イタリア語、フランス語、ドイツ語、簡体字中国語、日本語**（`language/*.lng`）にわたる完全なインターフェース翻訳。本エコシステム内の他のすべての Python ツール（URTC Flasher、URTC Tester、HYDRA-UMC SUITE）とまったく同じ、プレーンな `KEY=Value` ファイル方式を使用しています——この仕組み自体にプロジェクト固有のロジックはなく、ここで再発明する理由はないため、そのまま採用しています。言語の切り替えは、すでに構築されたすべてのウィジェットをライブで再翻訳するのではなく、アプリの再起動後に有効になり、同じ慣例に一致しています。`language/` は PyInstaller の `--add-data` でその内部にバンドルされるのではなく、実行ファイルの**隣**に置かれるため、翻訳者は再ビルドなしに `.lng` ファイルを編集または追加できます。
+
+---
+
+## 🎛️ テーマ
+
+ドッキング可能なワークスペースの上部ツールバーは、独立した Qt Quick/QML UI
+ではなく、実体のある `QToolBar`/`QLabel`/`QToolButton` コマンドデッキです -
+以前 QQuickWidget 経由で組み込んでいたバージョン(HYDRA-UMC-UPDATER や
+HYDRA-UMC-SUITE と同じ描画エンジン)は、この `QMainWindow` の実際の
+`QDockWidget` レイアウト内に置くと、コンソールエラーが一切出ないまま真っ黒な
+バーとして描画されてしまったため、通常のウィジェットに戻されました。詳しい
+経緯は `CHANGELOG.md` を参照してください。Source、DOF、Viewport、Properties、
+Upload は既存のドックを表示するだけで、Export と About も既存のアクションを
+再利用し、Export はモデルが実際に読み込まれるまで無効のままです。URDF の
+読み込み後(およびライブでのプロパティ編集のたび)、ステータスチップには
+読み込まれたモデル名、DOF 数、現在の実現可能性判定が表示されます。OpenGL
+ビューポート、エディター、パーサー、サーバーアップロードの実装を置き換える
+ものではありません。
+
+同一エコシステム内の姉妹デスクトップツール向けに新しい視覚テーマを設計するのではなく、HYDRA-UMC SUITE 自身の `assets/qss/industrial_dark.qss` をそのまま（同じ相対パス、同じファイル）再利用しています。
+
+### ビジュアルコマンドデッキ（`--qtquick`）
+
+その組み込みの試みは、このアプリが今持っている本物の Qt Quick コマンドデッキとは別の、切り離されたものです：
+
+~~~
+python main.py --qtquick
+~~~
+
+完全に独立した QML `ApplicationWindow`（`qt_editor_urdf.py` + `assets/qml/EditorDeck.qml`）で、従来の `QMainWindow` に組み込まれることは一切ありません——HYDRA-UMC-OS-REBUILDER、HYDRA-UMC-UPDATER、URTC-TESTER、URTC-FLASHER、HYDRA-UMC-SUITE がすでに使っている、実証済みの同じパターンで、従来のエントリポイントを置き換えるのではなく、その隣で起動します。従来のドッキング可能なワークスペースの実際の空間配置(左側に Source と DOF をタブ表示、Viewport と Properties を並べて表示、Upload を下部に全幅表示)と、その 5 つのパネルすべての実際の機能——GitHub/ギャラリー/ローカルフォルダからの読み込み、ライブ DOF 検証、クリック可能なリンクツリーと関節ごとのジョグスライダーを備えたオービット/パン/ズーム 3D プレビュー、色/スケール/関節限界/質量と慣性の編集、STUDIO サーバーとの接続/送信/取得の実際の往復——を、同じ `EditorController` を通じて忠実に再現しており、そのどれも二重実装されていません。3D プレビューは、専用の `OffscreenUrdfRenderer` を介して従来のビューポート自身の実際の描画コード(`render/viewport.py` の `UrdfGLRenderer`)を再利用しており、これは HYDRA-UMC-SUITE 自身の Qt Quick Viewport パネルがすでに使っているのと同じ本物の `QOpenGLContext`/`QOffscreenSurface`/フレームバッファ方式で、`QQuickImageProvider` を介して QML に渡されます。
+
+---
+
+## 📂 リポジトリ構成
+
+```text
+HYDRA-UMC-EDITOR-URDF/
+├── main.py                        # エントリポイント——QApplication、テーマ、最大化起動、F11 フルスクリーン切替。--qtquick で下記のデッキに切り替え
+├── qt_editor_urdf.py               # Qt Quick フロントエンド —— 独立した `--qtquick` コマンドデッキ、変更を加えていない EditorController を QML に接続
+├── run.bat / run.sh                # 簡易起動スクリプト——.venv があれば有効化し main.py を実行、自動では閉じない
+├── requirements.txt                # PySide6、PyOpenGL、numpy-stl、numpy（バージョン固定）
+├── requirements-dev.txt            # numpy と pytest のみ —— tests/ が実際に必要とするもの、PySide6 は含まない
+├── build_exe.bat / build_exe.sh    # Windows/Linux 独立実行ファイルビルドスクリプト（PyInstaller）——最初にバージョンを加算
+├── build-test.bat / build-test.sh  # バージョンを更新しないビルド/コンパイル確認
+├── HYDRA-UMC_EDITOR-URDF.spec      # build_exe.bat/.sh が使用する PyInstaller ビルド仕様
+├── bump_version.py                 # オドメーター方式のバージョン加算、毎回の実際のビルド前に build_exe.bat/.sh から呼び出される
+├── bump_manifest_version.py        # hydra-umc.project.json のバージョンをネイティブ側と同期（--sync）
+├── CHANGELOG.md                    # バージョン履歴
+├── README.md                       # 本ファイル
+├── README_spa.md / README_ita.md / README_fra.md / README_deu.md / README_zho.md / README_jpn.md  # <- 翻訳
+├── LICENSE                         # GPL-3.0
+├── assets/
+│   ├── HYDRA_UMC_ICON.svg          # ツールバーのコマンドデッキで使用するアニメーション HYDRA-UMC マーク
+│   ├── qss/industrial_dark.qss     # HYDRA-UMC-SUITE からそのまま再利用
+│   └── qml/EditorDeck.qml          # `--qtquick` コマンドデッキの Qt Quick UI
+│   └── qss/industrial_dark.qss     # HYDRA-UMC-SUITE からそのまま再利用
+├── images/
+│   └── HYDRA_UMC_BANNER.svg        # メディアと図版
+├── language/                       # english/spanish/italian/french/german/chinese/japanese.lng —— exe の隣に置かれ、バンドルされない
+├── hydra_editor_urdf/
+│   ├── __init__.py                 # __version__ —— 唯一の権威ある情報源、About ダイアログが読み取り、bump_version.py が書き換える
+│   ├── app.py                      # EditorController —— 「何が読み込まれているか」の唯一の保持者、各パネルがリッスンする Qt シグナル
+│   ├── models.py                   # 自社製の URDF オブジェクトツリー（Robot/Link/Joint/Visual/Geometry/Material/…）
+│   ├── gallery.py                  # 実在が検証済みの公開ロボット記述リポジトリのスターターリスト
+│   ├── inertia_calc.py             # プリミティブ形状に対する慣性モーメントの閉形式公式
+│   ├── i18n.py                     # language/*.lng ローダー、設定の永続化——HYDRA-UMC-SUITE 自身の i18n.py から移植
+│   ├── urdf/
+│   │   ├── parser.py               # URDF XML -> models.py ツリー（ElementTree、xacro を検出して明確なエラーで拒否）
+│   │   ├── writer.py                # models.py ツリー -> URDF XML 文字列（エクスポート + サーバーアップロードペイロード）
+│   │   └── dof.py                  # 自由度カウント、STUDIO の 3-6 自由度上限に対する実現可能性検証
+│   ├── render/
+│   │   ├── mesh.py                 # STL/OBJ 読み込み、ボックス/円柱/球のプリミティブ生成、mm 対 m ガード
+│   │   ├── kinematics.py           # 任意のインポート済みツリーに対する汎用正運動学（Z 軸上、URDF 自身の規約）
+│   │   └── viewport.py             # UrdfGLRenderer(GLSL 3.3 コアシェーダー、オービットカメラ、リンクごとの GPU バッファ)+ 従来の QOpenGLWidget ラッパー + `--qtquick` デッキ向けの OffscreenUrdfRenderer
+│   ├── source/
+│   │   ├── scan.py                 # .urdf/.xacro ファイルを検索、package:// を認識するメッシュファイル名リゾルバーを構築
+│   │   ├── github_fetcher.py       # GitHub zip アーカイブのダウンロードと展開（urllib + zipfile、git 依存なし）
+│   │   └── local_folder.py         # ローカルフォルダの検証——github_fetcher.py の薄い対応物
+│   ├── server/
+│   │   └── client.py               # StudioClient —— HYDRA-UMC-SERVER の server.ts（2 つのリポジトリが分割される前は STUDIO 自身のバックエンド）に対する login/list_models/push_model/pull_model
+│   └── ui/
+│       ├── main_window.py          # QMainWindow —— ドッキング可能なワークスペース、メニューバー、言語切り替え、ステータスバー
+│       ├── about_dialog.py         # STUDIO 自身の About.tsx と SUITE 自身の about_dialog.py に準じた本物の About ダイアログ
+│       ├── theme.py                 # assets/qss/industrial_dark.qss を適用
+│       └── panels/
+│           ├── source_panel.py     # GitHub URL / ローカルフォルダ入力、見つかった URDF の一覧
+│           ├── dof_panel.py        # 実現可能性判定の読み出し
+│           ├── viewport_panel.py   # 3D ビューポートホスト、リンクツリー、ジョグスライダー
+│           ├── properties_panel.py # 色変更/スケール変更/タイプと限位の再設定エディター
+│           └── upload_panel.py     # サーバーの接続/プッシュ/プル
+├── docs/
+│   ├── ARCHITECTURE.md
+│   ├── BUILD_AND_RUN.md
+│   └── INTEGRATION_CONTRACT.md
+├── tests/                          # 実際の pytest スイート(177 件のテスト)—— 純粋なロジックのみ、ここでは PySide6 のインポートは一切なし
+│   ├── test_urdf_parser.py / test_urdf_writer.py  # URDF XML <-> models.py、parse -> write -> parse のラウンドトリップを含む
+│   ├── test_dof.py                 # 実現可能性検証、DOF の境界、ルート/孤立/切断/複数親の検出
+│   ├── test_kinematics.py          # 順運動学、修正済みの「実際のサイクルが永遠にハングする」回帰テストを含む
+│   ├── test_inertia_calc.py        # 独立に計算された教科書の値と照合したボックス/円柱/球の閉形式テンソル
+│   ├── test_models.py              # Robot.root_link_name()/joints_by_parent()/movable_joints()
+│   ├── test_scan.py                # find_urdf_files()/build_mesh_resolver()、修正済みの had_scheme 回帰テストを含む
+│   ├── test_local_folder.py / test_github_fetcher.py  # ソース検証; GitHub へのネットワーク呼び出しはモック化、実通信は行わない
+│   ├── test_i18n.py                # 設定/言語ファイルの実際の一時ファイルに対する I/O、操作者本人の実際の設定は使わない
+│   └── test_gallery.py             # 手作業で厳選された GALLERY リストの構造チェック
+├── tools/
+│   ├── build_test.py               # バージョンを更新しないビルド/コンパイル確認
+│   └── ci_validate.py              # CI が使用する manifest/CHANGELOG/docs の検証
+├── build/                           # PyInstaller 自身の中間ビルドディレクトリ（gitignore 対象）
+├── dist/                            # コンパイル済み独立実行ファイル（build_exe.bat/.sh の出力、gitignore 対象）
+└── work/                            # 取得した GitHub リポジトリとプルしたサーバーモデルのランタイム作業領域（gitignore 対象）
+```
+
+注：以前、`QQuickWidget` を使って Qt Quick/QML コマンドデッキ
+（`assets/qml/CommandDeck.qml`、`ui/qtquick_deck.py`）をこの
+`QMainWindow` の本物の `QDockWidget` レイアウトに直接組み込む試みが
+ありましたが、正しくコンポジットされず（コンソールエラーなしの真っ黒
+表示)、撤回されました。上記のツールバーのコマンドデッキは、素の
+`QToolBar`/`QLabel`/`QToolButton` ウィジェットです。このアプリが今日
+実際に持っている Qt Quick コマンドデッキ(上記に挙げた
+`qt_editor_urdf.py` / `assets/qml/EditorDeck.qml`)は、それとは別の、
+より新しい独立した `--qtquick` ウィンドウです——詳細は上記の
+**🎛️ テーマ** と `CHANGELOG.md` を参照。
+
+---
+
+## 🛠️ 開発環境
+
+### 必要環境
+- [Python](https://www.python.org/) 3.11 以上
+- pip
+
+### インストール
+
+```bash
+pip install -r requirements.txt
+```
+
+これにより、バージョン固定された依存関係セットが導入されます：**PySide6**（Qt6 UI）、**PyOpenGL**（3D ビューポートレンダリング）、**numpy** / **numpy-stl**（メッシュ計算と STL 読み込み）。`git` のインストールは不要です——GitHub ソース読み込みパスは、プレーンな zip アーカイブを HTTPS でダウンロードします。
+
+### 開発モード
+
+```bash
+python main.py
+```
+
+または簡易起動スクリプト——`run.bat`（Windows）/ `run.sh`（Linux/Mac）を使うこともできます。隣に `.venv` があれば有効化し、引数を `main.py` に渡します。どちらもダブルクリック時にターミナルウィンドウを自動では閉じません。
+
+最大化された状態で起動します（真の OS レベルのフルスクリーンではないため、ネイティブなウィンドウのタイトルバーとコントロールは表示されたままです）——**F11** を押すと、本物のボーダーレスフルスクリーンとの切り替えができます。
+
+### 自動テスト
+
+```bash
+pip install -r requirements-dev.txt
+python -m pytest tests/ -q
+```
+
+エコシステム全体のソフトウェア改善監査で発見:このアプリ自身の純粋なロジック(URDF のパース/エクスポート、DOF 実現可能性検証、順運動学、慣性推定、メッシュ参照解決、GitHub 取得、i18n)には自動テストのカバレッジが一切ありませんでした。修正済み:11 のテストモジュールにまたがる 177 件の実際のテストを追加——どれも PySide6/PyOpenGL をインポートしないため、`requirements-dev.txt` は `tests/` が実際に必要とするもの(`numpy` と `pytest`)だけをインストールし、ディスプレイや Qt プラットフォームプラグインなしでスイート全体が実行できます。いくつかのテストは、以前の監査パスで既に見つかって修正され、ソースコード自体にコメントとして記録済みのバグ(`render/kinematics.py` の実際のサイクルでの無限ループ防止、`source/scan.py` の `had_scheme` 条件分岐、`urdf/dof.py` の負の質量チェック)に対する明示的な回帰テストです——今後の変更がテストを失敗させることなくこれらのいずれかを静かに再発させることはできません。CI(`.github/workflows/ci.yml`)はプッシュのたびに同じコマンドを実行します。
+
+### プロダクションビルド
+
+PyInstaller を通じて、独立した実行ファイル（実行に Python のインストールが不要）をコンパイルします：
+
+- **Windows：** `build_exe.bat` を実行 → `dist\HYDRA-UMC_EDITOR-URDF.exe` を生成
+- **Linux：** `./build_exe.sh` を実行（初回のみ先に `chmod +x build_exe.sh`）→ `dist/HYDRA-UMC_EDITOR-URDF` を生成
+
+どちらのスクリプトも、自身の `.venv` を作成/有効化し、`requirements.txt` に加えて `pyinstaller` をインストールし、以前の `build`/`dist` があれば削除し、**バージョン番号を加算**し、コンパイルし、最後に `README.md`、`LICENSE`、そして `language/` フォルダ全体を、生成されたバイナリの隣にコピーします（`language/` は意図的に `--add-data` で実行ファイルの内部にバンドルされていないため、後から再ビルドなしに `.lng` ファイルを編集または追加できます）。
+
+**バージョン管理：** 本アプリのバージョン（`hydra_editor_urdf/__version__`、Help → About ダイアログに表示）は `MAJOR.MINOR.PATCH` に従います。`build_exe.bat`/`build_exe.sh` の実際の実行のたびに、最初に `bump_version.py` が呼び出され、オドメーター方式の加算が適用されます：`PATCH` が 1 増加し；`PATCH` が 9 を超えると 0 にリセットされ、代わりに `MINOR` が 1 増加します（例：`0.0.9` → `0.1.0`）。`MAJOR` は自動的には決して変更されません——それは常に意図的な手動の判断です。バージョン履歴は `CHANGELOG.md` を参照してください。
+
+スクリプトの代わりに手動で等価な手順を実行したい場合——スクリプトがカバーしていないプラットフォームでビルドを調整する場合や、PyInstaller のフラグをデバッグする場合に便利です——手動プロセスは次のとおりです：
+
+```bash
+# 1. 仮想環境を作成して有効化
+python -m venv .venv
+# Windows: .venv\Scripts\activate.bat   |   Linux/Mac: source .venv/bin/activate
+
+# 2. 依存関係 + PyInstaller をインストール
+pip install -r requirements.txt
+pip install pyinstaller
+
+# 3. PySide6 自身のインストールディレクトリを特定（その Qt プラグインはその下にあります）
+python -c "import PySide6, os; print(os.path.dirname(PySide6.__file__))"
+# -> 以下の $PYSIDE_DIR
+
+# 4. コンパイル——明示的にステージングされるのは 4 つの Qt プラグイン
+#    サブフォルダ（platforms/styles/imageformats/iconengines）のみで、
+#    --collect-all PySide6 ではありません。それをすると、
+#    本アプリが決して使用しない Qt6WebEngineCore.dll などの数百 MB 級の
+#    部品まで引き込まれてしまいます。PyInstaller 自身の依存関係アナライザーは、
+#    main.py の実際のインポートグラフを追跡して、実際の
+#    Qt6Core/Gui/Widgets/OpenGL DLL を見つけます——プラグインフォルダのみ
+#    手動で追加する必要があります。
+#
+#    Windows（プラグインは PySide6/plugins/ 直下にあります）：
+pyinstaller --onefile --windowed --noconfirm --name "HYDRA-UMC_EDITOR-URDF" \
+    --add-data "assets;assets" \
+    --add-data "%PYSIDE_DIR%\plugins\platforms;PySide6\plugins\platforms" \
+    --add-data "%PYSIDE_DIR%\plugins\styles;PySide6\plugins\styles" \
+    --add-data "%PYSIDE_DIR%\plugins\imageformats;PySide6\plugins\imageformats" \
+    --add-data "%PYSIDE_DIR%\plugins\iconengines;PySide6\plugins\iconengines" \
+    --hidden-import PySide6.QtOpenGL --hidden-import PySide6.QtOpenGLWidgets \
+    --hidden-import OpenGL.platform.win32 \
+    main.py
+
+#    Linux（プラグインは PySide6/Qt/plugins/ の下にあります——Windows とは
+#    異なるレイアウトで、PyInstaller 自身のランタイムフック
+#    pyi_rth_pyside6.py を読んで確認済み）：
+pyinstaller --onefile --noconfirm --name "HYDRA-UMC_EDITOR-URDF" \
+    --add-data "assets:assets" \
+    --add-data "$PYSIDE_DIR/Qt/plugins/platforms:PySide6/Qt/plugins/platforms" \
+    --add-data "$PYSIDE_DIR/Qt/plugins/styles:PySide6/Qt/plugins/styles" \
+    --add-data "$PYSIDE_DIR/Qt/plugins/imageformats:PySide6/Qt/plugins/imageformats" \
+    --add-data "$PYSIDE_DIR/Qt/plugins/iconengines:PySide6/Qt/plugins/iconengines" \
+    --hidden-import PySide6.QtOpenGL --hidden-import PySide6.QtOpenGLWidgets \
+    main.py
+
+# 5. バイナリの内部ではなく、隣に置く必要があるファイルをコピー
+cp README.md LICENSE dist/
+cp -r language dist/language
+```
+
+Linux では、コンパイル済みバイナリの実行に、システム自身の OpenGL ランタイム（`libGL.so.1`——例：Debian/Ubuntu では `libgl1`、Fedora では `mesa-libGL`、Arch では `libglvnd`）に加えて、Qt 自身の XCB プラットフォームプラグイン向けの `libxkbcommon-x11-0`/`xcb-util-cursor` が必要です。`build_exe.sh` は事前に `libGL.so.1` の有無を確認し、それが見つからない場合、PyInstaller の実行の奥深くで失敗させるのではなく、ディストリビューションごとの正しいインストールコマンドを表示します。
+
+---
+
+## 🔗 関連プロジェクト
+
+このプロジェクトは、同じ作者（JuanenRac / Electro Hobby 3D）によるHYDRA-UMCロボティクスエコシステムの一部です。リクエストが実際にはこのリポジトリではなく、これらのいずれかに関するものである可能性があるため、知っておく価値があります。
+
+**親プロジェクト**
+- **[HYDRA-UMC-STUDIO](https://github.com/JuanenRac/HYDRA-UMC-STUDIO)** — このエディタが存在する目的そのものである、モデルカタログを埋めるための対象。完成した結果は `POST /api/models/submit` を介して、稼働中のSTUDIOサーバーに直接送信される。
+
+**直接関連**
+- **[HYDRA-UMC-SERVER](https://github.com/JuanenRac/HYDRA-UMC-SERVER)** — このエディタが完成したモデルを送信する実際の `POST /api/models/submit` エンドポイントを所有する。
+- **[HYDRA-UMC-TWIN](https://github.com/JuanenRac/HYDRA-UMC-TWIN)** — ここで作成されたURDFモデルを使用して物理シミュレーションを駆動する。
+- **[HYDRA-UMC-PHYSICS-REPLICA](https://github.com/JuanenRac/HYDRA-UMC-PHYSICS-REPLICA)** — ここで作成されたURDFモデルを使用して物理シミュレーションを駆動する。
+- **[HYDRA-UMC-SYNTHETIC-DATA-GEN](https://github.com/JuanenRac/HYDRA-UMC-SYNTHETIC-DATA-GEN)** — ここで作成されたモデルからトレーニングデータを生成する。
+
+**エコシステムの他の一部**
+
+*コアハードウェアとプラットフォーム*
+- **[HYDRA-UMC-SDK](https://github.com/JuanenRac/HYDRA-UMC-SDK)** — 各ブリッジが自身のコマンドを検証する際の基準となる、共有のJSON-Schema契約とセーフティゲートの境界。
+- **[HYDRA-UMC-CONNECTOR-HUB](https://github.com/JuanenRac/HYDRA-UMC-CONNECTOR-HUB)** — 外部マシン用コネクタのための宣言的アダプターマニフェストのレジストリとバリデーター。SDK 自身の契約という発想を外部マシンにまで拡張し、産業用ゲートウェイ系のプロジェクトを置き換えることはありません。
+
+*コアバックエンドとクライアント*
+- **[HYDRA-UMC](https://github.com/JuanenRac/HYDRA-UMC)** — ロボットアームの物理マザーボード：CM5ホスト + デュアルコアSTM32H745、CAN-OTA/SPI-OTA経由で最大8本のツールアームを協調制御。
+- **[HYDRA-UMC-SUITE](https://github.com/JuanenRac/HYDRA-UMC-SUITE)** — 複数のサーバーを同時に扱うデスクトップ（PySide6）スウォーム指令センター。
+- **[HYDRA-UMC-ANDROID-CONTROL](https://github.com/JuanenRac/HYDRA-UMC-ANDROID-CONTROL)** — 生体認証ログインとペアリングされたWear OSコンパニオンを備えたネイティブAndroid制御アプリ。
+- **[HYDRA-UMC-IOS-CONTROL](https://github.com/JuanenRac/HYDRA-UMC-IOS-CONTROL)** — リアルタイムWebSocket同期を備えたiOS/iPadOS制御アプリ（Flutter）。
+- **[HYDRA-UMC-DSI](https://github.com/JuanenRac/HYDRA-UMC-DSI)** — CM5自体に搭載された7インチDSIタッチスクリーン向けのネイティブタッチUI。
+- **[HYDRA-UMC-BRIDGE-AMR](https://github.com/JuanenRac/HYDRA-UMC-BRIDGE-AMR)** — 実際のVDA 5050 MQTTパブリッシャーによるAGV/AMRフリート向けの協調境界。
+- **[HYDRA-UMC-BRIDGE-CNC](https://github.com/JuanenRac/HYDRA-UMC-BRIDGE-CNC)** — 実際のGRBLステータス/制御バイトアクセスを備えた高レベルCNCセルコーディネーター。
+- **[HYDRA-UMC-BRIDGE-DROIDS](https://github.com/JuanenRac/HYDRA-UMC-BRIDGE-DROIDS)** — 実際のBoston Dynamics Spotコマンド送信機を備えた、脚式/ヒューマノイドドロイド向けの協調境界。
+- **[HYDRA-UMC-BRIDGE-LASER](https://github.com/JuanenRac/HYDRA-UMC-BRIDGE-LASER)** — 3つの実際のキー/筐体/インターロックGPIO保護装置を読み取るレーザーセル安全コーディネーター。
+- **[HYDRA-UMC-BRIDGE-OPENPNP](https://github.com/JuanenRac/HYDRA-UMC-BRIDGE-OPENPNP)** — OpenPnPピック＆プレース向けの安全な高レベルボードフローコーディネーター。
+- **[HYDRA-UMC-BRIDGE-PRINTER3D](https://github.com/JuanenRac/HYDRA-UMC-BRIDGE-PRINTER3D)** — 実際に制御されたジョブコマンドを備えた、Moonraker/Klipper 3Dプリンター向けの安全な協調境界。
+- **[HYDRA-UMC-BRIDGE-ROS2](https://github.com/JuanenRac/HYDRA-UMC-BRIDGE-ROS2)** — 実際に遅延インポートされるrclpy ROS 2トランスポートを備えた安全コーディネーター。
+- **[HYDRA-UMC-BRIDGE-UAV](https://github.com/JuanenRac/HYDRA-UMC-BRIDGE-UAV)** — 実際のMAVLinkコマンド送信機を備えた、カメラ搭載UAV向けの協調境界。
+
+*URTCツールプラットフォーム*
+- **[URTC](https://github.com/JuanenRac/URTC)** — 物理的なUniversal Robot Tool ControllerボードのCAN バス経由25以上のツールプロファイル対応ファームウェア。
+- **[URTC-FLASHER](https://github.com/JuanenRac/URTC-FLASHER)** — URTCボードをフラッシュするデスクトップGUIツール、CAN-OTAに加え完全チップSWD/JTAGにも対応。
+- **[URTC-TESTER](https://github.com/JuanenRac/URTC-TESTER)** — URTCボード向けのデスクトップライブCANバス診断ツール、ツールプロファイルごとに1パネル。
+- **[URTC-WEB-STUDIO](https://github.com/JuanenRac/URTC-WEB-STUDIO)** — Web Serial API経由のブラウザベースのURTC-TESTER代替、ローカルインストール不要。
+
+*ビジョンAIノード（Hailo-8）*
+- **[HYDRA-UMC-VISION-NODE](https://github.com/JuanenRac/HYDRA-UMC-VISION-NODE)** — Hailo-8ビジョンパイプラインの統合ハブ、実際の段階ごとのハードウェア準備状態チェックを備える。
+- **[HYDRA-UMC-DETECTION-HEF](https://github.com/JuanenRac/HYDRA-UMC-DETECTION-HEF)** — Hailoアーキテクチャ/チェックサムの安全な読み込み検証を備えた実際のコンパイル済みモデルレジストリ。
+- **[HYDRA-UMC-VISION-STREAMER](https://github.com/JuanenRac/HYDRA-UMC-VISION-STREAMER)** — 実際のHailoRT統合境界を備えた実際のGStreamerパイプライン + MediaMTX設定ジェネレータ。
+- **[HYDRA-UMC-VISUAL-SERVOING-API](https://github.com/JuanenRac/HYDRA-UMC-VISUAL-SERVOING-API)** — 上流のゾーン状態によって安全ゲートされる、実際の位置ベースビジュアルサーボイング補正則。
+- **[HYDRA-UMC-SAFETY-ZONES](https://github.com/JuanenRac/HYDRA-UMC-SAFETY-ZONES)** — 校正の最新性を強制する、実際のゾーン侵入チェックと緊急停止要求。
+
+*コグニティブAIノード（Hailo-10）*
+- **[HYDRA-UMC-COGNITIVE-NODE](https://github.com/JuanenRac/HYDRA-UMC-COGNITIVE-NODE)** — Hailo-10コグニティブパイプライン（LLM/VLA/音声オーケストレーション）の統合ハブ。
+- **[HYDRA-UMC-VLA-ENGINE](https://github.com/JuanenRac/HYDRA-UMC-VLA-ENGINE)** — Vision-Language-Actionモデル向けの実際のアクショントークンのエンコード/デコードと軌道生成。
+- **[HYDRA-UMC-VOICE-UI](https://github.com/JuanenRac/HYDRA-UMC-VOICE-UI)** — 制限された確認必須のWatchリレーを備えた実際の音声フロントエンド（VAD + インテントパーサー）。
+- **[HYDRA-UMC-SEMANTIC-PLANNER](https://github.com/JuanenRac/HYDRA-UMC-SEMANTIC-PLANNER)** — MCUエラーコードに対する実際のルールベースのタスク分解とセマンティックエラー復旧。
+- **[HYDRA-UMC-DOCS-QA](https://github.com/JuanenRac/HYDRA-UMC-DOCS-QA)** — このエコシステム自身のMarkdownドキュメントに対する、実際の標準ライブラリのみによるTF-IDF文書検索。
+
+*オーケストレーションとスウォーム*
+- **[HYDRA-UMC-ORCHESTRATOR](https://github.com/JuanenRac/HYDRA-UMC-ORCHESTRATOR)** — 実際のgRPC/Protobufヘルスレポート契約とミッションステートマシンを備えた統合ハブ。
+- **[HYDRA-UMC-JOB-DISPATCHER](https://github.com/JuanenRac/HYDRA-UMC-JOB-DISPATCHER)** — 実際のHTTP API上での、重複排除機能を備えた実際の優先度ベースジョブキュー。
+- **[HYDRA-UMC-NODE-HEALING](https://github.com/JuanenRac/HYDRA-UMC-NODE-HEALING)** — リトライ/バックオフと識別不一致検出を備えた、実際のgRPCベースのフリートヘルスウォッチドッグ。
+- **[HYDRA-UMC-PATH-PLANNER-3D](https://github.com/JuanenRac/HYDRA-UMC-PATH-PLANNER-3D)** — 実際の障害物/作業空間衝突検証を備えた実際のRRTベース3Dパスプランナー。
+- **[HYDRA-UMC-SWARM-SYNC](https://github.com/JuanenRac/HYDRA-UMC-SWARM-SYNC)** — マルチセル収束についてプロパティテスト済みの実際のCRDT LWW-Element-Map状態同期。
+
+*デジタルツインとシミュレーション*
+- **[HYDRA-UMC-HIL-BRIDGE](https://github.com/JuanenRac/HYDRA-UMC-HIL-BRIDGE)** — シミュレーションと実際のハードウェアの間でコマンドをルーティングする実際のハードウェアインザループ安全インターロック。
+
+*データと分析*
+- **[HYDRA-UMC-DATALAKE](https://github.com/JuanenRac/HYDRA-UMC-DATALAKE)** — 実際の取り込み/クエリHTTP APIを備えた、sqlite3による実際の時系列ストア。
+- **[HYDRA-UMC-ANOMALY-DETECTOR](https://github.com/JuanenRac/HYDRA-UMC-ANOMALY-DETECTOR)** — ドリフト監視を備えた実際のFFT + 統計的ベースライン異常検出器。
+- **[HYDRA-UMC-PRODUCTION-REPORTS](https://github.com/JuanenRac/HYDRA-UMC-PRODUCTION-REPORTS)** — DATALAKEの履歴に基づく、再現可能なCSVエクスポートを備えた実際のOEE/稼働率計算。
+- **[HYDRA-UMC-TELEMETRY-COLLECTOR](https://github.com/JuanenRac/HYDRA-UMC-TELEMETRY-COLLECTOR)** — シーケンス重複排除を備えた、DATALAKEへの実際のCAN/WebSocket取り込みパイプライン。
+
+*産業用ゲートウェイ*
+- **[HYDRA-UMC-GATEWAY-INDUSTRIAL](https://github.com/JuanenRac/HYDRA-UMC-GATEWAY-INDUSTRIAL)** — 実際のコマンド許可リスト/バックプレッシャー層を備えた、産業プロトコルへ中継する統合ハブ。
+- **[HYDRA-UMC-OPCUA-SERVER](https://github.com/JuanenRac/HYDRA-UMC-OPCUA-SERVER)** — 実際のバイナリプロトコルクライアントセッションで検証済みの実際のOPC-UAアドレス空間。
+- **[HYDRA-UMC-MQTT-BROKER](https://github.com/JuanenRac/HYDRA-UMC-MQTT-BROKER)** — クライアントごとの認証とトピックACLをオプションで備えた実際のMQTTブローカー。
+- **[HYDRA-UMC-MTCONNECT-ADAPTER](https://github.com/JuanenRac/HYDRA-UMC-MTCONNECT-ADAPTER)** — 劣化モード出力を備えた実際のMTConnect `/probe` および `/current` XMLエンドポイント。
+
+*補完ツールとエコシステム運用*
+- **[HYDRA-UMC-DASHBOARD-AI](https://github.com/JuanenRac/HYDRA-UMC-DASHBOARD-AI)** — DATALAKE/ANOMALY-DETECTOR上に構築された、誠実な統計的フォールバックを備えたスマートサマリーと異常ハイライトパネル。
+- **[HYDRA-UMC-TOOL-CLI](https://github.com/JuanenRac/HYDRA-UMC-TOOL-CLI)** — 実際の安定した終了コード契約を備えたフリートCLI、HYDRA-UMC-SERVER自身のAPIの本物のライブクライアント。
+- **[HYDRA-UMC-WATCH](https://github.com/JuanenRac/HYDRA-UMC-WATCH)** — 実際の触覚アラートとペアリングされたスマートフォンへの音声リレーを備えたWearOSコンパニオンアプリ。
+- **[URTC-SMART-RACK](https://github.com/JuanenRac/URTC-SMART-RACK)** — 実際のツールID解読とSmart Idle予熱ロジックを備えた、ボード取り付けラック用ファームウェア。
+- **[URTC-VISION-TOOL](https://github.com/JuanenRac/URTC-VISION-TOOL)** — サーマル/RGB検査ツールヘッド向けの実際のPythonビジョンコンパニオンを備えたファームウェア。
+- **[HYDRA-UMC-UPDATER](https://github.com/JuanenRac/HYDRA-UMC-UPDATER)** —— このエコシステム内のすべてのリポジトリを検出・クローン・更新する、管理用デスクトップツール。
+- **[HYDRA-UMC-OS-REBUILDER](https://github.com/JuanenRac/HYDRA-UMC-OS-REBUILDER)** — エコシステムの最新バージョンをプリロードした、書き込み可能なCM5イメージを構築するWindows/Linuxデスクトップツール。Raspberry Pi Imager方式の初回起動Wi-Fi/ユーザー/SSH設定を備える。
+- **[HYDRA-UMC-OPS-AGENT](https://github.com/JuanenRac/HYDRA-UMC-OPS-AGENT)** — 保守インシデントコーディネーター: 低権限のエッジ役割がサニタイズされたインベントリ/ヘルスのスナップショットを収集し、コントロールプレーン役割がそれを読み取り専用でレンダリングして AI プロバイダーに診断の提案を依頼します - パッチを適用することも、何かをデプロイすることも決してありません。
+
+---
+
+## 📚 ドキュメント & コミュニティ
+
+- **[docs/ARCHITECTURE.md](docs/ARCHITECTURE.md)** —— エディター自身の内部構造: パース、実現可能性検証、メッシュ解決、3D プレビューがなぜ別々の経路になっているか、そしてこのアプリが意図的に**行わない**こと(ロボットへの接続、URDF のアップロード、自発的な動作指示)。
+- **[docs/BUILD_AND_RUN.md](docs/BUILD_AND_RUN.md)** —— 非破壊的な `build-test.bat`/`.sh` 検証パスと、実際にパッケージ化する `build_exe.bat`/`.sh` との違い、そしてコマンドデッキが実際には何であるか(`QToolBar` であり Qt Quick/QML ではない —— 上記の**テーマ**セクションを参照)。
+- **[docs/INTEGRATION_CONTRACT.md](docs/INTEGRATION_CONTRACT.md)** —— エクスポートされた URDF ファイルの下流の利用者が自分で検証すべき内容。本プロジェクト自体はネットワークエンドポイントやハードウェア制御権限を一切提供しません。
+- **[CONTRIBUTING.md](CONTRIBUTING.md)** —— プルリクエストのための技術スタックとコーディング指針。
+- **[CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md)** —— このコミュニティで期待される行動規範。
+- **[SECURITY.md](SECURITY.md)** —— 脆弱性の報告方法と、このプロジェクトの実際のセキュリティ重点領域。
+- **[SUPPORT.md](SUPPORT.md)** —— 質問の投稿先とバグの報告先。
+- **[LICENSE.md](LICENSE.md)** —— このプロジェクト自身のライセンス。
+
+## 👤 作者
+**JuanenRac** (Electro Hobby 3D)
+📧 electrohobby3d@gmail.com
+📺 [youtube.com/@electrohobby3d](https://youtube.com/@electrohobby3d)
+
+## 📜 ライセンス
+
+HYDRA-UMC EDITOR-URDF の著作権は (c) 2026 JuanenRac（Electro Hobby 3D）に帰属します。本プロジェクトまたはその派生物を配布する際は、この表示を必ず含めてください。
+
+本プロジェクトはソースコードとそれ自身のドキュメントで構成されており、それぞれ実際にカバーする内容に適した異なるライセンスの下で提供されています：
+
+1. ソースコード（`hydra_editor_urdf/`、`main.py`、および `build_exe.bat`/`build_exe.sh` を通じてそこから構築されるあらゆるバイナリ）は、**GNU General Public License v3.0（GPL-3.0）** の下で提供されます。全文は https://www.gnu.org/licenses/gpl-3.0.html を参照してください。
+
+2. ドキュメント（本 README およびその自身の翻訳版——`README_spa.md`、`README_ita.md`、`README_fra.md`、`README_deu.md`、`README_zho.md`、`README_jpn.md`）は、**クリエイティブ・コモンズ 表示-継承 4.0 国際（CC BY-SA 4.0）** の下で提供されます。全文は https://creativecommons.org/licenses/by-sa/4.0/ を参照してください。
+
+本アプリはそれ自身のサードパーティ製ロボットメッシュアセットを一切同梱していません——HYDRA-UMC STUDIO の `public/models/` とは異なり、本エディターが読み込むすべてのメッシュは、オペレーターがそれを向けたどのソースリポジトリまたはローカルフォルダから来たものであれ、そのソース自身の原本ライセンスの下にあります。稼働中の STUDIO サーバーへモデルを提出する前に（本エディターのエクスポート機能がそのまま流し込む先である、そのサーバー自身の `public/models/<slug>/ATTRIBUTION.txt` の慣例）、そのアップストリームのライセンス/帰属表示を確認し保持することは、引き続きオペレーター自身の責任です——本アプリには、あるソースリポジトリのライセンス条件を自動的に検出したり強制したりする方法はありません。
+
+本エディターは [HYDRA-UMC STUDIO](https://github.com/JuanenRac/HYDRA-UMC-STUDIO) カタログのためのモデル作成ツールです——その自身のサーバー側ライセンスは同リポジトリを参照してください。本リポジトリ自身のライセンスはそちらには及ばず、その逆も同様です。
+
+本プロジェクトを基に開発を行う際は、このライセンス区分を念頭に置いてください：ここでのコードの変更は GPL-3.0 を維持し、ドキュメントの派生物（本 README およびその翻訳版）は CC BY-SA 4.0 を維持し、本エディターを通過した（インポート、編集、またはエクスポートされた）あらゆるメッシュアセットは、その自身の原本ソースリポジトリが携えているライセンスの下に維持され、そのソースへの帰属表示を伴う必要があります。

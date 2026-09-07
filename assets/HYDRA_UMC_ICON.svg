@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width="32" height="32">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%"><stop stop-color="#0A0D12"/><stop offset=".5" stop-color="#121720"/><stop offset="1" stop-color="#07090C"/></linearGradient>
+    <linearGradient id="neon" x1="0%" y1="0%" x2="100%" y2="100%"><stop stop-color="#00FF66"/><stop offset="1" stop-color="#009933"/></linearGradient>
+    <linearGradient id="metal" x1="0%" y1="0%" x2="0%" y2="100%"><stop stop-color="#2D3748"/><stop offset=".5" stop-color="#1A202C"/><stop offset="1" stop-color="#0D1117"/></linearGradient>
+    <filter id="glow" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="4" result="b"/><feComposite in="SourceGraphic" in2="b" operator="over"/></filter>
+  </defs>
+  <rect width="32" height="32" rx="4" fill="url(#bg)"/>
+  <g transform="translate(16 16) scale(.135)"><g><animateTransform attributeName="transform" type="scale" values="1 1; -1 1; 1 1" dur="6s" repeatCount="indefinite" keyTimes="0;.5;1" calcMode="spline" keySplines=".4 0 .2 1;.4 0 .2 1"/><polygon points="0,-100 68,-56 68,56 0,100 -68,56 -68,-56" fill="url(#metal)" stroke="#00FF66" stroke-width="8" filter="url(#glow)"/><path d="M-40,-56 L-18,-56 L-18,-12 L18,-12 L18,-56 L40,-56 L40,56 L18,56 L18,12 L-18,12 L-18,56 L-40,56 Z" fill="url(#neon)"/></g></g>
+</svg>
