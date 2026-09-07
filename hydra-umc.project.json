@@ -1,0 +1,24 @@
+{
+  "schema_version": "1.0",
+  "ecosystem": "HYDRA-UMC",
+  "name": "HYDRA-UMC-EDITOR-URDF",
+  "version": "0.0.5",
+  "role": "tool",
+  "stack": "python",
+  "technologies": [
+    "Python",
+    "PySide6",
+    "Qt6",
+    "OpenGL"
+  ],
+  "deployment_target": "user-pc",
+  "maturity": "established",
+  "family": "Core Backend & Clients",
+  "parent": "HYDRA-UMC-STUDIO",
+  "build": "Desktop PySide6/Qt6 app. run.bat/run.sh runs it from source; build-test.bat/build-test.sh validates sources without versioning; build_exe.bat/build_exe.sh produces a standalone PyInstaller executable.",
+  "notes": "Desktop graphical URDF creator/editor with real, shipped features (GitHub/local source loading, mesh reference resolution, DOF feasibility validation, live 3D preview editing) - pushes finished models to HYDRA-UMC-STUDIO's own model catalog via HYDRA-UMC-SERVER's POST /api/models/submit. tests/ now covers 177 real cases across the app's own pure logic (URDF parse/write, DOF validation, kinematics, inertia estimation, mesh resolution, GitHub fetching, i18n) via pytest, none of which need PySide6 - wired into CI, closing a real zero-test-coverage gap found in an ecosystem-wide audit.",
+  "native_version": {
+    "file": "hydra_editor_urdf/__init__.py",
+    "pattern": "__version__\\s*=\\s*\"(\\d+)\\.(\\d+)\\.(\\d+)\""
+  }
+}
