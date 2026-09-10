@@ -362,6 +362,7 @@ Linux では、コンパイル済みバイナリの実行に、システム自�
 **エコシステムの他の一部**
 
 *コアハードウェアとプラットフォーム*
+- **[HYDRA-UMC-OS](https://github.com/JuanenRac/HYDRA-UMC-OS)** — CM5 向けの再現可能な Raspberry Pi OS プロダクト層。読み取り専用エージェント、検証済み設定/プロファイル、WiFi 初回接続プロビジョニング。
 - **[HYDRA-UMC-SDK](https://github.com/JuanenRac/HYDRA-UMC-SDK)** — 各ブリッジが自身のコマンドを検証する際の基準となる、共有のJSON-Schema契約とセーフティゲートの境界。
 - **[HYDRA-UMC-CONNECTOR-HUB](https://github.com/JuanenRac/HYDRA-UMC-CONNECTOR-HUB)** — 外部マシン用コネクタのための宣言的アダプターマニフェストのレジストリとバリデーター。SDK 自身の契約という発想を外部マシンにまで拡張し、産業用ゲートウェイ系のプロジェクトを置き換えることはありません。
 
