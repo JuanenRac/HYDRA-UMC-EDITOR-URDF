@@ -11,7 +11,7 @@ bumped by hand, as a deliberate decision.
 
 ## [0.0.5] - DOC-18: removed private-document references
 
-- **DOC-18 (found in an ecosystem-wide software-improvements audit, P2):**
+- **DOC-18 (P2):**
   removed the 2 remaining references to an internal
   planning file with no public equivalent (`app.py`'s crash-safety `.bak`
   comment, `urdf/dof.py`'s negative-mass-link comment) - the reasoning
@@ -20,7 +20,7 @@ bumped by hand, as a deliberate decision.
 
 ## [0.0.4] - Real automated test suite
 
-- Found in an ecosystem-wide software-improvements audit: this app's own
+- Found while auditing the code: this app's own
   pure logic (`urdf/parser.py`/`urdf/writer.py`, `urdf/dof.py`,
   `render/kinematics.py`, `inertia_calc.py`, `models.py`,
   `source/scan.py`/`source/local_folder.py`/`source/github_fetcher.py`,
@@ -221,10 +221,10 @@ at all before this point.
 - The About dialog (Help menu) now shows the running version.
 - Added `CHANGELOG.md` (this file).
 
-## Unreleased history (pre-0.0.0, summarized from internal audit notes)
+## Unreleased history (pre-0.0.0, summarized from internal notes)
 
 The sections below summarize work completed before version numbering
-existed, drawn from the project's internal audit log.
+existed, drawn from the project's internal notes.
 
 ### Project commissioned
 
