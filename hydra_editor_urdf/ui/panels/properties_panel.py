@@ -105,7 +105,7 @@ class PropertiesPanel(QWidget):
         joint_form.addRow(self._joint_apply)
         outer.addWidget(self._joint_group)
 
-        # Mass/inertia tensor (audit idea: "calculador automático de
+        # Mass/inertia tensor (requested: "calculador automático de
         # centros de masa e inercias, aproximado"). "Auto-calculate"
         # only FILLS these fields from the selected link's own geometry
         # (inertia_calc.py's real closed-form formulas) - it doesn't
