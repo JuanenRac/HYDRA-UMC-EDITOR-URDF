@@ -24,9 +24,11 @@
 
 ### 🖌️ Creatore/Editor grafico di URDF per il Catalogo Modelli di HYDRA-UMC-STUDIO
 
-**Versione attuale:** 0.0.5 (`MAJOR.MINOR.PATCH` - vedi la sezione **Build di Produzione** più sotto per come si muove questo numero)
+**Versione attuale:** 0.0.6 (`MAJOR.MINOR.PATCH` - vedi la sezione **Build di Produzione** più sotto per come si muove questo numero)
 
 ---
+
+**Controllo di onestà - cosa funziona davvero oggi:** il nucleo di logica pura - parsing/esportazione URDF (`urdf/parser.py`, `urdf/writer.py`), validazione di fattibilità DOF (`urdf/dof.py`), cinematica diretta (`render/kinematics.py`), stima dell'inerzia (`inertia_calc.py`), risoluzione dei riferimenti alle mesh e download dello zipball GitHub (`source/scan.py`, `source/github_fetcher.py`, `source/local_folder.py`), il modello in memoria (`models.py`), l'elenco della galleria (`gallery.py`) e il caricatore i18n (`i18n.py`) - è reale ed è coperto da 177 test superati (`tests/`), nessuno dei quali importa PySide6/PyOpenGL. `test_github_fetcher.py` simula ogni chiamata di rete - un vero download di uno zipball GitHub è stato eseguito manualmente, mai come parte della suite automatizzata. Il livello Qt/OpenGL (`render/viewport.py` con il suo `UrdfGLRenderer`, `render/mesh.py`, ogni pannello `ui/*`, e l'`OffscreenUrdfRenderer` del deck `--qtquick`) è codice reale e funzionante ma privo di qualsiasi copertura di test automatizzata - richiede un vero display/plugin di piattaforma Qt, che la CI non ha, quindi viene verificato a mano, non da una suite di test. Il `StudioClient` di `server/client.py` (login/push/pull contro il `server.ts` di HYDRA-UMC-SERVER) è codice HTTP reale anch'esso privo di test automatizzati. L'espansione xacro e il caricamento di mesh COLLADA (`.dae`) sono non-funzionalità esplicite e dichiarate (un errore chiaro, non un parsing errato silenzioso) - vedi la nota di onestà nella Panoramica più sotto e le sezioni Parsing URDF/Caricamento Mesh per il perché. Vedi `CHANGELOG.md` per ciò che è stato consegnato esattamente finora.
 
 ## 🎯 Panoramica
 

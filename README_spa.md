@@ -24,9 +24,11 @@
 
 ### 🖌️ Creador/Editor Gráfico de URDF para el Catálogo de Modelos de HYDRA-UMC-STUDIO
 
-**Versión actual:** 0.0.5 (`MAJOR.MINOR.PATCH` - ver la sección **Compilación de Producción** más abajo para saber cómo se mueve este número)
+**Versión actual:** 0.0.6 (`MAJOR.MINOR.PATCH` - ver la sección **Compilación de Producción** más abajo para saber cómo se mueve este número)
 
 ---
+
+**Comprobación de honestidad - qué funciona realmente hoy:** el núcleo de lógica pura - parseo/exportación URDF (`urdf/parser.py`, `urdf/writer.py`), validación de factibilidad DOF (`urdf/dof.py`), cinemática directa (`render/kinematics.py`), estimación de inercia (`inertia_calc.py`), resolución de referencias de malla y descarga de zipball de GitHub (`source/scan.py`, `source/github_fetcher.py`, `source/local_folder.py`), el modelo en memoria (`models.py`), la lista de la galería (`gallery.py`) y el cargador i18n (`i18n.py`) - es real y está cubierto por 177 tests pasando (`tests/`), ninguno de los cuales importa PySide6/PyOpenGL. `test_github_fetcher.py` simula (mock) toda llamada de red - una descarga real de un zipball de GitHub se ha ejecutado manualmente, nunca como parte de la suite automatizada. La capa Qt/OpenGL (`render/viewport.py`'s `UrdfGLRenderer`, `render/mesh.py`, cada panel de `ui/*`, y el `OffscreenUrdfRenderer` del deck `--qtquick`) es código real y funcional pero no tiene ninguna cobertura de tests automatizada - necesita una pantalla/plugin de plataforma Qt real, que CI no tiene, así que se verifica a mano, no con una suite de tests. `server/client.py`'s `StudioClient` (login/push/pull contra el `server.ts` de HYDRA-UMC-SERVER) es código HTTP real sin ningún test automatizado tampoco. La expansión de xacro y la carga de mallas COLLADA (`.dae`) son no-funcionalidades explícitas y nombradas (un error claro, no un mal-parseo silencioso) - ver la Nota de Honestidad en la Visión General más abajo y las secciones de Parseo URDF/Carga de Mallas para el porqué. Ver `CHANGELOG.md` para lo que se ha entregado exactamente hasta ahora.
 
 ## 🎯 Visión General
 

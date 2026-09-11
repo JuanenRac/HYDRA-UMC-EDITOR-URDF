@@ -24,9 +24,11 @@
 
 ### 🖌️ HYDRA-UMC-STUDIO モデルカタログ向けグラフィカル URDF 作成/編集ツール
 
-**現在のバージョン：** 0.0.5（`MAJOR.MINOR.PATCH` —— この番号がどう変化するかは下記「プロダクションビルド」セクションを参照）
+**現在のバージョン：** 0.0.6（`MAJOR.MINOR.PATCH` —— この番号がどう変化するかは下記「プロダクションビルド」セクションを参照）
 
 ---
+
+**正直な現状確認 - 今日実際に動くもの:** 純粋なロジックのコア - URDF のパース/エクスポート(`urdf/parser.py`、`urdf/writer.py`)、DOF 実現可能性検証(`urdf/dof.py`)、順運動学(`render/kinematics.py`)、慣性推定(`inertia_calc.py`)、メッシュ参照解決と GitHub zipball 取得(`source/scan.py`、`source/github_fetcher.py`、`source/local_folder.py`)、インメモリモデル(`models.py`)、ギャラリー一覧(`gallery.py`)、そして i18n ローダー(`i18n.py`)は本物であり、`tests/` 内の 177 件のテストに合格しており、そのいずれも PySide6/PyOpenGL をインポートしていない。`test_github_fetcher.py` はすべてのネットワーク呼び出しをモック化している - 実際の GitHub zipball ダウンロードは手動で実行されたことはあるが、自動化されたテストスイートの一部として実行されたことは一度もない。Qt/OpenGL 層(`render/viewport.py` の `UrdfGLRenderer`、`render/mesh.py`、各 `ui/*` パネル、そして `--qtquick` デッキの `OffscreenUrdfRenderer`)は本物の動作するコードだが、自動テストのカバレッジは一切ない - 実際のディスプレイ/Qt プラットフォームプラグインが必要であり、CI にはそれがないため、テストスイートではなく手作業で検証されている。`server/client.py` の `StudioClient`(HYDRA-UMC-SERVER の `server.ts` に対するログイン/プッシュ/プル)も同様に本物の HTTP コードであり、自動テストは一切ない。xacro の展開と COLLADA(`.dae`)メッシュの読み込みは、明示的に名前が付けられた未実装機能である(サイレントな誤解析ではなく明確なエラーを返す) - その理由については下記の概要にある正直さについての注記、および URDF パース/メッシュ読み込みの各セクションを参照。これまでに何が実際に出荷されたかは `CHANGELOG.md` を参照。
 
 ## 🎯 概要
 

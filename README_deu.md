@@ -23,9 +23,11 @@
 
 ### 🖌️ Grafischer URDF-Ersteller/-Editor für den Modellkatalog von HYDRA-UMC-STUDIO
 
-**Aktuelle Version:** 0.0.5 (`MAJOR.MINOR.PATCH` - siehe den Abschnitt **Produktions-Build** weiter unten dafür, wie sich diese Zahl bewegt)
+**Aktuelle Version:** 0.0.6 (`MAJOR.MINOR.PATCH` - siehe den Abschnitt **Produktions-Build** weiter unten dafür, wie sich diese Zahl bewegt)
 
 ---
+
+**Ehrlichkeitscheck - was heute wirklich läuft:** der Kern aus reiner Logik - URDF-Parsing/-Export (`urdf/parser.py`, `urdf/writer.py`), DOF-Machbarkeitsprüfung (`urdf/dof.py`), Vorwärtskinematik (`render/kinematics.py`), Trägheitsschätzung (`inertia_calc.py`), Mesh-Referenzauflösung und GitHub-Zipball-Download (`source/scan.py`, `source/github_fetcher.py`, `source/local_folder.py`), das In-Memory-Modell (`models.py`), die Galerie-Liste (`gallery.py`) und der i18n-Lader (`i18n.py`) - ist real und durch 177 bestandene Tests abgedeckt (`tests/`), von denen keiner PySide6/PyOpenGL importiert. `test_github_fetcher.py` simuliert jeden Netzwerkaufruf - ein echter GitHub-Zipball-Download wurde manuell ausgeführt, nie als Teil der automatisierten Suite. Die Qt/OpenGL-Schicht (`render/viewport.py` mit seinem `UrdfGLRenderer`, `render/mesh.py`, jedes `ui/*`-Panel und der `OffscreenUrdfRenderer` des `--qtquick`-Decks) ist echter, funktionierender Code, hat aber überhaupt keine automatisierte Testabdeckung - sie benötigt ein echtes Display/Qt-Plattform-Plugin, das die CI nicht hat, also wird sie von Hand geprüft, nicht durch eine Testsuite. `server/client.py`s `StudioClient` (Login/Push/Pull gegen das `server.ts` von HYDRA-UMC-SERVER) ist ebenfalls echter HTTP-Code ohne jeglichen automatisierten Test. xacro-Expansion und das Laden von COLLADA-Meshes (`.dae`) sind explizite, benannte Nicht-Funktionen (ein klarer Fehler, kein stiller Fehlparse) - siehe den Ehrlichkeitshinweis im Überblick weiter unten und die Abschnitte URDF-Parsing/Mesh-Laden für das Warum. Siehe `CHANGELOG.md` für das, was bisher genau ausgeliefert wurde.
 
 ## 🎯 Überblick
 
