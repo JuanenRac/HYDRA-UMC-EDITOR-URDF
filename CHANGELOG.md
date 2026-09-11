@@ -9,6 +9,20 @@ goes up by 1 per build; once `PATCH` would exceed 9 it resets to 0 and
 `MINOR` goes up by 1 instead (e.g. `0.0.9` -> `0.1.0`). `MAJOR` is only ever
 bumped by hand, as a deliberate decision.
 
+## [0.0.6] - Honesty check section in every README
+
+Added a "Honesty check" paragraph right after the intro badges in
+`README.md` and all 6 translated READMEs, naming the real, tested
+pure-logic modules (`urdf/parser.py`, `urdf/writer.py`, `urdf/dof.py`,
+`render/kinematics.py`, `inertia_calc.py`, `source/scan.py`,
+`source/github_fetcher.py`, `source/local_folder.py`, `models.py`,
+`gallery.py`, `i18n.py`) and the real test count (177 passing). States
+plainly that the Qt/OpenGL layer (`render/viewport.py`, `render/mesh.py`,
+every `ui/*` panel, `server/client.py`'s `StudioClient`) has no
+automated test coverage at all and is only verified by hand, and that
+`test_github_fetcher.py` mocks every network call. Documents the real,
+current state of what's implemented vs. planned; no behavior changed.
+
 ## [0.0.5] - DOC-18: removed private-document references
 
 - **DOC-18 (P2):**
