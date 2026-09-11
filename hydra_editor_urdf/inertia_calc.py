@@ -8,7 +8,7 @@
 # textbook uniform-density solid-body tensors, not a guess. MeshGeometry
 # has no such closed form (it's an arbitrary triangle soup); the
 # reasonable approximation there is the mesh's own AXIS-ALIGNED BOUNDING
-# BOX treated as a solid box, which is exactly what the audit's own idea
+# BOX treated as a solid box, which is exactly what the request
 # asked for ("aproximado, por geometría de la malla/primitiva"). This is
 # explicitly an approximation, not a real per-mesh
 # integral (that would need signed-tetrahedron volume integration over

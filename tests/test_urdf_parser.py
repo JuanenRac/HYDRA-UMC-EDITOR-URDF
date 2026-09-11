@@ -4,8 +4,7 @@
 # GPL-3.0 - see LICENSE
 #
 # Real unit tests for hydra_editor_urdf/urdf/parser.py - previously
-# untested pure logic (found in an ecosystem-wide software-improvements
-# audit). No Qt import anywhere in this file, so this runs with just the
+# untested pure logic (found while auditing the code). No Qt import anywhere in this file, so this runs with just the
 # stdlib - no PySide6 install needed to verify the actual parsing rules.
 # =============================================================================
 from __future__ import annotations
