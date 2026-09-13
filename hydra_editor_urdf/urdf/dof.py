@@ -48,6 +48,7 @@ class DofReport:
     orphan_link_names: list[str] = field(default_factory=list)  # links reachable from no joint at all
     disconnected_link_names: list[str] = field(default_factory=list)  # a real chain of >1 link, but reachable from no root
     multi_parent_link_names: list[str] = field(default_factory=list)  # appear as <child> of >1 <joint> - invalid per the URDF spec (a link has at most one parent)
+    unknown_link_names: list[str] = field(default_factory=list)  # named as a joint's parent/child but no <link> with that name exists at all
 
 
 def _reachable_from(robot: Robot, root: str) -> set[str]:
@@ -69,6 +70,28 @@ def validate(robot: Robot) -> DofReport:
     root = robot.root_link_name()
 
     reasons: list[str] = []
+
+    # H016: a joint's own <parent>/<child> naming a link that has no
+    # matching <link> element at all (a real typo, or a link deleted
+    # without updating the joints pointing at it) used to get a "viable"
+    # verdict. root_link_name()/_reachable_from() below only ever walk
+    # names already present in robot.links, so a fictitious child name
+    # just gets silently added to the "reachable" set (see
+    # _reachable_from()) without ever being checked against a real link
+    # - it never shows up in disconnected/orphan/multi_parent either,
+    # since all three also only iterate robot.links. Checked here, first
+    # and independently of every other structural check, since it can
+    # otherwise stay completely invisible when the rest of the tree
+    # happens to look fine.
+    unknown_links = sorted(
+        {j.parent for j in robot.joints.values() if j.parent not in robot.links}
+        | {j.child for j in robot.joints.values() if j.child not in robot.links}
+    )
+    if unknown_links:
+        reasons.append(
+            f"{len(unknown_links)} link name(s) are referenced by a joint's parent/child but have no matching "
+            f"<link> element at all: {', '.join(unknown_links)}."
+        )
 
     if root is None:
         child_names = {j.child for j in robot.joints.values()}
@@ -126,6 +149,16 @@ def validate(robot: Robot) -> DofReport:
     for joint in movable:
         if joint.type != JointType.CONTINUOUS and joint.limit is None:
             reasons.append(f"Joint {joint.name!r} ({joint.type.value}) has no <limit> - required by the URDF spec for anything but a CONTINUOUS joint.")
+        # H017: an inverted range (lower > upper) is not a finiteness
+        # problem (parser.py's own H017 fix already rejects NaN/inf), but
+        # it is just as physically meaningless - no real joint position
+        # exists between two bounds that don't overlap - and was
+        # previously never checked at all here.
+        elif joint.limit is not None and joint.limit.lower > joint.limit.upper:
+            reasons.append(
+                f"Joint {joint.name!r} has an invalid <limit>: lower ({joint.limit.lower}) is greater than "
+                f"upper ({joint.limit.upper})."
+            )
 
     # BUG (found in audit): a link's <inertial><mass value="..."/> was
     # parsed as a plain float (urdf/parser.py's own _parse_inertial())
@@ -163,4 +196,5 @@ def validate(robot: Robot) -> DofReport:
         orphan_link_names=orphans,
         disconnected_link_names=disconnected,
         multi_parent_link_names=multi_parent,
+        unknown_link_names=unknown_links,
     )

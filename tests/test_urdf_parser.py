@@ -196,6 +196,47 @@ def test_empty_xyz_attribute_falls_back_to_default():
     assert robot.joints["j"].origin.xyz == (0.0, 0.0, 0.0)
 
 
+# --- H017: non-finite/invalid numeric values are rejected, not silently accepted ---
+
+
+def test_nan_in_origin_xyz_is_rejected():
+    # Python's own float("nan") succeeds - a real gap this closes.
+    xml = (
+        '<robot><link name="a"/><link name="b"/>'
+        '<joint name="j" type="fixed"><origin xyz="0 nan 0"/><parent link="a"/><child link="b"/></joint></robot>'
+    )
+    with pytest.raises(UrdfParseError, match="finite number"):
+        parse_urdf_string(xml)
+
+
+def test_infinity_in_joint_limit_is_rejected():
+    xml = (
+        '<robot><link name="a"/><link name="b"/>'
+        '<joint name="j" type="revolute"><parent link="a"/><child link="b"/>'
+        '<limit lower="-inf" upper="1.57" effort="10" velocity="1"/></joint></robot>'
+    )
+    with pytest.raises(UrdfParseError, match="finite number"):
+        parse_urdf_string(xml)
+
+
+def test_nan_inertial_mass_is_rejected():
+    xml = '<robot><link name="a"><inertial><mass value="nan"/></inertial></link></robot>'
+    with pytest.raises(UrdfParseError, match="finite number"):
+        parse_urdf_string(xml)
+
+
+def test_non_numeric_text_in_a_float_field_is_a_clear_error_not_a_raw_valueerror():
+    xml = '<robot><link name="a"><visual><geometry><sphere radius="not-a-number"/></geometry></visual></link></robot>'
+    with pytest.raises(UrdfParseError, match="real number"):
+        parse_urdf_string(xml)
+
+
+def test_infinite_cylinder_radius_is_rejected():
+    xml = '<robot><link name="a"><visual><geometry><cylinder radius="inf" length="1"/></geometry></visual></link></robot>'
+    with pytest.raises(UrdfParseError, match="finite number"):
+        parse_urdf_string(xml)
+
+
 # --- geometry -------------------------------------------------------------
 
 

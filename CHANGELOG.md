@@ -9,6 +9,42 @@ goes up by 1 per build; once `PATCH` would exceed 9 it resets to 0 and
 `MINOR` goes up by 1 instead (e.g. `0.0.9` -> `0.1.0`). `MAJOR` is only ever
 bumped by hand, as a deliberate decision.
 
+## [0.0.7] - H015/H016/H017/H064: insecure defaults, an invisible ghost link, non-finite geometry, and denied capabilities
+
+- **H015:** the Upload panel's username/password fields were pre-filled
+  with the literal text `"admin"`/`"admin"` - a real credential, not a
+  placeholder, suggesting it as legitimate to actually connect with.
+  Both now start empty with neutral placeholder text (added to all 7
+  languages).
+- **H016:** a joint whose own `<parent>`/`<child>` names a link with no
+  matching `<link>` element at all used to get a "viable" DOF verdict -
+  `root_link_name()`/`_reachable_from()` only ever walk names already in
+  `robot.links`, so a fictitious name was silently accepted into the
+  "reachable" set instead of being flagged. `validate()` now checks every
+  joint's parent/child against the real link set first.
+- **H017:** the parser's `float(...)` calls happily accepted `"nan"`/
+  `"inf"`/`"-inf"` (valid per Python's own `float()`) for any numeric URDF
+  field - origin xyz/rpy, geometry dimensions, inertia, joint limits -
+  baking non-finite, physically meaningless values into a model that
+  then parsed "successfully". A new shared `_parse_float()`/`_parse_floats()`
+  now reject any non-finite result (and any non-numeric text, with a
+  clearer message) with the same `UrdfParseError` every other malformed
+  input in this parser already raises. Also added: an inverted joint
+  `<limit>` (lower > upper) is now flagged as invalid.
+- **H064 (docs):** `INTEGRATION_CONTRACT.md` claimed "no network endpoint,
+  remote loading contract... is provided", and `ARCHITECTURE.md` claimed
+  the editor "does not... upload a URDF" - both false: `source/
+  github_fetcher.py` (real, read-only GitHub zipball fetch) and `server/
+  client.py`'s `StudioClient` (real authenticated push/pull to
+  HYDRA-UMC-SERVER) both exist and are exercised from the Upload panel.
+  Reworded both documents to describe the real boundary (explicit-action
+  network paths, no hardware/motion authority ever) instead of denying
+  capabilities that exist. `BUILD_AND_RUN.md` also gained a mention of the
+  real, working standalone `--qtquick` mode next to its existing account
+  of the abandoned embedded-widget attempt, which previously left a
+  reader unaware the standalone mode exists at all.
+- 185 tests passing (8 new: H016/H017 regressions), up from 177.
+
 ## [0.0.6] - Honesty check section in every README
 
 Added a "Honesty check" paragraph right after the intro badges in

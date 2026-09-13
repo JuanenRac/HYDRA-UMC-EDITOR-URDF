@@ -93,8 +93,19 @@ class UploadPanel(QWidget):
         self._port = QSpinBox()
         self._port.setRange(1, 65535)
         self._port.setValue(3000)
-        self._username = QLineEdit("admin")
-        self._password = QLineEdit("admin")
+        # H015: these used to be pre-filled with the literal text "admin"/
+        # "admin" - a real credential, not a placeholder, and exactly the
+        # default HYDRA-UMC-SERVER's own bootstrap admin account used to
+        # ship with (see feedback_reboot_cm5_after_updates in this
+        # ecosystem's own history). Pre-filling a real-looking credential
+        # here suggested it as a legitimate thing to actually connect
+        # with, rather than requiring the user's own real one. Empty
+        # fields with placeholder text ask for input instead of
+        # suggesting an answer.
+        self._username = QLineEdit()
+        self._username.setPlaceholderText(_("UPLOAD_USERNAME_PLACEHOLDER"))
+        self._password = QLineEdit()
+        self._password.setPlaceholderText(_("UPLOAD_PASSWORD_PLACEHOLDER"))
         self._password.setEchoMode(QLineEdit.EchoMode.Password)
         self._connect_btn = QPushButton(_("UPLOAD_CONNECT_BUTTON"))
         self._connect_btn.clicked.connect(self._on_connect)
