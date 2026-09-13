@@ -10,3 +10,4 @@ work/
 .env
 .env.*
 !.env.example
+hydra_editor_urdf_config.json
