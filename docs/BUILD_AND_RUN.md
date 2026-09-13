@@ -28,3 +28,12 @@ model's name, DOF count and current Studio feasibility verdict. The
 Source, DOF, Viewport, Properties and Upload buttons only raise their
 corresponding existing docks; export retains the established backup-safe
 writer and remains unavailable until a model is loaded.
+
+That failed embed is a separate thing from the real, standalone Qt Quick
+mode this app also has: `python main.py --qtquick` launches a genuinely
+independent QML `ApplicationWindow` (`qt_editor_urdf.py`), with its own
+offscreen-rendered viewport, bridging the same unchanged `EditorController`
+the default widget UI uses - not a second, divergent editor. See the main
+[`README.md`](../README.md)'s own "Visual command deck (`--qtquick`)"
+section for the full picture, including why it is a separate launch mode
+rather than embedded inside the default window.

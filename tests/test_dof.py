@@ -77,6 +77,17 @@ def test_fixed_joints_dont_count_toward_dof():
     assert report.is_feasible
 
 
+# H017: an inverted <limit> range (lower > upper) is physically
+# meaningless - no real joint position exists between two bounds that
+# don't overlap - but was never checked before.
+def test_joint_limit_with_lower_greater_than_upper_is_flagged():
+    robot = chain(3)
+    robot.joints["j0"].limit = JointLimit(lower=1.0, upper=-1.0, effort=10.0, velocity=1.0)
+    report = validate(robot)
+    assert not report.is_feasible
+    assert any("invalid <limit>" in reason for reason in report.reasons)
+
+
 def test_revolute_or_prismatic_without_limit_is_flagged():
     robot = chain(3, with_limits=False)
     report = validate(robot)
@@ -146,6 +157,34 @@ def test_orphan_link_not_referenced_by_any_joint_is_reported_separately_from_dis
     report = validate(robot)
     assert "unused" in report.orphan_link_names
     assert "unused" not in report.disconnected_link_names
+
+
+# H016 regression: a joint whose own parent/child names a link with no
+# matching <link> element at all used to get a "viable" verdict -
+# root_link_name()/_reachable_from() only ever walk names already in
+# robot.links, so a fictitious child name was silently accepted into the
+# "reachable" set instead of being flagged. Built on top of an otherwise
+# perfectly feasible chain, to prove this specific check (not a knock-on
+# effect of DOF count or missing limits) is what catches it.
+def test_joint_referencing_a_nonexistent_link_is_flagged_not_viable():
+    robot = chain(3)
+    robot.joints["jghost"] = Joint(
+        name="jghost", type=JointType.FIXED, parent="link3", child="ghost_link"
+    )
+    report = validate(robot)
+    assert report.unknown_link_names == ["ghost_link"]
+    assert not report.is_feasible
+    assert any("ghost_link" in reason for reason in report.reasons)
+
+
+def test_joint_with_a_nonexistent_parent_is_also_flagged():
+    robot = chain(3)
+    robot.joints["jghost"] = Joint(
+        name="jghost", type=JointType.FIXED, parent="ghost_parent", child="link3"
+    )
+    report = validate(robot)
+    assert report.unknown_link_names == ["ghost_parent"]
+    assert not report.is_feasible
 
 
 def test_multi_parent_link_is_flagged_as_invalid():

@@ -18,6 +18,7 @@
 # =============================================================================
 from __future__ import annotations
 
+import math
 import xml.etree.ElementTree as ET
 from pathlib import Path
 
@@ -47,20 +48,42 @@ class UrdfParseError(Exception):
     source_panel.py surface directly to the operator, not a stack trace."""
 
 
-def _parse_floats(text: str | None, count: int, default: tuple[float, ...]) -> tuple[float, ...]:
+def _parse_float(text: str | float, *, field: str) -> float:
+    """Parse one URDF numeric attribute, rejecting a non-finite result.
+
+    H017: Python's own `float()` happily accepts "nan"/"inf"/"-inf" as
+    valid input - a radius, mass, joint limit or inertia component of
+    NaN or Infinity is physically meaningless, and every call site here
+    used to accept it silently, letting a genuinely broken (or crafted)
+    URDF report a fully "viable" robot with corrupted geometry baked in
+    (dof.py's own validate() never checked finiteness either - see that
+    file's own H017 fix). Raises the same UrdfParseError every other
+    malformed-input case in this module already does, instead of
+    substituting corrupted geometry for a successful parse.
+    """
+    try:
+        value = float(text)
+    except (TypeError, ValueError) as exc:
+        raise UrdfParseError(f"{field} must be a real number, got {text!r}") from exc
+    if not math.isfinite(value):
+        raise UrdfParseError(f"{field} must be a finite number, got {text!r}")
+    return value
+
+
+def _parse_floats(text: str | None, count: int, default: tuple[float, ...], *, field: str) -> tuple[float, ...]:
     if not text or not text.strip():
         return default
     parts = text.split()
     if len(parts) != count:
         raise UrdfParseError(f"Expected {count} numbers, got {len(parts)!r} in {text!r}")
-    return tuple(float(p) for p in parts)
+    return tuple(_parse_float(p, field=f"{field}[{i}]") for i, p in enumerate(parts))
 
 
 def _parse_origin(el: ET.Element | None) -> Origin:
     if el is None:
         return Origin.identity()
-    xyz = _parse_floats(el.get("xyz"), 3, (0.0, 0.0, 0.0))
-    rpy = _parse_floats(el.get("rpy"), 3, (0.0, 0.0, 0.0))
+    xyz = _parse_floats(el.get("xyz"), 3, (0.0, 0.0, 0.0), field="origin xyz")
+    rpy = _parse_floats(el.get("rpy"), 3, (0.0, 0.0, 0.0), field="origin rpy")
     return Origin(xyz=xyz, rpy=rpy)  # type: ignore[arg-type]
 
 
@@ -73,16 +96,19 @@ def _parse_geometry(el: ET.Element | None) -> Geometry:
         return BoxGeometry(size=(0.05, 0.05, 0.05))
     box = el.find("box")
     if box is not None:
-        return BoxGeometry(size=_parse_floats(box.get("size"), 3, (1.0, 1.0, 1.0)))  # type: ignore[arg-type]
+        return BoxGeometry(size=_parse_floats(box.get("size"), 3, (1.0, 1.0, 1.0), field="box size"))  # type: ignore[arg-type]
     cylinder = el.find("cylinder")
     if cylinder is not None:
-        return CylinderGeometry(radius=float(cylinder.get("radius", 0.5)), length=float(cylinder.get("length", 1.0)))
+        return CylinderGeometry(
+            radius=_parse_float(cylinder.get("radius", 0.5), field="cylinder radius"),
+            length=_parse_float(cylinder.get("length", 1.0), field="cylinder length"),
+        )
     sphere = el.find("sphere")
     if sphere is not None:
-        return SphereGeometry(radius=float(sphere.get("radius", 0.5)))
+        return SphereGeometry(radius=_parse_float(sphere.get("radius", 0.5), field="sphere radius"))
     mesh = el.find("mesh")
     if mesh is not None:
-        scale = _parse_floats(mesh.get("scale"), 3, (1.0, 1.0, 1.0))
+        scale = _parse_floats(mesh.get("scale"), 3, (1.0, 1.0, 1.0), field="mesh scale")
         return MeshGeometry(filename=mesh.get("filename", ""), scale=scale)  # type: ignore[arg-type]
     return BoxGeometry(size=(0.05, 0.05, 0.05))
 
@@ -97,7 +123,7 @@ def _parse_material_inline(el: ET.Element | None) -> Material | None:
     name = el.get("name", "")
     color_el = el.find("color")
     if color_el is not None:
-        rgba = _parse_floats(color_el.get("rgba"), 4, (0.8, 0.8, 0.8, 1.0))
+        rgba = _parse_floats(color_el.get("rgba"), 4, (0.8, 0.8, 0.8, 1.0), field="material rgba")
         return Material(name=name, rgba=rgba)  # type: ignore[arg-type]
     return Material(name=name, rgba=(0.8, 0.8, 0.8, 1.0))  # resolved against Robot.materials by name, if it exists
 
@@ -110,7 +136,7 @@ def _parse_top_level_materials(root: ET.Element) -> dict[str, Material]:
             continue
         color_el = el.find("color")
         if color_el is not None:
-            rgba = _parse_floats(color_el.get("rgba"), 4, (0.8, 0.8, 0.8, 1.0))
+            rgba = _parse_floats(color_el.get("rgba"), 4, (0.8, 0.8, 0.8, 1.0), field="material rgba")
             materials[name] = Material(name=name, rgba=rgba)  # type: ignore[arg-type]
     return materials
 
@@ -144,15 +170,15 @@ def _parse_inertial(el: ET.Element | None) -> Inertial | None:
     if el is None:
         return None
     mass_el = el.find("mass")
-    mass = float(mass_el.get("value", 0.0)) if mass_el is not None else 0.0
+    mass = _parse_float(mass_el.get("value", 0.0), field="inertial mass") if mass_el is not None else 0.0
     inertia_el = el.find("inertia")
     if inertia_el is not None:
-        ixx = float(inertia_el.get("ixx", 0.0))
-        ixy = float(inertia_el.get("ixy", 0.0))
-        ixz = float(inertia_el.get("ixz", 0.0))
-        iyy = float(inertia_el.get("iyy", 0.0))
-        iyz = float(inertia_el.get("iyz", 0.0))
-        izz = float(inertia_el.get("izz", 0.0))
+        ixx = _parse_float(inertia_el.get("ixx", 0.0), field="inertia ixx")
+        ixy = _parse_float(inertia_el.get("ixy", 0.0), field="inertia ixy")
+        ixz = _parse_float(inertia_el.get("ixz", 0.0), field="inertia ixz")
+        iyy = _parse_float(inertia_el.get("iyy", 0.0), field="inertia iyy")
+        iyz = _parse_float(inertia_el.get("iyz", 0.0), field="inertia iyz")
+        izz = _parse_float(inertia_el.get("izz", 0.0), field="inertia izz")
     else:
         ixx = ixy = ixz = iyy = iyz = izz = 0.0
     return Inertial(mass=mass, origin=_parse_origin(el.find("origin")), ixx=ixx, ixy=ixy, ixz=ixz, iyy=iyy, iyz=iyz, izz=izz)
@@ -191,16 +217,16 @@ def _parse_joint(el: ET.Element) -> Joint:
         raise UrdfParseError(f"Joint {name!r} has a <parent>/<child> with no link= attribute")
 
     axis_el = el.find("axis")
-    axis = _parse_floats(axis_el.get("xyz") if axis_el is not None else None, 3, (1.0, 0.0, 0.0))
+    axis = _parse_floats(axis_el.get("xyz") if axis_el is not None else None, 3, (1.0, 0.0, 0.0), field="joint axis")
 
     limit_el = el.find("limit")
     limit = None
     if limit_el is not None:
         limit = JointLimit(
-            lower=float(limit_el.get("lower", 0.0)),
-            upper=float(limit_el.get("upper", 0.0)),
-            effort=float(limit_el.get("effort", 0.0)),
-            velocity=float(limit_el.get("velocity", 0.0)),
+            lower=_parse_float(limit_el.get("lower", 0.0), field=f"joint {name!r} limit lower"),
+            upper=_parse_float(limit_el.get("upper", 0.0), field=f"joint {name!r} limit upper"),
+            effort=_parse_float(limit_el.get("effort", 0.0), field=f"joint {name!r} limit effort"),
+            velocity=_parse_float(limit_el.get("velocity", 0.0), field=f"joint {name!r} limit velocity"),
         )
 
     return Joint(name=name, type=jtype, parent=parent, child=child, origin=_parse_origin(el.find("origin")), axis=axis, limit=limit)  # type: ignore[arg-type]
