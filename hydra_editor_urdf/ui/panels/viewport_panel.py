@@ -15,7 +15,18 @@ from __future__ import annotations
 import math
 
 from PySide6.QtCore import Qt, Signal
-from PySide6.QtWidgets import QHBoxLayout, QLabel, QSlider, QSplitter, QTreeWidget, QTreeWidgetItem, QVBoxLayout, QWidget
+from PySide6.QtWidgets import (
+    QFileDialog,
+    QHBoxLayout,
+    QLabel,
+    QPushButton,
+    QSlider,
+    QSplitter,
+    QTreeWidget,
+    QTreeWidgetItem,
+    QVBoxLayout,
+    QWidget,
+)
 
 from hydra_editor_urdf.app import EditorController
 from hydra_editor_urdf.i18n import _
@@ -94,8 +105,21 @@ class ViewportPanel(QWidget):
         # skipped) - routed through the same status_message path
         # ui/main_window.py already wires to the status bar, not a new
         # UI mechanism.
-        self._viewport.mesh_warning.connect(self._controller.status_message.emit)
+        self._viewport.mesh_warning.connect(self._on_mesh_warning)
         center_layout.addWidget(self._viewport, stretch=1)
+
+        # Graphical fallback for when source/scan.py's own heuristic
+        # package:// resolution (relative path, then basename search
+        # under the fetched/opened folder) can't find a referenced mesh -
+        # e.g. the URDF references a sibling ROS package that lives in a
+        # separate checkout the original fetch/open never saw. Hidden
+        # until a real mesh_warning actually fires, so it doesn't clutter
+        # the viewport for the common case where resolution already
+        # worked for everything.
+        self._locate_meshes_btn = QPushButton(_("VIEWPORT_LOCATE_MESHES_BUTTON"))
+        self._locate_meshes_btn.setVisible(False)
+        self._locate_meshes_btn.clicked.connect(self._on_locate_meshes_clicked)
+        center_layout.addWidget(self._locate_meshes_btn)
         splitter.addWidget(center)
 
         right = QWidget()
@@ -117,6 +141,7 @@ class ViewportPanel(QWidget):
         controller.selected_link_changed.connect(self._viewport.set_selected_link)
 
     def _on_robot_loaded(self, robot: Robot, _report) -> None:
+        self._locate_meshes_btn.setVisible(False)  # a fresh load starts without any known-missing mesh from a previous file
         self._rebuild_link_tree(robot)
         self._rebuild_jog_sliders(robot)
         self._viewport.rebuild_buffers(robot)
@@ -125,8 +150,19 @@ class ViewportPanel(QWidget):
     def _on_tree_changed(self) -> None:
         if self._controller.robot is None:
             return
+        self._locate_meshes_btn.setVisible(False)  # rebuild_buffers() below re-raises mesh_warning (and re-shows the button) if anything is still missing after this
         self._viewport.rebuild_buffers(self._controller.robot)
         self._viewport.refresh_colors()
+
+    def _on_mesh_warning(self, message: str) -> None:
+        self._controller.status_message.emit(message)
+        self._locate_meshes_btn.setVisible(True)
+
+    def _on_locate_meshes_clicked(self) -> None:
+        folder = QFileDialog.getExistingDirectory(self, _("VIEWPORT_LOCATE_MESHES_DIALOG_TITLE"))
+        if not folder:
+            return
+        self._controller.add_mesh_search_folder(folder)
 
     def _rebuild_link_tree(self, robot: Robot) -> None:
         self._link_tree.clear()

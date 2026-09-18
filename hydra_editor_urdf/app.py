@@ -75,6 +75,13 @@ class EditorController(QObject):
         self.selected_link: str | None = None
         self.joint_values: dict[str, float] = {}
         self._source_description: str = ""
+        # Rebuilt on every load_urdf_file() call, and reused by
+        # add_mesh_search_folder() below to rebuild the resolver with an
+        # extra operator-picked search folder without needing the whole
+        # URDF to be re-parsed.
+        self._mesh_search_root: Path | None = None
+        self._urdf_file_dir: Path | None = None
+        self._extra_mesh_roots: list[Path] = []
 
     # --- loading ---------------------------------------------------------------
 
@@ -123,12 +130,37 @@ class EditorController(QObject):
             return
 
         search_root = Path(mesh_search_root) if mesh_search_root is not None else urdf_path.parent
+        self._mesh_search_root = search_root
+        self._urdf_file_dir = urdf_path.parent
+        self._extra_mesh_roots = []  # a fresh load starts over - an extra folder picked for a previous URDF isn't assumed relevant to this one
         self.mesh_resolver = build_mesh_resolver(search_root, urdf_path.parent)
         self.robot = robot
         self.dof_report = validate(robot)
         self.joint_values = {}  # render/kinematics.default_joint_values() fills this in once the viewport asks for a pose
         self.selected_link = None
         self.robot_loaded.emit(robot, self.dof_report)
+
+    def add_mesh_search_folder(self, folder: str | Path) -> None:
+        """Adds `folder` as an extra place to look up a mesh by basename,
+        on top of the automatic heuristic resolution in source/scan.py
+        (relative-to-URDF, absolute, then basename search under the
+        originally fetched/opened folder). Meant to be called from the
+        UI's "Locate Missing Meshes..." dialog after that automatic
+        resolution couldn't find one or more `<mesh filename="package://...">`
+        references on its own - typically because the referenced ROS
+        package lives in a separate checkout the original fetch/open
+        never saw. Rebuilds the resolver and asks every panel listening
+        to tree_changed to retry every geometry, including ones that
+        previously failed."""
+        if self.robot is None or self._mesh_search_root is None or self._urdf_file_dir is None:
+            return
+        folder = Path(folder)
+        if folder not in self._extra_mesh_roots:
+            self._extra_mesh_roots.append(folder)
+        self.mesh_resolver = build_mesh_resolver(
+            self._mesh_search_root, self._urdf_file_dir, extra_roots=self._extra_mesh_roots
+        )
+        self.tree_changed.emit()
 
     # --- editing (each of these re-validates and re-emits, so every panel
     #     stays consistent without polling) --------------------------------
