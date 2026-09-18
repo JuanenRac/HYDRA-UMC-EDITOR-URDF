@@ -54,7 +54,11 @@ def _basename_index(root: Path) -> dict[str, list[Path]]:
     return index
 
 
-def build_mesh_resolver(root: str | Path, urdf_file_dir: str | Path) -> Callable[[str], "Path | None"]:
+def build_mesh_resolver(
+    root: str | Path,
+    urdf_file_dir: str | Path,
+    extra_roots: list[str | Path] | None = None,
+) -> Callable[[str], "Path | None"]:
     """Returns a function `resolve(mesh_filename: str) -> Path | None`
     that turns whatever a <mesh filename="..."> attribute contains into a
     real file under `root`, trying (in order):
@@ -75,13 +79,22 @@ def build_mesh_resolver(root: str | Path, urdf_file_dir: str | Path) -> Callable
        somewhere in the tree - ambiguous, but a same-named mesh file
        used by two different links in the same repo virtually always
        IS the same real file (e.g. a duplicated bolt/bracket mesh).
+    4. By basename under each of `extra_roots`, in order - folders the
+       operator explicitly points at (via the UI's "Locate Missing
+       Meshes..." dialog) after step 3 failed to find a match, e.g.
+       because the referenced ROS package lives in a sibling checkout
+       outside the originally fetched/opened folder entirely. Empty by
+       default; nothing changes for a resolver nobody ever pointed at an
+       extra folder.
     """
     root = Path(root)
     urdf_file_dir = Path(urdf_file_dir)
+    extra_root_paths = [Path(p) for p in extra_roots] if extra_roots else []
     index: dict[str, list[Path]] | None = None  # built lazily - most resolvers are only ever asked for a handful of files
+    extra_indexes: list[dict[str, list[Path]]] = []  # one per extra root, also built lazily and in the same order
 
     def resolve(mesh_filename: str) -> Path | None:
-        nonlocal index
+        nonlocal index, extra_indexes
         if not mesh_filename:
             return None
 
@@ -125,6 +138,15 @@ def build_mesh_resolver(root: str | Path, urdf_file_dir: str | Path) -> Callable
             index = _basename_index(root)
         basename = Path(tail).name.lower()
         matches = index.get(basename)
-        return matches[0] if matches else None
+        if matches:
+            return matches[0]
+
+        if extra_root_paths and not extra_indexes:
+            extra_indexes = [_basename_index(p) for p in extra_root_paths]
+        for extra_index in extra_indexes:
+            matches = extra_index.get(basename)
+            if matches:
+                return matches[0]
+        return None
 
     return resolve

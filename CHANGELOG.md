@@ -9,6 +9,22 @@ goes up by 1 per build; once `PATCH` would exceed 9 it resets to 0 and
 `MINOR` goes up by 1 instead (e.g. `0.0.9` -> `0.1.0`). `MAJOR` is only ever
 bumped by hand, as a deliberate decision.
 
+## [0.0.8] - A graphical fallback when package:// mesh resolution can't find a file
+
+- **Locate Missing Meshes... dialog:** `source/scan.py`'s heuristic
+  `package://` resolution (relative path, then basename search under
+  the fetched/opened folder) already handles the common case, but had
+  no fallback when a referenced mesh genuinely isn't anywhere under the
+  original folder - e.g. the URDF references a sibling ROS package that
+  lives in a separate checkout. The viewport now shows a "Locate Missing
+  Meshes..." button whenever a mesh actually fails to resolve; picking a
+  folder there rebuilds the resolver with that folder as an extra
+  basename-search root (`build_mesh_resolver`'s new `extra_roots`
+  parameter) and retries every geometry, including ones that previously
+  failed, without needing to re-open the URDF. New `VIEWPORT_LOCATE_MESHES_
+  BUTTON`/`VIEWPORT_LOCATE_MESHES_DIALOG_TITLE` keys across all 7
+  languages.
+
 ## [0.0.7] - H015/H016/H017/H064: insecure defaults, an invisible ghost link, non-finite geometry, and denied capabilities
 
 - **H015:** the Upload panel's username/password fields were pre-filled

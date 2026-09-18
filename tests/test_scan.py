@@ -78,6 +78,48 @@ def test_resolve_falls_back_to_basename_search_anywhere_under_root(tmp_path):
     assert result == mesh_file
 
 
+def test_resolve_falls_back_to_extra_roots_when_root_has_no_match(tmp_path):
+    # The graphical "Locate Missing Meshes..." dialog (app.py's own
+    # add_mesh_search_folder()) rebuilds the resolver with an
+    # operator-picked extra folder once the automatic root search above
+    # comes up empty - e.g. the referenced ROS package lives in a
+    # separate checkout the original fetch/open never saw.
+    root = tmp_path / "fetched_repo"
+    root.mkdir()
+    sibling_pkg = tmp_path / "sibling_pkg"
+    (sibling_pkg / "meshes").mkdir(parents=True)
+    mesh_file = sibling_pkg / "meshes" / "gripper.stl"
+    mesh_file.write_bytes(b"stl-data")
+
+    resolve = build_mesh_resolver(root=root, urdf_file_dir=root, extra_roots=[sibling_pkg])
+    result = resolve("package://sibling_pkg/meshes/gripper.stl")
+    assert result == mesh_file
+
+
+def test_resolve_prefers_root_over_extra_roots_when_both_match(tmp_path):
+    root = tmp_path / "fetched_repo"
+    root.mkdir()
+    root_mesh = root / "gripper.stl"
+    root_mesh.write_bytes(b"root-data")
+    extra_root = tmp_path / "extra"
+    extra_root.mkdir()
+    (extra_root / "gripper.stl").write_bytes(b"extra-data")
+
+    resolve = build_mesh_resolver(root=root, urdf_file_dir=root, extra_roots=[extra_root])
+    result = resolve("package://some_pkg/gripper.stl")
+    assert result == root_mesh
+
+
+def test_resolve_returns_none_when_extra_roots_also_have_no_match(tmp_path):
+    root = tmp_path / "fetched_repo"
+    root.mkdir()
+    extra_root = tmp_path / "extra"
+    extra_root.mkdir()
+
+    resolve = build_mesh_resolver(root=root, urdf_file_dir=root, extra_roots=[extra_root])
+    assert resolve("package://some_pkg/nonexistent.stl") is None
+
+
 def test_resolve_returns_none_for_empty_filename(tmp_path):
     resolve = build_mesh_resolver(root=tmp_path, urdf_file_dir=tmp_path)
     assert resolve("") is None
