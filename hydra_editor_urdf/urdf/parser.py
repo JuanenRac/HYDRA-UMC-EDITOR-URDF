@@ -51,13 +51,13 @@ class UrdfParseError(Exception):
 def _parse_float(text: str | float, *, field: str) -> float:
     """Parse one URDF numeric attribute, rejecting a non-finite result.
 
-    H017: Python's own `float()` happily accepts "nan"/"inf"/"-inf" as
+    Python's own `float()` happily accepts "nan"/"inf"/"-inf" as
     valid input - a radius, mass, joint limit or inertia component of
     NaN or Infinity is physically meaningless, and every call site here
     used to accept it silently, letting a genuinely broken (or crafted)
     URDF report a fully "viable" robot with corrupted geometry baked in
     (dof.py's own validate() never checked finiteness either - see that
-    file's own H017 fix). Raises the same UrdfParseError every other
+    file's own equivalent fix). Raises the same UrdfParseError every other
     malformed-input case in this module already does, instead of
     substituting corrupted geometry for a successful parse.
     """
