@@ -93,11 +93,10 @@ class UploadPanel(QWidget):
         self._port = QSpinBox()
         self._port.setRange(1, 65535)
         self._port.setValue(3000)
-        # H015: these used to be pre-filled with the literal text "admin"/
+        # These used to be pre-filled with the literal text "admin"/
         # "admin" - a real credential, not a placeholder, and exactly the
         # default HYDRA-UMC-SERVER's own bootstrap admin account used to
-        # ship with (see feedback_reboot_cm5_after_updates in this
-        # ecosystem's own history). Pre-filling a real-looking credential
+        # ship with. Pre-filling a real-looking credential
         # here suggested it as a legitimate thing to actually connect
         # with, rather than requiring the user's own real one. Empty
         # fields with placeholder text ask for input instead of

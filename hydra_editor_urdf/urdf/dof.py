@@ -71,7 +71,7 @@ def validate(robot: Robot) -> DofReport:
 
     reasons: list[str] = []
 
-    # H016: a joint's own <parent>/<child> naming a link that has no
+    # A joint's own <parent>/<child> naming a link that has no
     # matching <link> element at all (a real typo, or a link deleted
     # without updating the joints pointing at it) used to get a "viable"
     # verdict. root_link_name()/_reachable_from() below only ever walk
@@ -149,8 +149,8 @@ def validate(robot: Robot) -> DofReport:
     for joint in movable:
         if joint.type != JointType.CONTINUOUS and joint.limit is None:
             reasons.append(f"Joint {joint.name!r} ({joint.type.value}) has no <limit> - required by the URDF spec for anything but a CONTINUOUS joint.")
-        # H017: an inverted range (lower > upper) is not a finiteness
-        # problem (parser.py's own H017 fix already rejects NaN/inf), but
+        # An inverted range (lower > upper) is not a finiteness
+        # problem (parser.py's own equivalent fix already rejects NaN/inf), but
         # it is just as physically meaningless - no real joint position
         # exists between two bounds that don't overlap - and was
         # previously never checked at all here.
