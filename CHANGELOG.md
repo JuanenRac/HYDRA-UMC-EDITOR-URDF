@@ -9,6 +9,15 @@ goes up by 1 per build; once `PATCH` would exceed 9 it resets to 0 and
 `MINOR` goes up by 1 instead (e.g. `0.0.9` -> `0.1.0`). `MAJOR` is only ever
 bumped by hand, as a deliberate decision.
 
+## [0.0.9] - Export refuses an unsound robot
+
+- `urdf/save_check.py`: before anything is written, export checks every joint limit (finite,
+  lower below upper, non-negative effort and velocity, present for revolute and prismatic
+  joints), that a movable joint's axis is a real direction, that geometry has positive
+  dimensions and non-zero mesh scale, and (when a mesh folder is given) that each mesh file
+  exists. A failing robot raises `UrdfSaveError` listing every problem, nothing is written and
+  the existing file is left alone. The UI already shows the message. Nine new tests.
+
 ## [0.0.8] - A graphical fallback when package:// mesh resolution can't find a file
 
 - **Locate Missing Meshes... dialog:** `source/scan.py`'s heuristic

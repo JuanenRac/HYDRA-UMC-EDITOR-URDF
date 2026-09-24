@@ -26,6 +26,7 @@ from hydra_editor_urdf.source.local_folder import LocalFolderError, validate_loc
 from hydra_editor_urdf.source.scan import build_mesh_resolver, find_urdf_files
 from hydra_editor_urdf.urdf.dof import DofReport, validate
 from hydra_editor_urdf.urdf.parser import UrdfParseError, parse_urdf_file
+from hydra_editor_urdf.urdf.save_check import UrdfSaveError, check_before_save
 from hydra_editor_urdf.urdf.writer import robot_to_urdf_string
 
 # Where fetched-from-GitHub repos land - a real subfolder of this app's
@@ -191,11 +192,17 @@ class EditorController(QObject):
             return None
         return robot_to_urdf_string(self.robot)
 
-    def export_urdf_file(self, path: str | Path) -> None:
+    def export_urdf_file(self, path: str | Path, mesh_root: str | Path | None = None) -> None:
         text = self.export_urdf_string()
         if text is None:
             raise ValueError("No robot loaded to export.")
         path = Path(path)
+        # Refuse a robot with impossible limits, a non-direction axis, empty
+        # geometry or a missing mesh before anything is written; the error
+        # lists every problem so it can all be fixed in one pass.
+        issues = check_before_save(self.robot, Path(mesh_root) if mesh_root is not None else None)
+        if issues:
+            raise UrdfSaveError(issues)
         # BUG (found in audit): this used to call write_text() directly
         # over whatever file the operator picked - if that path already
         # existed (the overwhelmingly common case: "Export" onto the same
