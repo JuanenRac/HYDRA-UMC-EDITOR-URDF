@@ -118,7 +118,7 @@ def fetch_github_repo(url_or_shorthand: str, work_dir: str | Path) -> Path:
     alone, so re-fetching the same repo/ref twice just leaves 2 (or
     overwrites one, if the resulting folder name collides) rather than
     silently deleting anything the operator hasn't been told about, per
-    [[feedback_no_permanent_delete]] applied to this app's own scratch
+    The "never delete permanently" rule applied to this app's own scratch
     space too even though it's not the operator's real project files."""
     owner, repo, ref = parse_github_url(url_or_shorthand)
     if ref is None:
