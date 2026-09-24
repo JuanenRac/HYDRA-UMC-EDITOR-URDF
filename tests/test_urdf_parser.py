@@ -196,7 +196,7 @@ def test_empty_xyz_attribute_falls_back_to_default():
     assert robot.joints["j"].origin.xyz == (0.0, 0.0, 0.0)
 
 
-# --- H017: non-finite/invalid numeric values are rejected, not silently accepted ---
+# --- non-finite/invalid numeric values are rejected, not silently accepted ---
 
 
 def test_nan_in_origin_xyz_is_rejected():

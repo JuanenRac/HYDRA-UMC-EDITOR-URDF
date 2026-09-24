@@ -77,7 +77,7 @@ def test_fixed_joints_dont_count_toward_dof():
     assert report.is_feasible
 
 
-# H017: an inverted <limit> range (lower > upper) is physically
+# an inverted <limit> range (lower > upper) is physically
 # meaningless - no real joint position exists between two bounds that
 # don't overlap - but was never checked before.
 def test_joint_limit_with_lower_greater_than_upper_is_flagged():
@@ -159,7 +159,7 @@ def test_orphan_link_not_referenced_by_any_joint_is_reported_separately_from_dis
     assert "unused" not in report.disconnected_link_names
 
 
-# H016 regression: a joint whose own parent/child names a link with no
+# regression: a joint whose own parent/child names a link with no
 # matching <link> element at all used to get a "viable" verdict -
 # root_link_name()/_reachable_from() only ever walk names already in
 # robot.links, so a fictitious child name was silently accepted into the
