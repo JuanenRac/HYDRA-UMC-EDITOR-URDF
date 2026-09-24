@@ -8,7 +8,6 @@ from pathlib import Path
 
 import pytest
 
-from hydra_editor_urdf.app import EditorController
 from hydra_editor_urdf.models import (
     BoxGeometry,
     CylinderGeometry,
@@ -74,8 +73,16 @@ def test_a_missing_mesh_file_is_reported_and_a_present_one_is_not():
     assert check_before_save(robot) == []  # no mesh root known: not checked
 
 
+def _controller():
+    # The controller needs the Qt bindings; the checks above do not.
+    pytest.importorskip("PySide6")
+    from hydra_editor_urdf.app import EditorController
+
+    return EditorController()
+
+
 def test_export_refuses_an_invalid_robot_and_writes_nothing():
-    controller = EditorController()
+    controller = _controller()
     controller.robot = _robot(limit=JointLimit(2.0, 1.0, 1.0, 1.0))
     with tempfile.TemporaryDirectory() as tmp:
         target = Path(tmp) / "out.urdf"
@@ -86,7 +93,7 @@ def test_export_refuses_an_invalid_robot_and_writes_nothing():
 
 
 def test_export_of_a_sound_robot_still_works():
-    controller = EditorController()
+    controller = _controller()
     controller.robot = _robot()
     with tempfile.TemporaryDirectory() as tmp:
         target = Path(tmp) / "out.urdf"

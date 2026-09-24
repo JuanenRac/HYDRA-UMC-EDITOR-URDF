@@ -9,6 +9,10 @@ goes up by 1 per build; once `PATCH` would exceed 9 it resets to 0 and
 `MINOR` goes up by 1 instead (e.g. `0.0.9` -> `0.1.0`). `MAJOR` is only ever
 bumped by hand, as a deliberate decision.
 
+## [0.1.0] - CI test fix
+
+- The pre-save export tests that need the editor controller now skip when PySide6 is not installed, so the plain Python test job stays green.
+
 ## [0.0.9] - Export refuses an unsound robot
 
 - `urdf/save_check.py`: before anything is written, export checks every joint limit (finite,
