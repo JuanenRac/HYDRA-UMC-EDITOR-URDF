@@ -75,9 +75,9 @@ automated test coverage at all and is only verified by hand, and that
 `test_github_fetcher.py` mocks every network call. Documents the real,
 current state of what's implemented vs. planned; no behavior changed.
 
-## [0.0.5] - DOC-18: removed private-document references
+## [0.0.5] - removed private-document references
 
-- **DOC-18 (P2):**
+- 
   removed the 2 remaining references to an internal
   planning file with no public equivalent (`app.py`'s crash-safety `.bak`
   comment, `urdf/dof.py`'s negative-mass-link comment) - the reasoning
