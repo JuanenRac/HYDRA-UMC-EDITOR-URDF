@@ -24,7 +24,7 @@
 
 ### 🖌️ Graphical URDF Creator/Editor for the HYDRA-UMC-STUDIO Model Catalog
 
-**Current version:** 0.0.8 (`MAJOR.MINOR.PATCH` - see the **Production Build** section below for how this number moves)
+**Current version:** 0.0.9 (`MAJOR.MINOR.PATCH` - see the **Production Build** section below for how this number moves)
 
 ---
 
