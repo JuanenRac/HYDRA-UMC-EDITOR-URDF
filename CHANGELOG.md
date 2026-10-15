@@ -99,7 +99,7 @@ current state of what's implemented vs. planned; no behavior changed.
 
 ## [0.0.4] - Real automated test suite
 
-- Found while auditing the code: this app's own
+- Found on code review: this app's own
   pure logic (`urdf/parser.py`/`urdf/writer.py`, `urdf/dof.py`,
   `render/kinematics.py`, `inertia_calc.py`, `models.py`,
   `source/scan.py`/`source/local_folder.py`/`source/github_fetcher.py`,
@@ -111,11 +111,10 @@ current state of what's implemented vs. planned; no behavior changed.
   structural failure mode: no/multiple root links, disconnected
   sub-graphs, multi-parent links, negative mass), forward kinematics
   (including explicit regressions for the real-cycle-hangs-forever bug
-  and the diamond-reconvergence determinism already fixed in a prior
-  audit pass), closed-form inertia tensors checked against independently
+  and the diamond-reconvergence determinism already fixed in an earlier review), closed-form inertia tensors checked against independently
   computed textbook values, the mesh-reference resolver (including an
   explicit regression for the `had_scheme` gating bug already fixed in
-  a prior audit pass), `parse_github_url()`'s every real-world URL form,
+  an earlier review), `parse_github_url()`'s every real-world URL form,
   `resolve_default_branch()`/`fetch_github_repo()` with GitHub's network
   calls mocked (never real), and `i18n.py`'s config/language file I/O
   against real temp files (never the operator's own real config).
@@ -300,10 +299,10 @@ at all before this point.
 - The About dialog (Help menu) now shows the running version.
 - Added `CHANGELOG.md` (this file).
 
-## Unreleased history (pre-0.0.0, summarized from internal notes)
+## Earlier history (before version numbering)
 
 The sections below summarize work completed before version numbering
-existed, drawn from the project's internal notes.
+existed, drawn from the project's history.
 
 ### Project commissioned
 
