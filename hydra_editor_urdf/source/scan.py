@@ -54,6 +54,35 @@ def _basename_index(root: Path) -> dict[str, list[Path]]:
     return index
 
 
+def _pick_closest(matches: list[Path], tail: str, urdf_file_dir: Path) -> Path:
+    """Chooses among files that share the basename of a mesh reference, the same
+    way on every machine (the directory walk order differs between file systems).
+
+    The closest one wins: the one whose path ends with the most of the
+    reference's own path components ("meshes/link1.stl" prefers
+    ".../arm/meshes/link1.stl" to ".../gripper/link1.stl"). A reference that
+    names a folder ("sub/mesh.stl") but did not resolve next to the URDF is not
+    pointing at a file lying directly in the URDF's own folder, so those come
+    last; whatever still ties is ordered by path, never by walk order."""
+    if len(matches) == 1:
+        return matches[0]
+    wanted = [part.lower() for part in Path(tail).parts]
+    has_folder = len(wanted) > 1
+    urdf_dir = urdf_file_dir.resolve()
+
+    def rank(path: Path) -> tuple[int, int, str]:
+        have = [part.lower() for part in path.parts]
+        shared = 0
+        for a, b in zip(reversed(wanted), reversed(have)):
+            if a != b:
+                break
+            shared += 1
+        beside_urdf = 1 if has_folder and path.resolve().parent == urdf_dir else 0
+        return (-shared, beside_urdf, str(path).lower())
+
+    return min(matches, key=rank)
+
+
 def build_mesh_resolver(
     root: str | Path,
     urdf_file_dir: str | Path,
@@ -78,7 +107,10 @@ def build_mesh_resolver(
        the first match if more than one file shares that basename
        somewhere in the tree - ambiguous, but a same-named mesh file
        used by two different links in the same repo virtually always
-       IS the same real file (e.g. a duplicated bolt/bracket mesh).
+       IS the same real file (e.g. a duplicated bolt/bracket mesh). When
+       they are not, the file whose path shares the most trailing
+       components with the reference wins, and ties are broken by path
+       (see `_pick_closest`), never by the file system's walk order.
     4. By basename under each of `extra_roots`, in order - folders the
        operator explicitly points at (via the UI's "Locate Missing
        Meshes..." dialog) after step 3 failed to find a match, e.g.
@@ -139,14 +171,14 @@ def build_mesh_resolver(
         basename = Path(tail).name.lower()
         matches = index.get(basename)
         if matches:
-            return matches[0]
+            return _pick_closest(matches, tail, urdf_file_dir)
 
         if extra_root_paths and not extra_indexes:
             extra_indexes = [_basename_index(p) for p in extra_root_paths]
         for extra_index in extra_indexes:
             matches = extra_index.get(basename)
             if matches:
-                return matches[0]
+                return _pick_closest(matches, tail, urdf_file_dir)
         return None
 
     return resolve

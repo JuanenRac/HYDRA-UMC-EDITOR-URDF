@@ -9,6 +9,12 @@ goes up by 1 per build; once `PATCH` would exceed 9 it resets to 0 and
 `MINOR` goes up by 1 instead (e.g. `0.0.9` -> `0.1.0`). `MAJOR` is only ever
 bumped by hand, as a deliberate decision.
 
+## [0.1.1] - Deterministic mesh choice; the interface speaks Portuguese
+
+- **Mesh references that match several files:** when a `<mesh filename>` basename is found in more than one place, the file whose path shares the most trailing components with the reference now wins, a reference that names a folder that did not resolve no longer picks the file lying beside the URDF, and ties are broken by path. It used to take whichever file the directory walk listed first, so the same project loaded a different mesh on another file system (`test_scan.py` failed on one of them).
+- **Portuguese interface:** `language/portuguese.lng` (103 keys, the same placeholders as English) and a `Português` entry in the language menu. A README_por.md joins the other seven.
+- 3 new tests (202 in all): the closest path wins whatever the walk order, ties go by path, and a folder reference that missed does not pick the file beside the URDF.
+
 ## [0.1.0] - CI test fix
 
 - The pre-save export tests that need the editor controller now skip when PySide6 is not installed, so the plain Python test job stays green.

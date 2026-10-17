@@ -24,11 +24,11 @@
 
 ### 🖌️ HYDRA-UMC-STUDIO モデルカタログ向けグラフィカル URDF 作成/編集ツール
 
-**現在のバージョン：** 0.1.0（`MAJOR.MINOR.PATCH` —— この番号がどう変化するかは下記「プロダクションビルド」セクションを参照）
+**現在のバージョン：** 0.1.1（`MAJOR.MINOR.PATCH` —— この番号がどう変化するかは下記「プロダクションビルド」セクションを参照）
 
 ---
 
-**正直な現状確認 - 今日実際に動くもの:** 純粋なロジックのコア - URDF のパース/エクスポート(`urdf/parser.py`、`urdf/writer.py`)、DOF 実現可能性検証(`urdf/dof.py`)、順運動学(`render/kinematics.py`)、慣性推定(`inertia_calc.py`)、メッシュ参照解決と GitHub zipball 取得(`source/scan.py`、`source/github_fetcher.py`、`source/local_folder.py`)、インメモリモデル(`models.py`)、ギャラリー一覧(`gallery.py`)、そして i18n ローダー(`i18n.py`)は本物であり、`tests/` 内の 199 件のテストに合格しており、そのいずれも PySide6/PyOpenGL をインポートしていない。`test_github_fetcher.py` はすべてのネットワーク呼び出しをモック化している - 実際の GitHub zipball ダウンロードは手動で実行されたことはあるが、自動化されたテストスイートの一部として実行されたことは一度もない。Qt/OpenGL 層(`render/viewport.py` の `UrdfGLRenderer`、`render/mesh.py`、各 `ui/*` パネル、そして `--qtquick` デッキの `OffscreenUrdfRenderer`)は本物の動作するコードだが、自動テストのカバレッジは一切ない - 実際のディスプレイ/Qt プラットフォームプラグインが必要であり、CI にはそれがないため、テストスイートではなく手作業で検証されている。`server/client.py` の `StudioClient`(HYDRA-UMC-SERVER の `server.ts` に対するログイン/プッシュ/プル)も同様に本物の HTTP コードであり、自動テストは一切ない。xacro の展開と COLLADA(`.dae`)メッシュの読み込みは、明示的に名前が付けられた未実装機能である(サイレントな誤解析ではなく明確なエラーを返す) - その理由については下記の概要にある正直さについての注記、および URDF パース/メッシュ読み込みの各セクションを参照。これまでに何が実際に出荷されたかは `CHANGELOG.md` を参照。
+**正直な現状確認 - 今日実際に動くもの:** 純粋なロジックのコア - URDF のパース/エクスポート(`urdf/parser.py`、`urdf/writer.py`)、DOF 実現可能性検証(`urdf/dof.py`)、順運動学(`render/kinematics.py`)、慣性推定(`inertia_calc.py`)、メッシュ参照解決と GitHub zipball 取得(`source/scan.py`、`source/github_fetcher.py`、`source/local_folder.py`)、インメモリモデル(`models.py`)、ギャラリー一覧(`gallery.py`)、そして i18n ローダー(`i18n.py`)は本物であり、`tests/` 内の 202 件のテストに合格しており、そのいずれも PySide6/PyOpenGL をインポートしていない。`test_github_fetcher.py` はすべてのネットワーク呼び出しをモック化している - 実際の GitHub zipball ダウンロードは手動で実行されたことはあるが、自動化されたテストスイートの一部として実行されたことは一度もない。Qt/OpenGL 層(`render/viewport.py` の `UrdfGLRenderer`、`render/mesh.py`、各 `ui/*` パネル、そして `--qtquick` デッキの `OffscreenUrdfRenderer`)は本物の動作するコードだが、自動テストのカバレッジは一切ない - 実際のディスプレイ/Qt プラットフォームプラグインが必要であり、CI にはそれがないため、テストスイートではなく手作業で検証されている。`server/client.py` の `StudioClient`(HYDRA-UMC-SERVER の `server.ts` に対するログイン/プッシュ/プル)も同様に本物の HTTP コードであり、自動テストは一切ない。xacro の展開と COLLADA(`.dae`)メッシュの読み込みは、明示的に名前が付けられた未実装機能である(サイレントな誤解析ではなく明確なエラーを返す) - その理由については下記の概要にある正直さについての注記、および URDF パース/メッシュ読み込みの各セクションを参照。これまでに何が実際に出荷されたかは `CHANGELOG.md` を参照。
 
 ## 🎯 概要
 
@@ -122,7 +122,7 @@
 
 ## 🌐 多言語インターフェース
 
-**英語、スペイン語、イタリア語、フランス語、ドイツ語、簡体字中国語、日本語**（`language/*.lng`）にわたる完全なインターフェース翻訳。本エコシステム内の他のすべての Python ツール（URTC Flasher、URTC Tester、HYDRA-UMC SUITE）とまったく同じ、プレーンな `KEY=Value` ファイル方式を使用しています——この仕組み自体にプロジェクト固有のロジックはなく、ここで再発明する理由はないため、そのまま採用しています。言語の切り替えは、すでに構築されたすべてのウィジェットをライブで再翻訳するのではなく、アプリの再起動後に有効になり、同じ慣例に一致しています。`language/` は PyInstaller の `--add-data` でその内部にバンドルされるのではなく、実行ファイルの**隣**に置かれるため、翻訳者は再ビルドなしに `.lng` ファイルを編集または追加できます。
+**英語、スペイン語、イタリア語、フランス語、ドイツ語、簡体字中国語、日本語、ポルトガル語**（`language/*.lng`）にわたる完全なインターフェース翻訳。本エコシステム内の他のすべての Python ツール（URTC Flasher、URTC Tester、HYDRA-UMC SUITE）とまったく同じ、プレーンな `KEY=Value` ファイル方式を使用しています——この仕組み自体にプロジェクト固有のロジックはなく、ここで再発明する理由はないため、そのまま採用しています。言語の切り替えは、すでに構築されたすべてのウィジェットをライブで再翻訳するのではなく、アプリの再起動後に有効になり、同じ慣例に一致しています。`language/` は PyInstaller の `--add-data` でその内部にバンドルされるのではなく、実行ファイルの**隣**に置かれるため、翻訳者は再ビルドなしに `.lng` ファイルを編集または追加できます。
 
 ---
 
@@ -172,7 +172,7 @@ HYDRA-UMC-EDITOR-URDF/
 ├── bump_manifest_version.py        # hydra-umc.project.json のバージョンをネイティブ側と同期（--sync）
 ├── CHANGELOG.md                    # バージョン履歴
 ├── README.md                       # 本ファイル
-├── README_spa.md / README_ita.md / README_fra.md / README_deu.md / README_zho.md / README_jpn.md  # <- 翻訳
+├── README_spa.md / README_ita.md / README_fra.md / README_deu.md / README_zho.md / README_jpn.md / README_por.md  # <- 翻訳
 ├── LICENSE                         # GPL-3.0
 ├── assets/
 │   ├── HYDRA_UMC_ICON.svg          # ツールバーのコマンドデッキで使用するアニメーション HYDRA-UMC マーク
@@ -181,7 +181,7 @@ HYDRA-UMC-EDITOR-URDF/
 │   └── qss/industrial_dark.qss     # HYDRA-UMC-SUITE からそのまま再利用
 ├── images/
 │   └── HYDRA_UMC_BANNER.svg        # メディアと図版
-├── language/                       # english/spanish/italian/french/german/chinese/japanese.lng —— exe の隣に置かれ、バンドルされない
+├── language/                       # english/spanish/italian/french/german/chinese/japanese/portuguese.lng —— exe の隣に置かれ、バンドルされない
 ├── hydra_editor_urdf/
 │   ├── __init__.py                 # __version__ —— 唯一の権威ある情報源、About ダイアログが読み取り、bump_version.py が書き換える
 │   ├── app.py                      # EditorController —— 「何が読み込まれているか」の唯一の保持者、各パネルがリッスンする Qt シグナル
@@ -217,7 +217,7 @@ HYDRA-UMC-EDITOR-URDF/
 │   ├── ARCHITECTURE.md
 │   ├── BUILD_AND_RUN.md
 │   └── INTEGRATION_CONTRACT.md
-├── tests/                          # 実際の pytest スイート(199 件のテスト)—— 純粋なロジックのみ、ここでは PySide6 のインポートは一切なし
+├── tests/                          # 実際の pytest スイート(202 件のテスト)—— 純粋なロジックのみ、ここでは PySide6 のインポートは一切なし
 │   ├── test_urdf_parser.py / test_urdf_writer.py  # URDF XML <-> models.py、parse -> write -> parse のラウンドトリップを含む
 │   ├── test_dof.py                 # 実現可能性検証、DOF の境界、ルート/孤立/切断/複数親の検出
 │   ├── test_kinematics.py          # 順運動学、修正済みの「実際のサイクルが永遠にハングする」回帰テストを含む
@@ -279,7 +279,7 @@ pip install -r requirements-dev.txt
 python -m pytest tests/ -q
 ```
 
-エコシステム全体のソフトウェア改善監査で発見:このアプリ自身の純粋なロジック(URDF のパース/エクスポート、DOF 実現可能性検証、順運動学、慣性推定、メッシュ参照解決、GitHub 取得、i18n)には自動テストのカバレッジが一切ありませんでした。修正済み:11 のテストモジュールにまたがる 199 件の実際のテストを追加——どれも PySide6/PyOpenGL をインポートしないため、`requirements-dev.txt` は `tests/` が実際に必要とするもの(`numpy` と `pytest`)だけをインストールし、ディスプレイや Qt プラットフォームプラグインなしでスイート全体が実行できます。いくつかのテストは、以前の監査パスで既に見つかって修正され、ソースコード自体にコメントとして記録済みのバグ(`render/kinematics.py` の実際のサイクルでの無限ループ防止、`source/scan.py` の `had_scheme` 条件分岐、`urdf/dof.py` の負の質量チェック)に対する明示的な回帰テストです——今後の変更がテストを失敗させることなくこれらのいずれかを静かに再発させることはできません。CI(`.github/workflows/ci.yml`)はプッシュのたびに同じコマンドを実行します。
+エコシステム全体のソフトウェア改善監査で発見:このアプリ自身の純粋なロジック(URDF のパース/エクスポート、DOF 実現可能性検証、順運動学、慣性推定、メッシュ参照解決、GitHub 取得、i18n)には自動テストのカバレッジが一切ありませんでした。修正済み:11 のテストモジュールにまたがる 202 件の実際のテストを追加——どれも PySide6/PyOpenGL をインポートしないため、`requirements-dev.txt` は `tests/` が実際に必要とするもの(`numpy` と `pytest`)だけをインストールし、ディスプレイや Qt プラットフォームプラグインなしでスイート全体が実行できます。いくつかのテストは、以前の監査パスで既に見つかって修正され、ソースコード自体にコメントとして記録済みのバグ(`render/kinematics.py` の実際のサイクルでの無限ループ防止、`source/scan.py` の `had_scheme` 条件分岐、`urdf/dof.py` の負の質量チェック)に対する明示的な回帰テストです——今後の変更がテストを失敗させることなくこれらのいずれかを静かに再発させることはできません。CI(`.github/workflows/ci.yml`)はプッシュのたびに同じコマンドを実行します。
 
 ### プロダクションビルド
 
@@ -464,7 +464,7 @@ HYDRA-UMC EDITOR-URDF の著作権は (c) 2026 JuanenRac（Electro Hobby 3D）�
 
 1. ソースコード（`hydra_editor_urdf/`、`main.py`、および `build_exe.bat`/`build_exe.sh` を通じてそこから構築されるあらゆるバイナリ）は、**GNU General Public License v3.0（GPL-3.0）** の下で提供されます。全文は https://www.gnu.org/licenses/gpl-3.0.html を参照してください。
 
-2. ドキュメント（本 README およびその自身の翻訳版——`README_spa.md`、`README_ita.md`、`README_fra.md`、`README_deu.md`、`README_zho.md`、`README_jpn.md`）は、**クリエイティブ・コモンズ 表示-継承 4.0 国際（CC BY-SA 4.0）** の下で提供されます。全文は https://creativecommons.org/licenses/by-sa/4.0/ を参照してください。
+2. ドキュメント（本 README およびその自身の翻訳版——`README_spa.md`、`README_ita.md`、`README_fra.md`、`README_deu.md`、`README_zho.md`、`README_jpn.md`、`README_por.md`）は、**クリエイティブ・コモンズ 表示-継承 4.0 国際（CC BY-SA 4.0）** の下で提供されます。全文は https://creativecommons.org/licenses/by-sa/4.0/ を参照してください。
 
 本アプリはそれ自身のサードパーティ製ロボットメッシュアセットを一切同梱していません——HYDRA-UMC STUDIO の `public/models/` とは異なり、本エディターが読み込むすべてのメッシュは、オペレーターがそれを向けたどのソースリポジトリまたはローカルフォルダから来たものであれ、そのソース自身の原本ライセンスの下にあります。稼働中の STUDIO サーバーへモデルを提出する前に（本エディターのエクスポート機能がそのまま流し込む先である、そのサーバー自身の `public/models/<slug>/ATTRIBUTION.txt` の慣例）、そのアップストリームのライセンス/帰属表示を確認し保持することは、引き続きオペレーター自身の責任です——本アプリには、あるソースリポジトリのライセンス条件を自動的に検出したり強制したりする方法はありません。
 

@@ -182,3 +182,45 @@ def test_resolver_index_is_case_insensitive_on_basename(tmp_path):
     result = resolve("package://pkg/link1.stl")
     assert result is not None
     assert result.name == "Link1.STL"
+
+
+def test_the_closest_path_wins_when_two_files_share_a_basename_whatever_the_walk_order(tmp_path):
+    # "meshes/link1.stl" must pick arm/meshes/link1.stl, not gripper/link1.stl,
+    # and must do so on every file system (the walk order is not the same)
+    arm = tmp_path / "arm" / "meshes"
+    gripper = tmp_path / "gripper"
+    arm.mkdir(parents=True)
+    gripper.mkdir()
+    (arm / "link1.stl").write_bytes(b"arm")
+    (gripper / "link1.stl").write_bytes(b"gripper")
+
+    resolve = build_mesh_resolver(root=tmp_path, urdf_file_dir=tmp_path / "urdf")
+
+    assert resolve("package://pkg/meshes/link1.stl") == arm / "link1.stl"
+
+
+def test_a_tie_is_broken_by_path_not_by_directory_order(tmp_path, monkeypatch):
+    from hydra_editor_urdf.source import scan
+
+    first = tmp_path / "a" / "m.stl"
+    second = tmp_path / "b" / "m.stl"
+    first.parent.mkdir()
+    second.parent.mkdir()
+    first.write_bytes(b"1")
+    second.write_bytes(b"2")
+    # whichever order the file system lists them in, the same file is chosen
+    for order in ([first, second], [second, first]):
+        assert scan._pick_closest(order, "m.stl", tmp_path / "urdf") == first
+
+
+def test_a_folder_reference_that_missed_does_not_pick_the_file_beside_the_urdf(tmp_path):
+    urdf_dir = tmp_path / "urdf"
+    urdf_dir.mkdir()
+    beside = urdf_dir / "mesh.stl"
+    beside.write_bytes(b"beside")
+    elsewhere = tmp_path / "z_last_alphabetically" / "mesh.stl"
+    elsewhere.parent.mkdir()
+    elsewhere.write_bytes(b"elsewhere")
+    resolve = build_mesh_resolver(root=tmp_path, urdf_file_dir=urdf_dir)
+
+    assert resolve("sub/mesh.stl") == elsewhere

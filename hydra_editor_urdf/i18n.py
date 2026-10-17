@@ -36,6 +36,7 @@ AVAILABLE_LANGUAGES: list[tuple[str, str]] = [
     ("german", "Deutsch"),
     ("chinese", "简体中文"),
     ("japanese", "日本語"),
+    ("portuguese", "Português"),
 ]
 
 

@@ -24,11 +24,11 @@
 
 ### 🖌️ 面向 HYDRA-UMC-STUDIO 模型目录的图形化 URDF 创建/编辑工具
 
-**当前版本：** 0.1.0（`MAJOR.MINOR.PATCH`——该编号的变化方式见下方“生产构建”一节）
+**当前版本：** 0.1.1（`MAJOR.MINOR.PATCH`——该编号的变化方式见下方“生产构建”一节）
 
 ---
 
-**诚实核查 - 今天真正能运行的部分：** 纯逻辑核心 - URDF 解析/导出(`urdf/parser.py`、`urdf/writer.py`)、DOF 可行性验证(`urdf/dof.py`)、正向运动学(`render/kinematics.py`)、惯量估算(`inertia_calc.py`)、网格引用解析与 GitHub 压缩包下载(`source/scan.py`、`source/github_fetcher.py`、`source/local_folder.py`)、内存中的模型(`models.py`)、画廊列表(`gallery.py`)以及 i18n 加载器(`i18n.py`)——都是真实的，并由 199 个通过的测试(`tests/`)覆盖，其中没有一个测试导入 PySide6/PyOpenGL。`test_github_fetcher.py` 模拟了所有网络调用——真实的 GitHub 压缩包下载曾手动运行过，但从未纳入自动化测试套件。Qt/OpenGL 层(`render/viewport.py` 中的 `UrdfGLRenderer`、`render/mesh.py`、每一个 `ui/*` 面板，以及 `--qtquick` 面板的 `OffscreenUrdfRenderer`)是真实可运行的代码，但完全没有自动化测试覆盖——它需要真实的显示设备/Qt 平台插件，而 CI 环境没有，因此只能手动验证，而非通过测试套件验证。`server/client.py` 中的 `StudioClient`(针对 HYDRA-UMC-SERVER 的 `server.ts` 进行登录/推送/拉取)同样是真实的 HTTP 代码，也没有任何自动化测试。xacro 展开和 COLLADA(`.dae`)网格加载是明确声明、有名有姓的未实现功能(会给出清晰的错误，而不是静默解析错误)——原因见下方概述中的诚实说明，以及 URDF 解析/网格加载各节。具体已交付的内容请见 `CHANGELOG.md`。
+**诚实核查 - 今天真正能运行的部分：** 纯逻辑核心 - URDF 解析/导出(`urdf/parser.py`、`urdf/writer.py`)、DOF 可行性验证(`urdf/dof.py`)、正向运动学(`render/kinematics.py`)、惯量估算(`inertia_calc.py`)、网格引用解析与 GitHub 压缩包下载(`source/scan.py`、`source/github_fetcher.py`、`source/local_folder.py`)、内存中的模型(`models.py`)、画廊列表(`gallery.py`)以及 i18n 加载器(`i18n.py`)——都是真实的，并由 202 个通过的测试(`tests/`)覆盖，其中没有一个测试导入 PySide6/PyOpenGL。`test_github_fetcher.py` 模拟了所有网络调用——真实的 GitHub 压缩包下载曾手动运行过，但从未纳入自动化测试套件。Qt/OpenGL 层(`render/viewport.py` 中的 `UrdfGLRenderer`、`render/mesh.py`、每一个 `ui/*` 面板，以及 `--qtquick` 面板的 `OffscreenUrdfRenderer`)是真实可运行的代码，但完全没有自动化测试覆盖——它需要真实的显示设备/Qt 平台插件，而 CI 环境没有，因此只能手动验证，而非通过测试套件验证。`server/client.py` 中的 `StudioClient`(针对 HYDRA-UMC-SERVER 的 `server.ts` 进行登录/推送/拉取)同样是真实的 HTTP 代码，也没有任何自动化测试。xacro 展开和 COLLADA(`.dae`)网格加载是明确声明、有名有姓的未实现功能(会给出清晰的错误，而不是静默解析错误)——原因见下方概述中的诚实说明，以及 URDF 解析/网格加载各节。具体已交付的内容请见 `CHANGELOG.md`。
 
 ## 🎯 概述
 
@@ -122,7 +122,7 @@
 
 ## 🌐 多语言界面
 
-界面在**英语、西班牙语、意大利语、法语、德语、简体中文和日语**（`language/*.lng`）之间全面翻译，使用与本生态系统中每一个其他 Python 工具（URTC Flasher、URTC Tester、HYDRA-UMC SUITE）完全相同的纯 `KEY=Value` 文件机制——此处并未重新发明，因为该机制本身不带有任何项目特定的逻辑。语言切换在应用重启后生效，而非实时重新翻译每一个已构建的控件，遵循同样的惯例。`language/` 位于可执行文件**旁边**，而非通过 PyInstaller 的 `--add-data` 打包进其内部，因此翻译者无需重新构建即可编辑或添加一个 `.lng` 文件。
+界面在**英语、西班牙语、意大利语、法语、德语、简体中文、日语和葡萄牙语**（`language/*.lng`）之间全面翻译，使用与本生态系统中每一个其他 Python 工具（URTC Flasher、URTC Tester、HYDRA-UMC SUITE）完全相同的纯 `KEY=Value` 文件机制——此处并未重新发明，因为该机制本身不带有任何项目特定的逻辑。语言切换在应用重启后生效，而非实时重新翻译每一个已构建的控件，遵循同样的惯例。`language/` 位于可执行文件**旁边**，而非通过 PyInstaller 的 `--add-data` 打包进其内部，因此翻译者无需重新构建即可编辑或添加一个 `.lng` 文件。
 
 ---
 
@@ -168,7 +168,7 @@ HYDRA-UMC-EDITOR-URDF/
 ├── bump_manifest_version.py        # 将 hydra-umc.project.json 的版本与原生版本同步（--sync）
 ├── CHANGELOG.md                    # 版本历史
 ├── README.md                       # 本文件
-├── README_spa.md / README_ita.md / README_fra.md / README_deu.md / README_zho.md / README_jpn.md  # <- 翻译
+├── README_spa.md / README_ita.md / README_fra.md / README_deu.md / README_zho.md / README_jpn.md / README_por.md  # <- 翻译
 ├── LICENSE                         # GPL-3.0
 ├── assets/
 │   ├── HYDRA_UMC_ICON.svg          # 工具栏命令面板使用的动画 HYDRA-UMC 标志
@@ -177,7 +177,7 @@ HYDRA-UMC-EDITOR-URDF/
 │   └── qss/industrial_dark.qss     # 原样复用自 HYDRA-UMC-SUITE
 ├── images/
 │   └── HYDRA_UMC_BANNER.svg        # 媒体与图示
-├── language/                       # english/spanish/italian/french/german/chinese/japanese.lng —— 位于 exe 旁边，未打包
+├── language/                       # english/spanish/italian/french/german/chinese/japanese/portuguese.lng —— 位于 exe 旁边，未打包
 ├── hydra_editor_urdf/
 │   ├── __init__.py                 # __version__ —— 唯一权威来源，由 About 对话框读取，由 bump_version.py 重写
 │   ├── app.py                      # EditorController —— “当前加载了什么”的唯一持有者，每个面板监听的 Qt 信号
@@ -213,7 +213,7 @@ HYDRA-UMC-EDITOR-URDF/
 │   ├── ARCHITECTURE.md
 │   ├── BUILD_AND_RUN.md
 │   └── INTEGRATION_CONTRACT.md
-├── tests/                          # 真实的 pytest 套件(199 个测试)——只测纯逻辑,这里完全没有导入 PySide6
+├── tests/                          # 真实的 pytest 套件(202 个测试)——只测纯逻辑,这里完全没有导入 PySide6
 │   ├── test_urdf_parser.py / test_urdf_writer.py  # URDF XML <-> models.py,包括 parse -> write -> parse 往返测试
 │   ├── test_dof.py                 # 可行性校验、DOF 边界、根/孤立/断开/多父级检测
 │   ├── test_kinematics.py          # 正向运动学,包括已修复的"真实环路导致永久挂起"回归测试
@@ -273,7 +273,7 @@ pip install -r requirements-dev.txt
 python -m pytest tests/ -q
 ```
 
-在一次面向整个生态系统的软件改进审计中发现:本应用自身的纯逻辑(URDF 解析/导出、DOF 可行性校验、正向运动学、惯性估算、网格引用解析、GitHub 拉取、i18n)此前完全没有自动化测试覆盖。已修复:新增 11 个测试模块共 199 个真实测试,其中没有一个会导入 PySide6/PyOpenGL——`requirements-dev.txt` 只安装 `tests/` 真正需要的东西(`numpy` 和 `pytest`),因此整个测试套件无需显示器或 Qt 平台插件即可运行。其中几个测试是针对此前审计中已发现并修复、且已在源码本身留有注释记录的 bug 的明确回归测试(`render/kinematics.py` 中针对真实环路的无限循环防护、`source/scan.py` 的 `had_scheme` 条件、`urdf/dof.py` 的负质量检查)——今后的修改如果悄悄让其中任何一个问题重现,都会被测试直接拦下。CI(`.github/workflows/ci.yml`)在每次推送时都会运行同样的命令。
+在一次面向整个生态系统的软件改进审计中发现:本应用自身的纯逻辑(URDF 解析/导出、DOF 可行性校验、正向运动学、惯性估算、网格引用解析、GitHub 拉取、i18n)此前完全没有自动化测试覆盖。已修复:新增 11 个测试模块共 202 个真实测试,其中没有一个会导入 PySide6/PyOpenGL——`requirements-dev.txt` 只安装 `tests/` 真正需要的东西(`numpy` 和 `pytest`),因此整个测试套件无需显示器或 Qt 平台插件即可运行。其中几个测试是针对此前审计中已发现并修复、且已在源码本身留有注释记录的 bug 的明确回归测试(`render/kinematics.py` 中针对真实环路的无限循环防护、`source/scan.py` 的 `had_scheme` 条件、`urdf/dof.py` 的负质量检查)——今后的修改如果悄悄让其中任何一个问题重现,都会被测试直接拦下。CI(`.github/workflows/ci.yml`)在每次推送时都会运行同样的命令。
 
 ### 生产构建
 
@@ -455,7 +455,7 @@ HYDRA-UMC EDITOR-URDF 版权所有 (c) 2026 JuanenRac（Electro Hobby 3D）。�
 
 1. 源代码（`hydra_editor_urdf/`、`main.py`，以及通过 `build_exe.bat`/`build_exe.sh` 从中构建的任何二进制文件）依据 **GNU 通用公共许可证 v3.0（GPL-3.0）** 提供。完整文本见 https://www.gnu.org/licenses/gpl-3.0.html。
 
-2. 文档（本 README 及其自身的翻译版本——`README_spa.md`、`README_ita.md`、`README_fra.md`、`README_deu.md`、`README_zho.md`、`README_jpn.md`）依据 **知识共享 署名-相同方式共享 4.0 国际许可协议（CC BY-SA 4.0）** 提供。完整文本见 https://creativecommons.org/licenses/by-sa/4.0/。
+2. 文档（本 README 及其自身的翻译版本——`README_spa.md`、`README_ita.md`、`README_fra.md`、`README_deu.md`、`README_zho.md`、`README_jpn.md`、`README_por.md`）依据 **知识共享 署名-相同方式共享 4.0 国际许可协议（CC BY-SA 4.0）** 提供。完整文本见 https://creativecommons.org/licenses/by-sa/4.0/。
 
 本应用自身不附带任何第三方机器人网格资产——与 HYDRA-UMC STUDIO 的 `public/models/` 不同，本编辑器加载的每一个网格都来自操作员所指向的任意源仓库或本地文件夹，遵循该来源自身的原始许可证。在将一个模型提交到一个正在运行的 STUDIO 服务器之前（本编辑器的导出功能所对接的正是该服务器自身 `public/models/<slug>/ATTRIBUTION.txt` 的惯例），审查并保留该上游许可证/署名信息，仍然是操作员自己的责任——本应用无法自动检测或强制执行某个源仓库的许可条款。
 

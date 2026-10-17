@@ -23,11 +23,11 @@
 
 ### 🖌️ Grafischer URDF-Ersteller/-Editor für den Modellkatalog von HYDRA-UMC-STUDIO
 
-**Aktuelle Version:** 0.1.0 (`MAJOR.MINOR.PATCH` - siehe den Abschnitt **Produktions-Build** weiter unten dafür, wie sich diese Zahl bewegt)
+**Aktuelle Version:** 0.1.1 (`MAJOR.MINOR.PATCH` - siehe den Abschnitt **Produktions-Build** weiter unten dafür, wie sich diese Zahl bewegt)
 
 ---
 
-**Ehrlichkeitscheck - was heute wirklich läuft:** der Kern aus reiner Logik - URDF-Parsing/-Export (`urdf/parser.py`, `urdf/writer.py`), DOF-Machbarkeitsprüfung (`urdf/dof.py`), Vorwärtskinematik (`render/kinematics.py`), Trägheitsschätzung (`inertia_calc.py`), Mesh-Referenzauflösung und GitHub-Zipball-Download (`source/scan.py`, `source/github_fetcher.py`, `source/local_folder.py`), das In-Memory-Modell (`models.py`), die Galerie-Liste (`gallery.py`) und der i18n-Lader (`i18n.py`) - ist real und durch 199 bestandene Tests abgedeckt (`tests/`), von denen keiner PySide6/PyOpenGL importiert. `test_github_fetcher.py` simuliert jeden Netzwerkaufruf - ein echter GitHub-Zipball-Download wurde manuell ausgeführt, nie als Teil der automatisierten Suite. Die Qt/OpenGL-Schicht (`render/viewport.py` mit seinem `UrdfGLRenderer`, `render/mesh.py`, jedes `ui/*`-Panel und der `OffscreenUrdfRenderer` des `--qtquick`-Decks) ist echter, funktionierender Code, hat aber überhaupt keine automatisierte Testabdeckung - sie benötigt ein echtes Display/Qt-Plattform-Plugin, das die CI nicht hat, also wird sie von Hand geprüft, nicht durch eine Testsuite. `server/client.py`s `StudioClient` (Login/Push/Pull gegen das `server.ts` von HYDRA-UMC-SERVER) ist ebenfalls echter HTTP-Code ohne jeglichen automatisierten Test. xacro-Expansion und das Laden von COLLADA-Meshes (`.dae`) sind explizite, benannte Nicht-Funktionen (ein klarer Fehler, kein stiller Fehlparse) - siehe den Ehrlichkeitshinweis im Überblick weiter unten und die Abschnitte URDF-Parsing/Mesh-Laden für das Warum. Siehe `CHANGELOG.md` für das, was bisher genau ausgeliefert wurde.
+**Ehrlichkeitscheck - was heute wirklich läuft:** der Kern aus reiner Logik - URDF-Parsing/-Export (`urdf/parser.py`, `urdf/writer.py`), DOF-Machbarkeitsprüfung (`urdf/dof.py`), Vorwärtskinematik (`render/kinematics.py`), Trägheitsschätzung (`inertia_calc.py`), Mesh-Referenzauflösung und GitHub-Zipball-Download (`source/scan.py`, `source/github_fetcher.py`, `source/local_folder.py`), das In-Memory-Modell (`models.py`), die Galerie-Liste (`gallery.py`) und der i18n-Lader (`i18n.py`) - ist real und durch 202 bestandene Tests abgedeckt (`tests/`), von denen keiner PySide6/PyOpenGL importiert. `test_github_fetcher.py` simuliert jeden Netzwerkaufruf - ein echter GitHub-Zipball-Download wurde manuell ausgeführt, nie als Teil der automatisierten Suite. Die Qt/OpenGL-Schicht (`render/viewport.py` mit seinem `UrdfGLRenderer`, `render/mesh.py`, jedes `ui/*`-Panel und der `OffscreenUrdfRenderer` des `--qtquick`-Decks) ist echter, funktionierender Code, hat aber überhaupt keine automatisierte Testabdeckung - sie benötigt ein echtes Display/Qt-Plattform-Plugin, das die CI nicht hat, also wird sie von Hand geprüft, nicht durch eine Testsuite. `server/client.py`s `StudioClient` (Login/Push/Pull gegen das `server.ts` von HYDRA-UMC-SERVER) ist ebenfalls echter HTTP-Code ohne jeglichen automatisierten Test. xacro-Expansion und das Laden von COLLADA-Meshes (`.dae`) sind explizite, benannte Nicht-Funktionen (ein klarer Fehler, kein stiller Fehlparse) - siehe den Ehrlichkeitshinweis im Überblick weiter unten und die Abschnitte URDF-Parsing/Mesh-Laden für das Warum. Siehe `CHANGELOG.md` für das, was bisher genau ausgeliefert wurde.
 
 ## 🎯 Überblick
 
@@ -121,7 +121,7 @@ Spricht mit dem eigenen Modell-Übermittlungsvertrag von HYDRA-UMC-SERVER (`POST
 
 ## 🌐 Mehrsprachige Oberfläche
 
-Vollständige Übersetzung der Oberfläche in **Englisch, Spanisch, Italienisch, Französisch, Deutsch, vereinfachtem Chinesisch und Japanisch** (`language/*.lng`), unter Verwendung genau desselben einfachen `SCHLÜSSEL=Wert`-Dateimechanismus wie jedes andere Python-Tool in diesem Ökosystem (URTC Flasher, URTC Tester, HYDRA-UMC SUITE) - hier nicht neu erfunden, da der Mechanismus selbst keine projektspezifische Logik trägt. Ein Sprachwechsel wird erst nach einem Neustart der App wirksam, statt jedes bereits erstellte Widget live neu zu übersetzen, entsprechend derselben Konvention. `language/` liegt **neben** der ausführbaren Datei, statt über `--add-data` von PyInstaller darin gebündelt zu sein, sodass ein Übersetzer eine `.lng`-Datei bearbeiten oder hinzufügen kann, ohne einen Neubau durchzuführen.
+Vollständige Übersetzung der Oberfläche in **Englisch, Spanisch, Italienisch, Französisch, Deutsch, vereinfachtem Chinesisch, Japanisch und Portugiesisch** (`language/*.lng`), unter Verwendung genau desselben einfachen `SCHLÜSSEL=Wert`-Dateimechanismus wie jedes andere Python-Tool in diesem Ökosystem (URTC Flasher, URTC Tester, HYDRA-UMC SUITE) - hier nicht neu erfunden, da der Mechanismus selbst keine projektspezifische Logik trägt. Ein Sprachwechsel wird erst nach einem Neustart der App wirksam, statt jedes bereits erstellte Widget live neu zu übersetzen, entsprechend derselben Konvention. `language/` liegt **neben** der ausführbaren Datei, statt über `--add-data` von PyInstaller darin gebündelt zu sein, sodass ein Übersetzer eine `.lng`-Datei bearbeiten oder hinzufügen kann, ohne einen Neubau durchzuführen.
 
 ---
 
@@ -172,7 +172,7 @@ HYDRA-UMC-EDITOR-URDF/
 ├── bump_manifest_version.py        # Synchronisiert die Version von hydra-umc.project.json mit der nativen (--sync)
 ├── CHANGELOG.md                    # Versionshistorie
 ├── README.md                       # Diese Datei
-├── README_spa.md / README_ita.md / README_fra.md / README_deu.md / README_zho.md / README_jpn.md  # <- Übersetzungen
+├── README_spa.md / README_ita.md / README_fra.md / README_deu.md / README_zho.md / README_jpn.md / README_por.md  # <- Übersetzungen
 ├── LICENSE                         # GPL-3.0
 ├── assets/
 │   ├── HYDRA_UMC_ICON.svg          # Animiertes HYDRA-UMC-Zeichen des Symbolleisten-Bedienfelds
@@ -181,7 +181,7 @@ HYDRA-UMC-EDITOR-URDF/
 │   └── qss/industrial_dark.qss     # Wörtlich von HYDRA-UMC-SUITE wiederverwendet
 ├── images/
 │   └── HYDRA_UMC_BANNER.svg        # Medien und Diagramme
-├── language/                       # english/spanish/italian/french/german/japanese/chinese.lng - liegt neben der exe, nicht gebündelt
+├── language/                       # english/spanish/italian/french/german/japanese/chinese/portuguese.lng - liegt neben der exe, nicht gebündelt
 ├── hydra_editor_urdf/
 │   ├── __init__.py                 # __version__ - einzige Quelle der Wahrheit, gelesen vom Über-Dialog und neu geschrieben von bump_version.py
 │   ├── app.py                      # EditorController - alleiniger Besitzer von „was geladen ist", Qt-Signale, denen jedes Panel zuhört
@@ -217,7 +217,7 @@ HYDRA-UMC-EDITOR-URDF/
 │   ├── ARCHITECTURE.md
 │   ├── BUILD_AND_RUN.md
 │   └── INTEGRATION_CONTRACT.md
-├── tests/                          # Echte pytest-Suite (199 Tests) - nur reine Logik, hier wird nirgends PySide6 importiert
+├── tests/                          # Echte pytest-Suite (202 Tests) - nur reine Logik, hier wird nirgends PySide6 importiert
 │   ├── test_urdf_parser.py / test_urdf_writer.py  # URDF-XML <-> models.py, einschliesslich parse -> write -> parse Round-Trips
 │   ├── test_dof.py                 # Machbarkeitspruefung, DOF-Grenzen, Erkennung von Wurzel/Waise/getrennt/Mehrfach-Eltern
 │   ├── test_kinematics.py          # Vorwaertskinematik, einschliesslich des bereits behobenen Regressionsfalls des Zyklus, der fuer immer hing
@@ -280,7 +280,7 @@ pip install -r requirements-dev.txt
 python -m pytest tests/ -q
 ```
 
-Beim Auditieren des Codes gefunden: die eigene reine Logik dieser App (URDF-Parsing/-Export, DOF-Machbarkeitsprüfung, Vorwärtskinematik, Trägheitsschätzung, Mesh-Referenzauflösung, GitHub-Abruf, i18n) hatte null automatisierte Testabdeckung. Behoben: 199 echte Tests über 11 Testmodule, von denen keines PySide6/PyOpenGL importiert - `requirements-dev.txt` installiert nur das, was `tests/` tatsächlich braucht (`numpy` + `pytest`), sodass die Suite ohne Display oder Qt-Plattform-Plugin läuft. Mehrere Tests sind explizite Regressionstests für Bugs, die bereits in einem früheren Audit-Durchgang gefunden und behoben wurden und direkt im Quellcode dokumentiert sind (die Schutzmaßnahme gegen die Endlosschleife bei einem echten Zyklus in `render/kinematics.py`, die `had_scheme`-Bedingung in `source/scan.py`, die Prüfung auf negative Masse in `urdf/dof.py`) - eine zukünftige Änderung kann keinen davon mehr stillschweigend wieder einführen, ohne dass ein Test fehlschlägt. Die CI (`.github/workflows/ci.yml`) führt bei jedem Push denselben Befehl aus.
+Beim Auditieren des Codes gefunden: die eigene reine Logik dieser App (URDF-Parsing/-Export, DOF-Machbarkeitsprüfung, Vorwärtskinematik, Trägheitsschätzung, Mesh-Referenzauflösung, GitHub-Abruf, i18n) hatte null automatisierte Testabdeckung. Behoben: 202 echte Tests über 11 Testmodule, von denen keines PySide6/PyOpenGL importiert - `requirements-dev.txt` installiert nur das, was `tests/` tatsächlich braucht (`numpy` + `pytest`), sodass die Suite ohne Display oder Qt-Plattform-Plugin läuft. Mehrere Tests sind explizite Regressionstests für Bugs, die bereits in einem früheren Audit-Durchgang gefunden und behoben wurden und direkt im Quellcode dokumentiert sind (die Schutzmaßnahme gegen die Endlosschleife bei einem echten Zyklus in `render/kinematics.py`, die `had_scheme`-Bedingung in `source/scan.py`, die Prüfung auf negative Masse in `urdf/dof.py`) - eine zukünftige Änderung kann keinen davon mehr stillschweigend wieder einführen, ohne dass ein Test fehlschlägt. Die CI (`.github/workflows/ci.yml`) führt bei jedem Push denselben Befehl aus.
 
 ### Produktions-Build
 
@@ -463,7 +463,7 @@ Dieses Projekt besteht aus Quellcode und eigener Dokumentation, die unter unters
 
 1. Der Quellcode (`hydra_editor_urdf/`, `main.py`, sowie jede daraus über `build_exe.bat`/`build_exe.sh` erstellte Binärdatei) ist unter der **GNU General Public License v3.0 (GPL-3.0)** verfügbar. Vollständiger Text unter https://www.gnu.org/licenses/gpl-3.0.html.
 
-2. Die Dokumentation (dieses README und dessen eigene Übersetzungen - `README_spa.md`, `README_ita.md`, `README_fra.md`, `README_deu.md`, `README_zho.md`, `README_jpn.md`) ist unter der **Creative Commons Attribution-ShareAlike 4.0 International (CC BY-SA 4.0)** verfügbar. Vollständiger Text unter https://creativecommons.org/licenses/by-sa/4.0/.
+2. Die Dokumentation (dieses README und dessen eigene Übersetzungen - `README_spa.md`, `README_ita.md`, `README_fra.md`, `README_deu.md`, `README_zho.md`, `README_jpn.md`, `README_por.md`) ist unter der **Creative Commons Attribution-ShareAlike 4.0 International (CC BY-SA 4.0)** verfügbar. Vollständiger Text unter https://creativecommons.org/licenses/by-sa/4.0/.
 
 Diese App liefert keine eigenen Drittanbieter-Robotermesh-Assets aus - anders als die `public/models/` von HYDRA-UMC STUDIO stammt jedes von diesem Editor jemals geladene Mesh aus dem jeweiligen Quell-Repository oder lokalen Ordner, auf das der Bediener es verweist, unter der ursprünglichen Lizenz dieser Quelle. Die Überprüfung und Wahrung dieser vorgelagerten Lizenz-/Attributionsangaben vor der Übermittlung eines Modells an einen laufenden STUDIO-Server (dessen eigene `public/models/<slug>/ATTRIBUTION.txt`-Konvention der Export dieses Editors speist) bleibt die eigene Verantwortung des Bedieners - diese App hat keine Möglichkeit, die Lizenzbedingungen eines Quell-Repositorys automatisch zu erkennen oder durchzusetzen.
 
