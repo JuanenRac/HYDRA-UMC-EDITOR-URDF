@@ -1,7 +1,7 @@
 # =============================================================================
 # HYDRA-UMC EDITOR-URDF - tests/test_models.py
 # Copyright (C) 2026 JuanenRac (Electro Hobby 3D) <electrohobby3d@gmail.com>
-# GPL-3.0 - see LICENSE
+# GPL-3.0-or-later - see LICENSE
 #
 # Real unit tests for hydra_editor_urdf/models.py's own graph helpers
 # (Robot.root_link_name/joints_by_parent/movable_joints) - the shared

@@ -1,7 +1,7 @@
 // =============================================================================
 // HYDRA-UMC EDITOR-URDF - Qt Quick command deck
 // Copyright (C) 2026 JuanenRac (Electro Hobby 3D) <electrohobby3d@gmail.com>
-// GPL-3.0 - see LICENSE
+// GPL-3.0-or-later - see LICENSE
 //
 // Faithfully reproduces the classic QMainWindow's own real spatial
 // arrangement (see ui/main_window.py's own _build_panels()) rather than

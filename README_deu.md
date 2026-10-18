@@ -15,7 +15,7 @@
 
 
 <p align="center">
-  <img src="https://img.shields.io/badge/Lizenz-GPL%203.0-blue.svg" alt="GPL 3.0">
+  <img src="https://img.shields.io/badge/Lizenz-GPL%203.0--or--later-blue.svg" alt="GPL 3.0 or later">
   <img src="https://img.shields.io/badge/Sprache-Python%203.11-3776AB.svg" alt="Python">
   <img src="https://img.shields.io/badge/Framework-PySide6-41CD52.svg" alt="PySide6">
   <img src="https://img.shields.io/badge/Format-URDF-red.svg" alt="URDF">
@@ -23,7 +23,7 @@
 
 ### 🖌️ Grafischer URDF-Ersteller/-Editor für den Modellkatalog von HYDRA-UMC-STUDIO
 
-**Aktuelle Version:** 0.1.2 (`MAJOR.MINOR.PATCH` - siehe den Abschnitt **Produktions-Build** weiter unten dafür, wie sich diese Zahl bewegt)
+**Aktuelle Version:** 0.1.3 (`MAJOR.MINOR.PATCH` - siehe den Abschnitt **Produktions-Build** weiter unten dafür, wie sich diese Zahl bewegt)
 
 ---
 
@@ -175,7 +175,7 @@ HYDRA-UMC-EDITOR-URDF/
 ├── CHANGELOG.md                    # Versionshistorie
 ├── README.md                       # Diese Datei
 ├── README_spa.md / README_ita.md / README_fra.md / README_deu.md / README_zho.md / README_jpn.md / README_por.md  # <- Übersetzungen
-├── LICENSE                         # GPL-3.0
+├── LICENSE                         # GPL-3.0-or-later
 ├── assets/
 │   ├── HYDRA_UMC_ICON.svg          # Animiertes HYDRA-UMC-Zeichen des Symbolleisten-Bedienfelds
 │   ├── qss/industrial_dark.qss     # Wörtlich von HYDRA-UMC-SUITE wiederverwendet
@@ -463,7 +463,7 @@ HYDRA-UMC EDITOR-URDF ist (c) 2026 JuanenRac (Electro Hobby 3D). Dieser Hinweis 
 
 Dieses Projekt besteht aus Quellcode und eigener Dokumentation, die unter unterschiedlichen Lizenzen bereitgestellt werden - jeweils passend zu dem, was sie tatsächlich abdecken:
 
-1. Der Quellcode (`hydra_editor_urdf/`, `main.py`, sowie jede daraus über `build_exe.bat`/`build_exe.sh` erstellte Binärdatei) ist unter der **GNU General Public License v3.0 (GPL-3.0)** verfügbar. Vollständiger Text unter https://www.gnu.org/licenses/gpl-3.0.html.
+1. Der Quellcode (`hydra_editor_urdf/`, `main.py`, sowie jede daraus über `build_exe.bat`/`build_exe.sh` erstellte Binärdatei) ist unter der **GNU General Public License v3.0 or later (GPL-3.0-or-later)** verfügbar. Vollständiger Text unter https://www.gnu.org/licenses/gpl-3.0.html.
 
 2. Die Dokumentation (dieses README und dessen eigene Übersetzungen - `README_spa.md`, `README_ita.md`, `README_fra.md`, `README_deu.md`, `README_zho.md`, `README_jpn.md`, `README_por.md`) ist unter der **Creative Commons Attribution-ShareAlike 4.0 International (CC BY-SA 4.0)** verfügbar. Vollständiger Text unter https://creativecommons.org/licenses/by-sa/4.0/.
 
@@ -471,4 +471,4 @@ Diese App liefert keine eigenen Drittanbieter-Robotermesh-Assets aus - anders al
 
 Dieser Editor ist das Werkzeug zur Modellerstellung für den Katalog von [HYDRA-UMC STUDIO](https://github.com/JuanenRac/HYDRA-UMC-STUDIO) - siehe dieses Repository für dessen eigene serverseitige Lizenzierung, auf die sich die eigene Lizenz dieses Repositorys nicht erstreckt, und umgekehrt.
 
-Wenn Sie auf diesem Projekt aufbauen, behalten Sie die Lizenzaufteilung im Hinterkopf: Code-Änderungen hier sollten unter GPL-3.0 bleiben, abgeleitete Dokumentation (dieses README und dessen Übersetzungen) sollte unter CC BY-SA 4.0 bleiben, und jedes Mesh-Asset, das diesen Editor durchläuft (importiert, bearbeitet oder exportiert), sollte unter der jeweiligen ursprünglichen Lizenz seines eigenen Quell-Repositorys bleiben, mit Attribution zurück zu dieser Quelle.
+Wenn Sie auf diesem Projekt aufbauen, behalten Sie die Lizenzaufteilung im Hinterkopf: Code-Änderungen hier sollten unter GPL-3.0-or-later bleiben, abgeleitete Dokumentation (dieses README und dessen Übersetzungen) sollte unter CC BY-SA 4.0 bleiben, und jedes Mesh-Asset, das diesen Editor durchläuft (importiert, bearbeitet oder exportiert), sollte unter der jeweiligen ursprünglichen Lizenz seines eigenen Quell-Repositorys bleiben, mit Attribution zurück zu dieser Quelle.

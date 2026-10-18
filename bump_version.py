@@ -2,7 +2,7 @@
 # =============================================================================
 # HYDRA-UMC EDITOR-URDF - bump_version.py
 # Copyright (C) 2026 JuanenRac (Electro Hobby 3D) <electrohobby3d@gmail.com>
-# GPL-3.0 - see LICENSE
+# GPL-3.0-or-later - see LICENSE
 #
 # Applies the ecosystem-wide "odometer" version bump to this project's own
 # hydra_editor_urdf/__init__.py before every real build: PATCH goes up by 1;

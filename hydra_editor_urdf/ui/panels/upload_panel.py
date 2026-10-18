@@ -1,7 +1,7 @@
 # =============================================================================
 # HYDRA-UMC EDITOR-URDF - ui/panels/upload_panel.py
 # Copyright (C) 2026 JuanenRac (Electro Hobby 3D) <electrohobby3d@gmail.com>
-# GPL-3.0 - see LICENSE
+# GPL-3.0-or-later - see LICENSE
 #
 # Push the currently-loaded, DOF-feasible robot to a running
 # HYDRA-UMC-SERVER instance's own model catalog (server/client.py) - the

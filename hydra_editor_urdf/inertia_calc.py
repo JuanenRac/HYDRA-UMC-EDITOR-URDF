@@ -1,7 +1,7 @@
 # =============================================================================
 # HYDRA-UMC EDITOR-URDF - inertia_calc.py
 # Copyright (C) 2026 JuanenRac (Electro Hobby 3D) <electrohobby3d@gmail.com>
-# GPL-3.0 - see LICENSE
+# GPL-3.0-or-later - see LICENSE
 #
 # Real, closed-form moment-of-inertia formulas for the 3 primitive
 # geometries URDF (and this app's own models.py) knows about - the

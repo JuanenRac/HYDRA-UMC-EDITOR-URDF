@@ -1,7 +1,7 @@
 # =============================================================================
 # HYDRA-UMC EDITOR-URDF - source/scan.py
 # Copyright (C) 2026 JuanenRac (Electro Hobby 3D) <electrohobby3d@gmail.com>
-# GPL-3.0 - see LICENSE
+# GPL-3.0-or-later - see LICENSE
 #
 # Given a folder of "whatever a real robot description repo looks like"
 # (fetched from GitHub by github_fetcher.py, or pointed at directly by

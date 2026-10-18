@@ -1,7 +1,7 @@
 # =============================================================================
 # HYDRA-UMC EDITOR-URDF - ui/panels/source_panel.py
 # Copyright (C) 2026 JuanenRac (Electro Hobby 3D) <electrohobby3d@gmail.com>
-# GPL-3.0 - see LICENSE
+# GPL-3.0-or-later - see LICENSE
 #
 # "Pull from a GitHub URL, or point at a local folder" - the entry point
 # to the whole app, per the owner's own spec ("coger de un GitHub

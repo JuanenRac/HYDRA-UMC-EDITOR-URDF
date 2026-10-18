@@ -15,7 +15,7 @@
 
 
 <p align="center">
-  <img src="https://img.shields.io/badge/License-GPL%203.0-blue.svg" alt="GPL 3.0">
+  <img src="https://img.shields.io/badge/License-GPL%203.0--or--later-blue.svg" alt="GPL 3.0 or later">
   <img src="https://img.shields.io/badge/Language-Python%203.11-3776AB.svg" alt="Python">
   <img src="https://img.shields.io/badge/Framework-PySide6-41CD52.svg" alt="PySide6">
   <img src="https://img.shields.io/badge/Format-URDF-red.svg" alt="URDF">
@@ -24,7 +24,7 @@
 
 ### 🖌️ HYDRA-UMC-STUDIO モデルカタログ向けグラフィカル URDF 作成/編集ツール
 
-**現在のバージョン：** 0.1.2（`MAJOR.MINOR.PATCH` —— この番号がどう変化するかは下記「プロダクションビルド」セクションを参照）
+**現在のバージョン：** 0.1.3（`MAJOR.MINOR.PATCH` —— この番号がどう変化するかは下記「プロダクションビルド」セクションを参照）
 
 ---
 
@@ -175,7 +175,7 @@ HYDRA-UMC-EDITOR-URDF/
 ├── CHANGELOG.md                    # バージョン履歴
 ├── README.md                       # 本ファイル
 ├── README_spa.md / README_ita.md / README_fra.md / README_deu.md / README_zho.md / README_jpn.md / README_por.md  # <- 翻訳
-├── LICENSE                         # GPL-3.0
+├── LICENSE                         # GPL-3.0-or-later
 ├── assets/
 │   ├── HYDRA_UMC_ICON.svg          # ツールバーのコマンドデッキで使用するアニメーション HYDRA-UMC マーク
 │   ├── qss/industrial_dark.qss     # HYDRA-UMC-SUITE からそのまま再利用
@@ -464,7 +464,7 @@ HYDRA-UMC EDITOR-URDF の著作権は (c) 2026 JuanenRac（Electro Hobby 3D）�
 
 本プロジェクトはソースコードとそれ自身のドキュメントで構成されており、それぞれ実際にカバーする内容に適した異なるライセンスの下で提供されています：
 
-1. ソースコード（`hydra_editor_urdf/`、`main.py`、および `build_exe.bat`/`build_exe.sh` を通じてそこから構築されるあらゆるバイナリ）は、**GNU General Public License v3.0（GPL-3.0）** の下で提供されます。全文は https://www.gnu.org/licenses/gpl-3.0.html を参照してください。
+1. ソースコード（`hydra_editor_urdf/`、`main.py`、および `build_exe.bat`/`build_exe.sh` を通じてそこから構築されるあらゆるバイナリ）は、**GNU General Public License v3.0（GPL-3.0-or-later）** の下で提供されます。全文は https://www.gnu.org/licenses/gpl-3.0.html を参照してください。
 
 2. ドキュメント（本 README およびその自身の翻訳版——`README_spa.md`、`README_ita.md`、`README_fra.md`、`README_deu.md`、`README_zho.md`、`README_jpn.md`、`README_por.md`）は、**クリエイティブ・コモンズ 表示-継承 4.0 国際（CC BY-SA 4.0）** の下で提供されます。全文は https://creativecommons.org/licenses/by-sa/4.0/ を参照してください。
 
@@ -472,4 +472,4 @@ HYDRA-UMC EDITOR-URDF の著作権は (c) 2026 JuanenRac（Electro Hobby 3D）�
 
 本エディターは [HYDRA-UMC STUDIO](https://github.com/JuanenRac/HYDRA-UMC-STUDIO) カタログのためのモデル作成ツールです——その自身のサーバー側ライセンスは同リポジトリを参照してください。本リポジトリ自身のライセンスはそちらには及ばず、その逆も同様です。
 
-本プロジェクトを基に開発を行う際は、このライセンス区分を念頭に置いてください：ここでのコードの変更は GPL-3.0 を維持し、ドキュメントの派生物（本 README およびその翻訳版）は CC BY-SA 4.0 を維持し、本エディターを通過した（インポート、編集、またはエクスポートされた）あらゆるメッシュアセットは、その自身の原本ソースリポジトリが携えているライセンスの下に維持され、そのソースへの帰属表示を伴う必要があります。
+本プロジェクトを基に開発を行う際は、このライセンス区分を念頭に置いてください：ここでのコードの変更は GPL-3.0-or-later を維持し、ドキュメントの派生物（本 README およびその翻訳版）は CC BY-SA 4.0 を維持し、本エディターを通過した（インポート、編集、またはエクスポートされた）あらゆるメッシュアセットは、その自身の原本ソースリポジトリが携えているライセンスの下に維持され、そのソースへの帰属表示を伴う必要があります。

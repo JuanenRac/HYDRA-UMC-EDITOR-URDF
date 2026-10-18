@@ -1,7 +1,7 @@
 # =============================================================================
 # HYDRA-UMC EDITOR-URDF - ui/panels/properties_panel.py
 # Copyright (C) 2026 JuanenRac (Electro Hobby 3D) <electrohobby3d@gmail.com>
-# GPL-3.0 - see LICENSE
+# GPL-3.0-or-later - see LICENSE
 #
 # The "editar al vuelo: colores, tamano, cinematica" panel - the 3 live-
 # edit capabilities the owner's own spec calls out as genuinely NEW (not

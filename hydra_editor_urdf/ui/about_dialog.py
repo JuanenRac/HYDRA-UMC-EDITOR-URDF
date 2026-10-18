@@ -1,7 +1,7 @@
 # =============================================================================
 # HYDRA-UMC EDITOR-URDF - ui/about_dialog.py
 # Copyright (C) 2026 JuanenRac (Electro Hobby 3D) <electrohobby3d@gmail.com>
-# GPL-3.0 - see LICENSE
+# GPL-3.0-or-later - see LICENSE
 #
 # Real About dialog, matching HYDRA-UMC-STUDIO's own About.tsx and
 # HYDRA-UMC-SUITE's own ui/about_dialog.py: animated logo, colored
@@ -20,7 +20,7 @@ from hydra_editor_urdf.i18n import _
 
 AUTHOR_NAME = "JuanenRac (Electro Hobby 3D)"
 AUTHOR_EMAIL = "electrohobby3d@gmail.com"
-LICENSE_NAME = "GNU General Public License v3.0 (GPL-3.0)"
+LICENSE_NAME = "GNU General Public License v3.0 or later (GPL-3.0-or-later)"
 
 # Same accent triad as HYDRA-UMC-SUITE's own command deck/About dialog -
 # keeps every desktop tool in this ecosystem visually consistent.

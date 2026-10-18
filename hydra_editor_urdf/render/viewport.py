@@ -1,7 +1,7 @@
 # =============================================================================
 # HYDRA-UMC EDITOR-URDF - render/viewport.py
 # Copyright (C) 2026 JuanenRac (Electro Hobby 3D) <electrohobby3d@gmail.com>
-# GPL-3.0 - see LICENSE
+# GPL-3.0-or-later - see LICENSE
 #
 # Real-time 3D viewport for an arbitrary, freshly-imported URDF -
 # QOpenGLWidget + a small GLSL shader (core profile), structurally a port

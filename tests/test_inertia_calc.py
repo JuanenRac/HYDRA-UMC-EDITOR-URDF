@@ -1,7 +1,7 @@
 # =============================================================================
 # HYDRA-UMC EDITOR-URDF - tests/test_inertia_calc.py
 # Copyright (C) 2026 JuanenRac (Electro Hobby 3D) <electrohobby3d@gmail.com>
-# GPL-3.0 - see LICENSE
+# GPL-3.0-or-later - see LICENSE
 #
 # Real unit tests for hydra_editor_urdf/inertia_calc.py - checks the
 # closed-form tensors against independently-computed textbook values, not

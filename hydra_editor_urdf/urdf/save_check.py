@@ -1,7 +1,7 @@
 # =============================================================================
 # HYDRA-UMC-EDITOR-URDF - hydra_editor_urdf/urdf/save_check.py
 # Copyright (C) 2026 JuanenRac (Electro Hobby 3D) <electrohobby3d@gmail.com>
-# GPL-3.0 - see LICENSE
+# GPL-3.0-or-later - see LICENSE
 # =============================================================================
 """Checks a robot before it is written out, so a model with a physically
 impossible or unusable part is refused with a list of exactly what to fix.

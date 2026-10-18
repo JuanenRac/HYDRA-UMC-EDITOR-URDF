@@ -9,6 +9,11 @@ goes up by 1 per build; once `PATCH` would exceed 9 it resets to 0 and
 `MINOR` goes up by 1 instead (e.g. `0.0.9` -> `0.1.0`). `MAJOR` is only ever
 bumped by hand, as a deliberate decision.
 
+## [0.1.3]
+
+- Build version synchronized with `hydra-umc.project.json` and the repository-native version source.
+- The licence is written as GPL-3.0-or-later in every header and in the package metadata.
+
 ## [0.1.2] - Mesh paths stay inside the repository, safer push and export
 
 - **Mesh paths can no longer leave the repository:** a `<mesh filename>` with `..` segments, an absolute path or a `file://` URI used to resolve to any readable file on the operator's computer, and "Push" would read it and upload it to the server. The resolver now only returns `.stl`, `.obj` or `.dae` files inside the opened folder, the URDF folder or a folder added with "Locate Missing Meshes", and the upload skips anything else.

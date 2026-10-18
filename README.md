@@ -15,7 +15,7 @@
 
 
 <p align="center">
-  <img src="https://img.shields.io/badge/License-GPL%203.0-blue.svg" alt="GPL 3.0">
+  <img src="https://img.shields.io/badge/License-GPL%203.0--or--later-blue.svg" alt="GPL 3.0 or later">
   <img src="https://img.shields.io/badge/Language-Python%203.11-3776AB.svg" alt="Python">
   <img src="https://img.shields.io/badge/Framework-PySide6-41CD52.svg" alt="PySide6">
   <img src="https://img.shields.io/badge/Format-URDF-red.svg" alt="URDF">
@@ -24,7 +24,7 @@
 
 ### 🖌️ Graphical URDF Creator/Editor for the HYDRA-UMC-STUDIO Model Catalog
 
-**Current version:** 0.1.2 (`MAJOR.MINOR.PATCH` - see the **Production Build** section below for how this number moves)
+**Current version:** 0.1.3 (`MAJOR.MINOR.PATCH` - see the **Production Build** section below for how this number moves)
 
 ---
 
@@ -193,7 +193,7 @@ HYDRA-UMC-EDITOR-URDF/
 ├── CHANGELOG.md                    # Version history
 ├── README.md                       # This file
 ├── README_spa.md / README_ita.md / README_fra.md / README_deu.md / README_zho.md / README_jpn.md / README_por.md  # <- translations
-├── LICENSE                         # GPL-3.0
+├── LICENSE                         # GPL-3.0-or-later
 ├── assets/
 │   ├── HYDRA_UMC_ICON.svg          # Animated HYDRA-UMC mark used by the toolbar command deck
 │   ├── qss/industrial_dark.qss     # Reused verbatim from HYDRA-UMC-SUITE
@@ -478,7 +478,7 @@ HYDRA-UMC EDITOR-URDF is (c) 2026 JuanenRac (Electro Hobby 3D). This notice must
 
 This project consists of source code and its own documentation, made available under different licenses - each suited to what it actually covers:
 
-1. The source code (`hydra_editor_urdf/`, `main.py`, and any binary built from it via `build_exe.bat`/`build_exe.sh`) is available under the **GNU General Public License v3.0 (GPL-3.0)**. Full text at https://www.gnu.org/licenses/gpl-3.0.html.
+1. The source code (`hydra_editor_urdf/`, `main.py`, and any binary built from it via `build_exe.bat`/`build_exe.sh`) is available under the **GNU General Public License v3.0 or later (GPL-3.0-or-later)**. Full text at https://www.gnu.org/licenses/gpl-3.0.html.
 
 2. The documentation (this README and its own translations - `README_spa.md`, `README_ita.md`, `README_fra.md`, `README_deu.md`, `README_zho.md`, `README_jpn.md`, `README_por.md`) is available under **Creative Commons Attribution-ShareAlike 4.0 International (CC BY-SA 4.0)**. Full text at https://creativecommons.org/licenses/by-sa/4.0/.
 
@@ -486,4 +486,4 @@ This app ships no third-party robot mesh assets of its own - unlike HYDRA-UMC ST
 
 This editor is the model-authoring tool for the [HYDRA-UMC STUDIO](https://github.com/JuanenRac/HYDRA-UMC-STUDIO) catalog - see that repository for its own server-side licensing, which this repository's own license doesn't extend to, and vice versa.
 
-If you build on this project, keep the licensing split in mind: code changes here should stay GPL-3.0, documentation derivatives (this README and its translations) should stay CC BY-SA 4.0, and any mesh asset that passes through this editor (imported, edited, or exported) should stay under whatever license its own original source repo carries, with attribution back to that source.
+If you build on this project, keep the licensing split in mind: code changes here should stay GPL-3.0-or-later, documentation derivatives (this README and its translations) should stay CC BY-SA 4.0, and any mesh asset that passes through this editor (imported, edited, or exported) should stay under whatever license its own original source repo carries, with attribution back to that source.

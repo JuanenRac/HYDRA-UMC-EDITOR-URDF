@@ -1,7 +1,7 @@
 # =============================================================================
 # HYDRA-UMC EDITOR-URDF - render/kinematics.py
 # Copyright (C) 2026 JuanenRac (Electro Hobby 3D) <electrohobby3d@gmail.com>
-# GPL-3.0 - see LICENSE
+# GPL-3.0-or-later - see LICENSE
 #
 # Generic forward kinematics over WHATEVER tree urdf/parser.py produced -
 # unlike HYDRA-UMC-SUITE's own render/kinematics.py (a fixed registry of

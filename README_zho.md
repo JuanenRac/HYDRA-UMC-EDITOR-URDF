@@ -15,7 +15,7 @@
 
 
 <p align="center">
-  <img src="https://img.shields.io/badge/License-GPL%203.0-blue.svg" alt="GPL 3.0">
+  <img src="https://img.shields.io/badge/License-GPL%203.0--or--later-blue.svg" alt="GPL 3.0 or later">
   <img src="https://img.shields.io/badge/Language-Python%203.11-3776AB.svg" alt="Python">
   <img src="https://img.shields.io/badge/Framework-PySide6-41CD52.svg" alt="PySide6">
   <img src="https://img.shields.io/badge/Format-URDF-red.svg" alt="URDF">
@@ -24,7 +24,7 @@
 
 ### 🖌️ 面向 HYDRA-UMC-STUDIO 模型目录的图形化 URDF 创建/编辑工具
 
-**当前版本：** 0.1.2（`MAJOR.MINOR.PATCH`——该编号的变化方式见下方“生产构建”一节）
+**当前版本：** 0.1.3（`MAJOR.MINOR.PATCH`——该编号的变化方式见下方“生产构建”一节）
 
 ---
 
@@ -171,7 +171,7 @@ HYDRA-UMC-EDITOR-URDF/
 ├── CHANGELOG.md                    # 版本历史
 ├── README.md                       # 本文件
 ├── README_spa.md / README_ita.md / README_fra.md / README_deu.md / README_zho.md / README_jpn.md / README_por.md  # <- 翻译
-├── LICENSE                         # GPL-3.0
+├── LICENSE                         # GPL-3.0-or-later
 ├── assets/
 │   ├── HYDRA_UMC_ICON.svg          # 工具栏命令面板使用的动画 HYDRA-UMC 标志
 │   ├── qss/industrial_dark.qss     # 原样复用自 HYDRA-UMC-SUITE
@@ -455,7 +455,7 @@ HYDRA-UMC EDITOR-URDF 版权所有 (c) 2026 JuanenRac（Electro Hobby 3D）。�
 
 本项目由源代码及其自身的文档组成，两者依据不同的许可证提供——各自适合其实际所涵盖的内容：
 
-1. 源代码（`hydra_editor_urdf/`、`main.py`，以及通过 `build_exe.bat`/`build_exe.sh` 从中构建的任何二进制文件）依据 **GNU 通用公共许可证 v3.0（GPL-3.0）** 提供。完整文本见 https://www.gnu.org/licenses/gpl-3.0.html。
+1. 源代码（`hydra_editor_urdf/`、`main.py`，以及通过 `build_exe.bat`/`build_exe.sh` 从中构建的任何二进制文件）依据 **GNU 通用公共许可证 v3.0（GPL-3.0-or-later）** 提供。完整文本见 https://www.gnu.org/licenses/gpl-3.0.html。
 
 2. 文档（本 README 及其自身的翻译版本——`README_spa.md`、`README_ita.md`、`README_fra.md`、`README_deu.md`、`README_zho.md`、`README_jpn.md`、`README_por.md`）依据 **知识共享 署名-相同方式共享 4.0 国际许可协议（CC BY-SA 4.0）** 提供。完整文本见 https://creativecommons.org/licenses/by-sa/4.0/。
 
@@ -463,4 +463,4 @@ HYDRA-UMC EDITOR-URDF 版权所有 (c) 2026 JuanenRac（Electro Hobby 3D）。�
 
 本编辑器是 [HYDRA-UMC STUDIO](https://github.com/JuanenRac/HYDRA-UMC-STUDIO) 目录的模型创作工具——其自身服务端的许可事宜参见该仓库，本仓库自身的许可证并不延伸至该仓库,反之亦然。
 
-如果你基于本项目进行开发，请留意这种许可证划分：这里的代码更改应保持 GPL-3.0，文档衍生品（本 README 及其翻译版本）应保持 CC BY-SA 4.0，任何经过本编辑器（导入、编辑或导出）的网格资产都应保持在其自身原始源仓库所携带的许可证之下，并附带指向该来源的署名。
+如果你基于本项目进行开发，请留意这种许可证划分：这里的代码更改应保持 GPL-3.0-or-later，文档衍生品（本 README 及其翻译版本）应保持 CC BY-SA 4.0，任何经过本编辑器（导入、编辑或导出）的网格资产都应保持在其自身原始源仓库所携带的许可证之下，并附带指向该来源的署名。

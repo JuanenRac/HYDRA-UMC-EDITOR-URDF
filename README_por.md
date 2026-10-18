@@ -16,7 +16,7 @@
 
 
 <p align="center">
-  <img src="https://img.shields.io/badge/License-GPL%203.0-blue.svg" alt="GPL 3.0">
+  <img src="https://img.shields.io/badge/License-GPL%203.0--or--later-blue.svg" alt="GPL 3.0 or later">
   <img src="https://img.shields.io/badge/Language-Python%203.11-3776AB.svg" alt="Python">
   <img src="https://img.shields.io/badge/Framework-PySide6-41CD52.svg" alt="PySide6">
   <img src="https://img.shields.io/badge/Format-URDF-red.svg" alt="URDF">
@@ -167,7 +167,7 @@ HYDRA-UMC-EDITOR-URDF/
 ├── CHANGELOG.md                    # Histórico de versões
 ├── README.md                       # Este ficheiro
 ├── README_spa.md / README_ita.md / README_fra.md / README_deu.md / README_zho.md / README_jpn.md / README_por.md  # <- traduções
-├── LICENSE                         # GPL-3.0
+├── LICENSE                         # GPL-3.0-or-later
 ├── assets/
 │   ├── HYDRA_UMC_ICON.svg          # Marca animada do HYDRA-UMC usada pelo painel de comandos da barra de ferramentas
 │   ├── qss/industrial_dark.qss     # Reutilizado tal como está do HYDRA-UMC-SUITE
@@ -444,7 +444,7 @@ O HYDRA-UMC EDITOR-URDF é (c) 2026 JuanenRac (Electro Hobby 3D). Este aviso tem
 
 Este projeto é composto por código-fonte e pela sua própria documentação, disponibilizados sob licenças diferentes - cada uma adequada ao que realmente cobre:
 
-1. O código-fonte (`hydra_editor_urdf/`, `main.py` e qualquer binário compilado a partir dele através do `build_exe.bat`/`build_exe.sh`) está disponível sob a **GNU General Public License v3.0 (GPL-3.0)**. Texto completo em https://www.gnu.org/licenses/gpl-3.0.html.
+1. O código-fonte (`hydra_editor_urdf/`, `main.py` e qualquer binário compilado a partir dele através do `build_exe.bat`/`build_exe.sh`) está disponível sob a **GNU General Public License v3.0 or later (GPL-3.0-or-later)**. Texto completo em https://www.gnu.org/licenses/gpl-3.0.html.
 
 2. A documentação (este README e as suas próprias traduções - `README_spa.md`, `README_ita.md`, `README_fra.md`, `README_deu.md`, `README_zho.md`, `README_jpn.md`, `README_por.md`) está disponível sob a **Creative Commons Attribution-ShareAlike 4.0 International (CC BY-SA 4.0)**. Texto completo em https://creativecommons.org/licenses/by-sa/4.0/.
 
@@ -452,5 +452,5 @@ Esta aplicação não distribui ativos de malha de robôs de terceiros - ao cont
 
 Este editor é a ferramenta de criação de modelos para o catálogo do [HYDRA-UMC STUDIO](https://github.com/JuanenRac/HYDRA-UMC-STUDIO) - consulte esse repositório para o seu próprio licenciamento do lado do servidor, a que a licença deste repositório não se estende, e vice-versa.
 
-Se construir sobre este projeto, tenha em mente a divisão de licenças: as alterações de código aqui devem permanecer GPL-3.0, os derivados de documentação (este README e as suas traduções) devem permanecer CC BY-SA 4.0, e qualquer ativo de malha que passe por este editor (importado, editado ou exportado) deve permanecer sob a licença que o seu próprio repositório de origem original tiver, com atribuição de volta a essa origem.
+Se construir sobre este projeto, tenha em mente a divisão de licenças: as alterações de código aqui devem permanecer GPL-3.0-or-later, os derivados de documentação (este README e as suas traduções) devem permanecer CC BY-SA 4.0, e qualquer ativo de malha que passe por este editor (importado, editado ou exportado) deve permanecer sob a licença que o seu próprio repositório de origem original tiver, com atribuição de volta a essa origem.
 

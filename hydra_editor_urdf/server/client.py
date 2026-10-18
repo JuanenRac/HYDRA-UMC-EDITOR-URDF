@@ -1,7 +1,7 @@
 # =============================================================================
 # HYDRA-UMC EDITOR-URDF - server/client.py
 # Copyright (C) 2026 JuanenRac (Electro Hobby 3D) <electrohobby3d@gmail.com>
-# GPL-3.0 - see LICENSE
+# GPL-3.0-or-later - see LICENSE
 #
 # Talks to HYDRA-UMC-SERVER's own model-submission contract (server.ts's
 # POST /api/models/submit, GET /api/models, GET /api/models/:category/:slug/

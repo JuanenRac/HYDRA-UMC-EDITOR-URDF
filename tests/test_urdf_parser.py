@@ -1,7 +1,7 @@
 # =============================================================================
 # HYDRA-UMC EDITOR-URDF - tests/test_urdf_parser.py
 # Copyright (C) 2026 JuanenRac (Electro Hobby 3D) <electrohobby3d@gmail.com>
-# GPL-3.0 - see LICENSE
+# GPL-3.0-or-later - see LICENSE
 #
 # Real unit tests for hydra_editor_urdf/urdf/parser.py - previously
 # untested pure logic (untested logic). No Qt import anywhere in this file, so this runs with just the

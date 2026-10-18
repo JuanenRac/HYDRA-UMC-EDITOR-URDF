@@ -1,7 +1,7 @@
 # =============================================================================
 # HYDRA-UMC EDITOR-URDF - language/spanish.lng
 # Copyright (C) 2026 JuanenRac (Electro Hobby 3D) <electrohobby3d@gmail.com>
-# GPL-3.0 - see LICENSE
+# GPL-3.0-or-later - see LICENSE
 # =============================================================================
 SOURCE_GALLERY_LABEL=Galería: repositorios de descripción de robots verificados
 SOURCE_GALLERY_PLACEHOLDER=-- Elige un robot --

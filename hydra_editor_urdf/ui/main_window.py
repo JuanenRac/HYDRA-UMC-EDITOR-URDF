@@ -1,7 +1,7 @@
 # =============================================================================
 # HYDRA-UMC EDITOR-URDF - ui/main_window.py
 # Copyright (C) 2026 JuanenRac (Electro Hobby 3D) <electrohobby3d@gmail.com>
-# GPL-3.0 - see LICENSE
+# GPL-3.0-or-later - see LICENSE
 #
 # The Photoshop/Fusion-360-style dockable workspace the owner's own spec
 # asked for - real QDockWidget panels (drag to float/dock/tab/split),

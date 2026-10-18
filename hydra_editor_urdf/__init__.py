@@ -1,7 +1,7 @@
 # =============================================================================
 # HYDRA-UMC EDITOR-URDF - hydra_editor_urdf/__init__.py
 # Copyright (C) 2026 JuanenRac (Electro Hobby 3D) <electrohobby3d@gmail.com>
-# GPL-3.0 - see LICENSE
+# GPL-3.0-or-later - see LICENSE
 #
 # Package version - single source of truth, read by ui/main_window.py's own
 # About dialog and rewritten in place by bump_version.py right before every
@@ -13,4 +13,4 @@
 #
 # Like every project of this ecosystem it starts at MAJOR 0.
 # =============================================================================
-__version__ = "0.1.2"
+__version__ = "0.1.3"

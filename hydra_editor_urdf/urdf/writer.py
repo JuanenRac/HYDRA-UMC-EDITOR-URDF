@@ -1,7 +1,7 @@
 # =============================================================================
 # HYDRA-UMC EDITOR-URDF - urdf/writer.py
 # Copyright (C) 2026 JuanenRac (Electro Hobby 3D) <electrohobby3d@gmail.com>
-# GPL-3.0 - see LICENSE
+# GPL-3.0-or-later - see LICENSE
 #
 # models.Robot -> URDF XML string - the exact inverse of parser.py, used
 # both for "Export URDF" (ui/panels/upload_panel.py) and for the payload

@@ -1,7 +1,7 @@
 # =============================================================================
 # HYDRA-UMC EDITOR-URDF - render/mesh.py
 # Copyright (C) 2026 JuanenRac (Electro Hobby 3D) <electrohobby3d@gmail.com>
-# GPL-3.0 - see LICENSE
+# GPL-3.0-or-later - see LICENSE
 #
 # Mesh loading for whatever a real-world URDF's <mesh filename="..."/>
 # points at. STL (via numpy-stl) is first-class and battle-tested - this

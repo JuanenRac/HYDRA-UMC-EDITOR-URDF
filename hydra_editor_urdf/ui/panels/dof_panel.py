@@ -1,7 +1,7 @@
 # =============================================================================
 # HYDRA-UMC EDITOR-URDF - ui/panels/dof_panel.py
 # Copyright (C) 2026 JuanenRac (Electro Hobby 3D) <electrohobby3d@gmail.com>
-# GPL-3.0 - see LICENSE
+# GPL-3.0-or-later - see LICENSE
 #
 # The automated feasibility verdict - the panel that replaces the manual
 # "count the joints, check if HYDRA-UMC-STUDIO can take it" judgment call

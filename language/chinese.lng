@@ -1,7 +1,7 @@
 # =============================================================================
 # HYDRA-UMC EDITOR-URDF - language/chinese.lng
 # Copyright (C) 2026 JuanenRac (Electro Hobby 3D) <electrohobby3d@gmail.com>
-# GPL-3.0 - see LICENSE
+# GPL-3.0-or-later - see LICENSE
 # =============================================================================
 SOURCE_GALLERY_LABEL=图库：已验证的机器人描述仓库
 SOURCE_GALLERY_PLACEHOLDER=-- 选择一个机器人 --

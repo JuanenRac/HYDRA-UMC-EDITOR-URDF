@@ -1,7 +1,7 @@
 # =============================================================================
 # HYDRA-UMC EDITOR-URDF - ui/theme.py
 # Copyright (C) 2026 JuanenRac (Electro Hobby 3D) <electrohobby3d@gmail.com>
-# GPL-3.0 - see LICENSE
+# GPL-3.0-or-later - see LICENSE
 #
 # Reuses HYDRA-UMC-SUITE's own assets/qss/industrial_dark.qss verbatim
 # (copied into this project's own assets/qss/, same relative path) rather

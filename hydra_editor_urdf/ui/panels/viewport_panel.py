@@ -1,7 +1,7 @@
 # =============================================================================
 # HYDRA-UMC EDITOR-URDF - ui/panels/viewport_panel.py
 # Copyright (C) 2026 JuanenRac (Electro Hobby 3D) <electrohobby3d@gmail.com>
-# GPL-3.0 - see LICENSE
+# GPL-3.0-or-later - see LICENSE
 #
 # Hosts the real OpenGL 3D view (render/viewport.py's own UrdfViewport)
 # plus a link tree (click to select - drives the properties panel and
