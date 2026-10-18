@@ -30,6 +30,17 @@
 
 **Controllo di onestà - cosa funziona davvero oggi:** il nucleo di logica pura - parsing/esportazione URDF (`urdf/parser.py`, `urdf/writer.py`), validazione di fattibilità DOF (`urdf/dof.py`), cinematica diretta (`render/kinematics.py`), stima dell'inerzia (`inertia_calc.py`), risoluzione dei riferimenti alle mesh e download dello zipball GitHub (`source/scan.py`, `source/github_fetcher.py`, `source/local_folder.py`), il modello in memoria (`models.py`), l'elenco della galleria (`gallery.py`) e il caricatore i18n (`i18n.py`) - è reale ed è coperto da 202 test superati (`tests/`), nessuno dei quali importa PySide6/PyOpenGL. `test_github_fetcher.py` simula ogni chiamata di rete - un vero download di uno zipball GitHub è stato eseguito manualmente, mai come parte della suite automatizzata. Il livello Qt/OpenGL (`render/viewport.py` con il suo `UrdfGLRenderer`, `render/mesh.py`, ogni pannello `ui/*`, e l'`OffscreenUrdfRenderer` del deck `--qtquick`) è codice reale e funzionante ma privo di qualsiasi copertura di test automatizzata - richiede un vero display/plugin di piattaforma Qt, che la CI non ha, quindi viene verificato a mano, non da una suite di test. Il `StudioClient` di `server/client.py` (login/push/pull contro il `server.ts` di HYDRA-UMC-SERVER) è codice HTTP reale anch'esso privo di test automatizzati. L'espansione xacro e il caricamento di mesh COLLADA (`.dae`) sono non-funzionalità esplicite e dichiarate (un errore chiaro, non un parsing errato silenzioso) - vedi la nota di onestà nella Panoramica più sotto e le sezioni Parsing URDF/Caricamento Mesh per il perché. Vedi `CHANGELOG.md` per ciò che è stato consegnato esattamente finora.
 
+## 📋 In breve
+
+| | |
+|---|---|
+| Versione | `0.1.3` |
+| Maturità | Consolidato |
+| Test | 202 |
+| Tecnologia | Python / PySide6 / Qt6 / OpenGL |
+| Destinazione | Il PC di chi lo usa |
+| Su hardware reale | Non applicabile: nulla qui gira su hardware |
+
 ## 🎯 Panoramica
 
 **HYDRA-UMC EDITOR-URDF** è lo strumento desktop che trasforma il "portare un nuovo robot nel catalogo modelli di [HYDRA-UMC STUDIO](https://github.com/JuanenRac/HYDRA-UMC-STUDIO)" da un'indagine manuale, robot per robot, in un flusso di lavoro grafico e ripetibile. In passato, ogni modello di robot reale nel catalogo di STUDIO ci è arrivato allo stesso modo: trovare un repository di descrizione su GitHub, capire come si risolvono i suoi riferimenti alle mesh, contare i gradi di libertà nella sua catena cinematica, verificare se STUDIO è effettivamente in grado di pilotarne così tanti, e posizionare a mano il risultato in `public/models/`. Questa app automatizza l'intero processo - preleva i file sorgente da un URL GitHub o da una cartella locale già scaricata, risolve ogni riferimento `<mesh filename="...">` (URI `package://` incluse) contro i file reali su disco, valida il conteggio dei DOF della catena rispetto a ciò che la cinematica di STUDIO supporta oggi, modifica colore/scala/limiti di giunto/tipo di giunto con un'anteprima 3D in tempo reale, e invia il risultato finito direttamente a un server STUDIO in esecuzione.

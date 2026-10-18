@@ -34,6 +34,17 @@
 ---
 
 
+## 📋 Num relance
+
+| | |
+|---|---|
+| Versão | `0.1.3` |
+| Maturidade | Estabelecido |
+| Testes | 202 |
+| Tecnologia | Python / PySide6 / Qt6 / OpenGL |
+| Destino | O PC de quem o usa |
+| Em hardware real | Não aplicável: nada aqui corre em hardware |
+
 ## 🎯 Visão geral
 
 O **HYDRA-UMC EDITOR-URDF** é a ferramenta de desktop que transforma «portar um robô novo para o catálogo de modelos do [HYDRA-UMC STUDIO](https://github.com/JuanenRac/HYDRA-UMC-STUDIO)» de uma investigação manual, robô a robô, num fluxo de trabalho gráfico e repetível. Cada modelo de robô real do catálogo do STUDIO chegou lá da mesma maneira no passado: encontrar um repositório de descrição no GitHub, perceber como se resolvem as suas referências a malhas, contar os graus de liberdade da sua cadeia cinemática, verificar se o STUDIO consegue realmente acionar tantos e colocar à mão o resultado em `public/models/`. Esta aplicação automatiza toda essa passagem - traz os ficheiros de origem a partir de um URL do GitHub ou de uma pasta local já descarregada, resolve cada referência `<mesh filename="...">` (incluindo URIs `package://`) contra os ficheiros reais em disco, valida o número de GDL da cadeia contra o que a cinemática do STUDIO suporta hoje, edita cor/escala/limites das juntas/tipo de junta com uma pré-visualização 3D em direto e envia o resultado final diretamente para um servidor STUDIO em execução.

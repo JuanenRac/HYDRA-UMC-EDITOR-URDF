@@ -30,6 +30,17 @@
 
 **Honesty check - what actually runs today:** the pure-logic core - URDF parsing/export (`urdf/parser.py`, `urdf/writer.py`), DOF feasibility validation (`urdf/dof.py`), forward kinematics (`render/kinematics.py`), inertia estimation (`inertia_calc.py`), mesh-reference resolution and GitHub-zipball fetching (`source/scan.py`, `source/github_fetcher.py`, `source/local_folder.py`), the in-memory model (`models.py`), the gallery list (`gallery.py`) and the i18n loader (`i18n.py`) - is real and covered by 202 passing tests (`tests/`), none of which import PySide6/PyOpenGL. `test_github_fetcher.py` mocks every network call - a real GitHub zipball download has been run manually, never as part of the automated suite. The Qt/OpenGL layer (`render/viewport.py`'s `UrdfGLRenderer`, `render/mesh.py`, every `ui/*` panel, and the `--qtquick` deck's `OffscreenUrdfRenderer`) is real, working code but has no automated test coverage at all - it needs a real display/Qt platform plugin, which CI doesn't have, so it's verified by hand, not by a test suite. `server/client.py`'s `StudioClient` (login/push/pull against HYDRA-UMC-SERVER's `server.ts`) is real HTTP code with no automated test either. xacro expansion and COLLADA (`.dae`) mesh loading are explicit, named non-features (a clear error, not a silent misparse) - see the Honesty note in the Overview below and the URDF Parsing/Mesh Loading sections for why. See `CHANGELOG.md` for exactly what has shipped so far.
 
+## 📋 At a glance
+
+| | |
+|---|---|
+| Version | `0.1.3` |
+| Maturity | Established |
+| Tests | 202 |
+| Stack | Python / PySide6 / Qt6 / OpenGL |
+| Target | The PC of the person using it |
+| On real hardware | Not applicable: nothing here runs on hardware |
+
 ## 🎯 Overview
 
 **HYDRA-UMC EDITOR-URDF** is the desktop tool that turns "porting a new robot into [HYDRA-UMC STUDIO](https://github.com/JuanenRac/HYDRA-UMC-STUDIO)'s model catalog" from a manual, per-robot investigation into a repeatable, graphical workflow. Every real robot model in STUDIO's catalog got there the same way in the past: find a description repo on GitHub, figure out how its mesh references resolve, count the degrees of freedom in its kinematic chain, check whether STUDIO can actually drive that many, and hand-place the result into `public/models/`. This app automates that entire pass - pull the source files from a GitHub URL or an already-downloaded local folder, resolve every `<mesh filename="...">` reference (`package://` URIs included) against the real files on disk, validate the chain's DOF count against what STUDIO's kinematics supports today, edit color/scale/joint limits/joint type with a live 3D preview, and push the finished result straight to a running STUDIO server.

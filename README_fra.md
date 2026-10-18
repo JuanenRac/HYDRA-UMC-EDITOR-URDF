@@ -29,6 +29,17 @@
 
 **Vérification d'honnêteté - ce qui fonctionne réellement aujourd'hui :** le noyau de logique pure - analyse/export URDF (`urdf/parser.py`, `urdf/writer.py`), validation de faisabilité DOF (`urdf/dof.py`), cinématique directe (`render/kinematics.py`), estimation d'inertie (`inertia_calc.py`), résolution des références de maillage et téléchargement de zipball GitHub (`source/scan.py`, `source/github_fetcher.py`, `source/local_folder.py`), le modèle en mémoire (`models.py`), la liste de la galerie (`gallery.py`) et le chargeur i18n (`i18n.py`) - est réel et couvert par 202 tests passants (`tests/`), dont aucun n'importe PySide6/PyOpenGL. `test_github_fetcher.py` simule chaque appel réseau - un vrai téléchargement de zipball GitHub a été exécuté manuellement, jamais dans le cadre de la suite automatisée. La couche Qt/OpenGL (`render/viewport.py` et son `UrdfGLRenderer`, `render/mesh.py`, chaque panneau `ui/*`, et l'`OffscreenUrdfRenderer` du deck `--qtquick`) est du code réel et fonctionnel mais sans aucune couverture de test automatisée - elle a besoin d'un vrai affichage/plugin de plateforme Qt, que la CI n'a pas, donc elle est vérifiée à la main, pas par une suite de tests. Le `StudioClient` de `server/client.py` (login/push/pull contre le `server.ts` de HYDRA-UMC-SERVER) est du code HTTP réel sans aucun test automatisé non plus. L'expansion xacro et le chargement de maillages COLLADA (`.dae`) sont des non-fonctionnalités explicites et nommées (une erreur claire, pas une mauvaise analyse silencieuse) - voir la note d'honnêteté dans l'Aperçu ci-dessous et les sections Analyse URDF/Chargement des maillages pour le pourquoi. Voir `CHANGELOG.md` pour ce qui a été livré exactement jusqu'à présent.
 
+## 📋 En un coup d'œil
+
+| | |
+|---|---|
+| Version | `0.1.3` |
+| Maturité | Établi |
+| Tests | 202 |
+| Technologie | Python / PySide6 / Qt6 / OpenGL |
+| Cible | Le PC de la personne qui l'utilise |
+| Sur matériel réel | Sans objet : rien ici ne s'exécute sur du matériel |
+
 ## 🎯 Aperçu
 
 **HYDRA-UMC EDITOR-URDF** est l'outil de bureau qui transforme le fait de « porter un nouveau robot dans le catalogue de modèles de [HYDRA-UMC STUDIO](https://github.com/JuanenRac/HYDRA-UMC-STUDIO) » - jusqu'ici une investigation manuelle, propre à chaque robot - en un flux de travail graphique et reproductible. Chaque modèle de robot réel du catalogue de STUDIO y est arrivé de la même façon par le passé : trouver un dépôt de description sur GitHub, comprendre comment ses références de maillage se résolvent, compter les degrés de liberté de sa chaîne cinématique, vérifier si STUDIO peut réellement en piloter autant, et placer le résultat à la main dans `public/models/`. Cette application automatise l'ensemble de ce processus - récupérer les fichiers source depuis une URL GitHub ou un dossier local déjà téléchargé, résoudre chaque référence `<mesh filename="...">` (URIs `package://` incluses) contre les fichiers réels présents sur le disque, valider le nombre de DDL de la chaîne par rapport à ce que la cinématique de STUDIO prend en charge aujourd'hui, éditer couleur/échelle/limites de joint/type de joint avec un aperçu 3D en direct, et pousser le résultat final directement vers un serveur STUDIO en cours d'exécution.

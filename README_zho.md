@@ -30,6 +30,17 @@
 
 **诚实核查 - 今天真正能运行的部分：** 纯逻辑核心 - URDF 解析/导出(`urdf/parser.py`、`urdf/writer.py`)、DOF 可行性验证(`urdf/dof.py`)、正向运动学(`render/kinematics.py`)、惯量估算(`inertia_calc.py`)、网格引用解析与 GitHub 压缩包下载(`source/scan.py`、`source/github_fetcher.py`、`source/local_folder.py`)、内存中的模型(`models.py`)、画廊列表(`gallery.py`)以及 i18n 加载器(`i18n.py`)——都是真实的，并由 202 个通过的测试(`tests/`)覆盖，其中没有一个测试导入 PySide6/PyOpenGL。`test_github_fetcher.py` 模拟了所有网络调用——真实的 GitHub 压缩包下载曾手动运行过，但从未纳入自动化测试套件。Qt/OpenGL 层(`render/viewport.py` 中的 `UrdfGLRenderer`、`render/mesh.py`、每一个 `ui/*` 面板，以及 `--qtquick` 面板的 `OffscreenUrdfRenderer`)是真实可运行的代码，但完全没有自动化测试覆盖——它需要真实的显示设备/Qt 平台插件，而 CI 环境没有，因此只能手动验证，而非通过测试套件验证。`server/client.py` 中的 `StudioClient`(针对 HYDRA-UMC-SERVER 的 `server.ts` 进行登录/推送/拉取)同样是真实的 HTTP 代码，也没有任何自动化测试。xacro 展开和 COLLADA(`.dae`)网格加载是明确声明、有名有姓的未实现功能(会给出清晰的错误，而不是静默解析错误)——原因见下方概述中的诚实说明，以及 URDF 解析/网格加载各节。具体已交付的内容请见 `CHANGELOG.md`。
 
+## 📋 速览
+
+| | |
+|---|---|
+| 版本 | `0.1.3` |
+| 成熟度 | 成熟 |
+| 测试 | 202 |
+| 技术栈 | Python / PySide6 / Qt6 / OpenGL |
+| 目标 | 使用者的电脑 |
+| 真实硬件 | 不适用：这里的内容不在硬件上运行 |
+
 ## 🎯 概述
 
 **HYDRA-UMC EDITOR-URDF** 是一款桌面工具，将“把一个新机器人移植进 [HYDRA-UMC STUDIO](https://github.com/JuanenRac/HYDRA-UMC-STUDIO) 的模型目录”这件事，从一次性的、逐机器人的人工调查，变成了一套可重复的图形化工作流程。STUDIO 目录中的每一个真实机器人型号，过去都是通过同样的方式进入的：在 GitHub 上找到一个描述仓库、弄清楚其网格引用如何解析、数清其运动学链中的自由度数量、检查 STUDIO 是否真的能驱动这么多自由度，然后手动将结果放入 `public/models/`。本应用将整个流程自动化——从一个 GitHub URL 或一个已下载的本地文件夹拉取源文件，针对磁盘上的真实文件解析每一个 `<mesh filename="...">` 引用（包括 `package://` URI），根据 STUDIO 当前运动学所支持的范围验证该链条的自由度数量，通过实时 3D 预览编辑颜色/比例/关节限位/关节类型，并将完成的结果直接推送到一个正在运行的 STUDIO 服务器。

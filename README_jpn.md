@@ -30,6 +30,17 @@
 
 **正直な現状確認 - 今日実際に動くもの:** 純粋なロジックのコア - URDF のパース/エクスポート(`urdf/parser.py`、`urdf/writer.py`)、DOF 実現可能性検証(`urdf/dof.py`)、順運動学(`render/kinematics.py`)、慣性推定(`inertia_calc.py`)、メッシュ参照解決と GitHub zipball 取得(`source/scan.py`、`source/github_fetcher.py`、`source/local_folder.py`)、インメモリモデル(`models.py`)、ギャラリー一覧(`gallery.py`)、そして i18n ローダー(`i18n.py`)は本物であり、`tests/` 内の 202 件のテストに合格しており、そのいずれも PySide6/PyOpenGL をインポートしていない。`test_github_fetcher.py` はすべてのネットワーク呼び出しをモック化している - 実際の GitHub zipball ダウンロードは手動で実行されたことはあるが、自動化されたテストスイートの一部として実行されたことは一度もない。Qt/OpenGL 層(`render/viewport.py` の `UrdfGLRenderer`、`render/mesh.py`、各 `ui/*` パネル、そして `--qtquick` デッキの `OffscreenUrdfRenderer`)は本物の動作するコードだが、自動テストのカバレッジは一切ない - 実際のディスプレイ/Qt プラットフォームプラグインが必要であり、CI にはそれがないため、テストスイートではなく手作業で検証されている。`server/client.py` の `StudioClient`(HYDRA-UMC-SERVER の `server.ts` に対するログイン/プッシュ/プル)も同様に本物の HTTP コードであり、自動テストは一切ない。xacro の展開と COLLADA(`.dae`)メッシュの読み込みは、明示的に名前が付けられた未実装機能である(サイレントな誤解析ではなく明確なエラーを返す) - その理由については下記の概要にある正直さについての注記、および URDF パース/メッシュ読み込みの各セクションを参照。これまでに何が実際に出荷されたかは `CHANGELOG.md` を参照。
 
+## 📋 ひと目で
+
+| | |
+|---|---|
+| バージョン | `0.1.3` |
+| 成熟度 | 確立 |
+| テスト | 202 |
+| 技術 | Python / PySide6 / Qt6 / OpenGL |
+| 対象 | 利用者の PC |
+| 実機での確認 | 対象外：ここにあるものはハードウェア上では動きません |
+
 ## 🎯 概要
 
 **HYDRA-UMC EDITOR-URDF** は、「新しいロボットを [HYDRA-UMC STUDIO](https://github.com/JuanenRac/HYDRA-UMC-STUDIO) のモデルカタログへ移植する」という作業を、手作業でロボットごとに調査する一回限りの作業から、再現可能なグラフィカルワークフローへと変えるデスクトップツールです。STUDIO のカタログにあるすべての実在するロボットモデルは、これまで同じ方法でそこにたどり着きました：GitHub 上で記述リポジトリを見つけ、そのメッシュ参照がどう解決されるかを把握し、その運動学チェーンの自由度を数え、STUDIO が実際にそれだけの数を駆動できるかを確認し、結果を手作業で `public/models/` に配置する、というものです。本アプリはそのプロセス全体を自動化します——GitHub の URL またはすでにダウンロード済みのローカルフォルダからソースファイルを取得し、ディスク上の実際のファイルに対してすべての `<mesh filename="...">` 参照（`package://` URI を含む）を解決し、STUDIO の現在の運動学がサポートする範囲に対してそのチェーンの自由度数を検証し、リアルタイム 3D プレビューで色/スケール/関節限位/関節タイプを編集し、完成した結果を稼働中の STUDIO サーバーへ直接プッシュします。
