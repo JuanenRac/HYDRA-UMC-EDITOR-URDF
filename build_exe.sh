@@ -47,7 +47,7 @@ set -euo pipefail
 # below). A trap on EXIT fires no matter how/where the script exits, so
 # this one line covers every exit point without needing a duplicate
 # read -p next to each individual error check.
-trap 'read -p "Pulsa Enter para cerrar / Press Enter to close..." _ || true' EXIT
+trap 'if [ -t 0 ] && [ "${HYDRA_UMC_CI:-}" != "1" ] && [ -z "${CI:-}" ]; then read -r -p "Pulsa Enter para cerrar / Press Enter to close..." _ || true; fi' EXIT
 if ! python3 -c "import ctypes; ctypes.CDLL('libGL.so.1')" 2>/dev/null; then
     echo "      libGL.so.1 not found."
     echo "      On Debian/Ubuntu:  sudo apt install libgl1 libxkbcommon-x11-0 libxcb-cursor0"

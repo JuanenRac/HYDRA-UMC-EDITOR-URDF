@@ -27,6 +27,10 @@ echo ***************************************************************************
 echo.
 REM HYDRA_UMC_SCRIPT_STANDARD_BANNER_END
 setlocal EnableDelayedExpansion
+rem Keep the window open for people, never in automation (CI / HYDRA_UMC_CI).
+set "KEEP_OPEN=pause"
+if defined CI set "KEEP_OPEN=ver >nul"
+if "%HYDRA_UMC_CI%"=="1" set "KEEP_OPEN=ver >nul"
 if not exist .venv (
     python -m venv .venv
 )
@@ -48,7 +52,7 @@ if exist dist (
     if exist dist (
         echo       ERROR: couldn't remove dist\ - is HYDRA-UMC_EDITOR-URDF.exe currently running?
         echo       Close it first, then run this script again.
-        pause
+        %KEEP_OPEN%
         exit /b 1
     )
 )
@@ -64,14 +68,14 @@ REM PyInstaller command by hand instead of through this script.
 REM HYDRA_UMC_SCRIPT_STANDARD_VERSION_STEP
 echo [1/6] Incrementing project version and synchronising its manifest...
 python bump_version.py
-if errorlevel 1 ( echo NATIVE VERSION BUMP FAILED. & pause & exit /b 1 )
+if errorlevel 1 ( echo NATIVE VERSION BUMP FAILED. & %KEEP_OPEN% & exit /b 1 )
 REM HYDRA_UMC_SCRIPT_STANDARD_VERSION_CAPTURE_BEFORE
 for /f "usebackq delims=" %%V in (`python -c "import json; print(json.load(open(r'%~dp0hydra-umc.project.json', encoding='utf-8'))['version'])"`) do set "HYDRA_UMC_VERSION_BEFORE=%%V"
 python "%~dp0bump_manifest_version.py" --sync
-if errorlevel 1 ( echo VERSION SYNCHRONIZATION FAILED. & pause & exit /b 1 )
+if errorlevel 1 ( echo VERSION SYNCHRONIZATION FAILED. & %KEEP_OPEN% & exit /b 1 )
 if errorlevel 1 (
     echo       ERROR: bump_version.py failed - see the output above.
-    pause
+    %KEEP_OPEN%
     exit /b 1
 )
 REM HYDRA_UMC_SCRIPT_STANDARD_VERSION_CAPTURE_AFTER
@@ -112,7 +116,7 @@ python -m PyInstaller --onefile --windowed --noconfirm --name "HYDRA-UMC_EDITOR-
     main.py
 if not exist dist\HYDRA-UMC_EDITOR-URDF.exe (
     echo       ERROR: PyInstaller did not produce dist\HYDRA-UMC_EDITOR-URDF.exe - see the output above.
-    pause
+    %KEEP_OPEN%
     exit /b 1
 )
 echo       Done.
@@ -142,4 +146,4 @@ echo  ===============================================================
 echo   dist\HYDRA-UMC_EDITOR-URDF.exe is ready to run - no Python needed.
 echo  ===============================================================
 echo.
-pause
+%KEEP_OPEN%
