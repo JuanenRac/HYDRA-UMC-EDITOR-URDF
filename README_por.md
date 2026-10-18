@@ -92,6 +92,8 @@ O `.stl` (via `numpy-stl`) e o `.obj` (um pequeno carregador Wavefront escrito �
 
 ---
 
+Os caminhos de malha estão confinados: um `<mesh filename>` só é resolvido para um ficheiro `.stl`, `.obj` ou `.dae` dentro da pasta aberta, da pasta do URDF ou de uma pasta adicionada em «Locate Missing Meshes»; os segmentos `..`, os caminhos absolutos e os URI `file://` que levem a outro sítio são ignorados, e só esses ficheiros são enviados. As malhas vazias, truncadas ou mal formadas são indicadas como não carregadas em vez de parar o visualizador. A proteção milímetros-metros redimensiona qualquer malha com mais de 5 unidades antes de aplicar a `scale` do URDF, pelo que uma malha já escalada pelo URDF pode ser reduzida duas vezes. As etiquetas que o editor não modela (`<dynamics>`, `<safety_controller>`, `<mimic>`, `<transmission>`, `<gazebo>`, texturas de material) não são conservadas ao reexportar um URDF.
+
 ## 📜 Leitura e exportação de URDF
 
 XML simples através do `xml.etree.ElementTree` da própria biblioteca padrão - não é preciso nenhuma dependência `lxml` para um formato tão simples. O modelo em memória (`hydra_editor_urdf/models.py`) é uma árvore de dataclasses própria, deliberadamente simples e mutável, e não um invólucro de uma biblioteca Python de URDF existente como a `urdfpy` ou a `yourdfpy`: esta aplicação precisa de *editar* a árvore de forma interativa e voltar a renderizar cada alteração em direto, para o que uma biblioteca de análise de leitura predominante não está desenhada, e ser dona do modelo mantém-no pequeno, inspecionável e livre do ritmo de lançamentos de uma dependência de terceiros. Os nomes dos campos e os valores por defeito seguem de perto o [esquema XML do URDF](http://wiki.ros.org/urdf/XML) real, para que o par leitor/escritor continue a ser um mapeamento XML↔objeto fino e óbvio.
@@ -208,7 +210,7 @@ HYDRA-UMC-EDITOR-URDF/
 │   ├── ARCHITECTURE.md
 │   ├── BUILD_AND_RUN.md
 │   └── INTEGRATION_CONTRACT.md
-├── tests/                          # Suíte pytest real (202 testes) - só lógica pura, sem importar PySide6 em lado nenhum
+├── tests/                          # Suíte pytest real (214 testes) - só lógica pura, sem importar PySide6 em lado nenhum
 │   ├── test_urdf_parser.py / test_urdf_writer.py  # XML URDF <-> models.py, incluindo idas e voltas leitura -> escrita -> leitura
 │   ├── test_dof.py                 # Validação de viabilidade, limites de GDL, deteção de raiz/órfão/desligado/multi-pai
 │   ├── test_kinematics.py          # Cinemática direta, incluindo a regressão corrigida do ciclo real que bloqueava para sempre
@@ -261,7 +263,7 @@ pip install -r requirements-dev.txt
 python -m pytest tests/ -q
 ```
 
-Descoberto ao auditar o código: a lógica pura desta aplicação (leitura/exportação de URDF, viabilidade de GDL, cinemática direta, estimativa de inércia, resolução de referências a malhas, descarga do GitHub, i18n) tinha cobertura de testes automáticos zero. Corrigido: 202 testes reais em 11 módulos de teste, nenhum dos quais importa PySide6/PyOpenGL - o `requirements-dev.txt` instala apenas o que os `tests/` realmente precisam (`numpy` + `pytest`), pelo que a suíte corre sem ecrã nem plugin de plataforma Qt. Vários testes são regressões explícitas de erros já encontrados e corrigidos numa passagem de auditoria anterior e documentados em linha no próprio código-fonte (a proteção contra ciclo infinito num ciclo real do `render/kinematics.py`, a condição `had_scheme` do `source/scan.py`, a verificação de massa negativa do `urdf/dof.py`) - uma edição futura não pode reintroduzir nenhum deles em silêncio sem que um teste falhe. O CI (`.github/workflows/ci.yml`) executa o mesmo comando a cada push.
+Nota: a lógica pura desta aplicação (leitura/exportação de URDF, viabilidade de GDL, cinemática direta, estimativa de inércia, resolução de referências a malhas, descarga do GitHub, i18n) tinha cobertura de testes automáticos zero. Corrigido: 202 testes reais em 11 módulos de teste, nenhum dos quais importa PySide6/PyOpenGL - o `requirements-dev.txt` instala apenas o que os `tests/` realmente precisam (`numpy` + `pytest`), pelo que a suíte corre sem ecrã nem plugin de plataforma Qt. Vários testes são regressões explícitas de erros já encontrados e corrigidos numa passagem de auditoria anterior e documentados em linha no próprio código-fonte (a proteção contra ciclo infinito num ciclo real do `render/kinematics.py`, a condição `had_scheme` do `source/scan.py`, a verificação de massa negativa do `urdf/dof.py`) - uma edição futura não pode reintroduzir nenhum deles em silêncio sem que um teste falhe. O CI (`.github/workflows/ci.yml`) executa o mesmo comando a cada push.
 
 ### Compilação de produção
 

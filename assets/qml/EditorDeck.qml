@@ -524,7 +524,7 @@ ApplicationWindow {
                                 NumberField { id: scaleY; Layout.fillWidth: true; numberValue: editorBackend.propsScale[1] }
                                 NumberField { id: scaleZ; Layout.fillWidth: true; numberValue: editorBackend.propsScale[2] }
                             }
-                            GameButton { text: editorBackend.uiText("PROPS_APPLY_SCALE"); Layout.fillWidth: true; onClicked: editorBackend.applyScale(Number(scaleX.text), Number(scaleY.text), Number(scaleZ.text)) }
+                            GameButton { text: editorBackend.uiText("PROPS_APPLY_SCALE"); Layout.fillWidth: true; onClicked: editorBackend.applyScale(Number(String(scaleX.text).replace(",", ".")), Number(String(scaleY.text).replace(",", ".")), Number(String(scaleZ.text).replace(",", "."))) }
                         }
 
                         Rectangle { Layout.fillWidth: true; Layout.preferredHeight: 1; color: panelBorder }
@@ -550,7 +550,7 @@ ApplicationWindow {
                                     NumberField { id: jointUpper; Layout.fillWidth: true; numberValue: editorBackend.propsJointUpper }
                                 }
                             }
-                            GameButton { text: editorBackend.uiText("PROPS_APPLY_JOINT"); Layout.fillWidth: true; onClicked: editorBackend.applyJoint(jointTypeCombo.currentIndex, Number(jointLower.text), Number(jointUpper.text)) }
+                            GameButton { text: editorBackend.uiText("PROPS_APPLY_JOINT"); Layout.fillWidth: true; onClicked: editorBackend.applyJoint(jointTypeCombo.currentIndex, Number(String(jointLower.text).replace(",", ".")), Number(String(jointUpper.text).replace(",", "."))) }
                         }
 
                         Rectangle { Layout.fillWidth: true; Layout.preferredHeight: 1; color: panelBorder }
@@ -582,8 +582,8 @@ ApplicationWindow {
                                 NumberField { id: inertialIzz; Layout.preferredWidth: 100; numberValue: editorBackend.propsInertialIzz }
                             }
                             Text { text: editorBackend.propsInertialNote; color: muted; font.pixelSize: 9; wrapMode: Text.WordWrap; Layout.fillWidth: true; visible: text.length > 0 }
-                            GameButton { text: editorBackend.uiText("PROPS_CALC_INERTIAL"); accent: "#24465e"; Layout.fillWidth: true; onClicked: editorBackend.calcInertial(Number(inertialMass.text)) }
-                            GameButton { text: editorBackend.uiText("PROPS_APPLY_INERTIAL"); Layout.fillWidth: true; onClicked: editorBackend.applyInertial(Number(inertialMass.text), Number(inertialIxx.text), Number(inertialIyy.text), Number(inertialIzz.text)) }
+                            GameButton { text: editorBackend.uiText("PROPS_CALC_INERTIAL"); accent: "#24465e"; Layout.fillWidth: true; onClicked: editorBackend.calcInertial(Number(String(inertialMass.text).replace(",", "."))) }
+                            GameButton { text: editorBackend.uiText("PROPS_APPLY_INERTIAL"); Layout.fillWidth: true; onClicked: editorBackend.applyInertial(Number(String(inertialMass.text).replace(",", ".")), Number(String(inertialIxx.text).replace(",", ".")), Number(String(inertialIyy.text).replace(",", ".")), Number(String(inertialIzz.text).replace(",", "."))) }
                         }
                     }
                 }
@@ -608,8 +608,8 @@ ApplicationWindow {
                         Layout.fillWidth: true
                         TextField { id: hostField; text: "192.168.1.100"; Layout.preferredWidth: 150; color: textPrimary; background: Rectangle { radius: 8; color: panelAlt; border.width: 1; border.color: panelBorder } }
                         SpinBox { id: portField; from: 1; to: 65535; value: 3000; editable: true; Layout.preferredWidth: 120 }
-                        TextField { id: userField; text: "admin"; Layout.preferredWidth: 90; color: textPrimary; background: Rectangle { radius: 8; color: panelAlt; border.width: 1; border.color: panelBorder } }
-                        TextField { id: passField; text: "admin"; echoMode: TextInput.Password; Layout.preferredWidth: 90; color: textPrimary; background: Rectangle { radius: 8; color: panelAlt; border.width: 1; border.color: panelBorder } }
+                        TextField { id: userField; text: ""; placeholderText: editorBackend.uiText("UPLOAD_USERNAME_PLACEHOLDER"); placeholderTextColor: muted; Layout.preferredWidth: 90; color: textPrimary; background: Rectangle { radius: 8; color: panelAlt; border.width: 1; border.color: panelBorder } }
+                        TextField { id: passField; text: ""; placeholderText: editorBackend.uiText("UPLOAD_PASSWORD_PLACEHOLDER"); placeholderTextColor: muted; echoMode: TextInput.Password; Layout.preferredWidth: 90; color: textPrimary; background: Rectangle { radius: 8; color: panelAlt; border.width: 1; border.color: panelBorder } }
                         GameButton { text: editorBackend.uiText("UPLOAD_CONNECT_BUTTON"); enabled: !editorBackend.uploadConnecting; onClicked: editorBackend.connectToServer(hostField.text, portField.value, userField.text, passField.text) }
                     }
                     Text { text: editorBackend.uploadStatusText; color: editorBackend.uploadConnected ? emerald : muted; font.pixelSize: 10 }

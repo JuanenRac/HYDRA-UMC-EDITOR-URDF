@@ -17,7 +17,6 @@ import math
 from PySide6.QtCore import Qt, Signal
 from PySide6.QtWidgets import (
     QFileDialog,
-    QHBoxLayout,
     QLabel,
     QPushButton,
     QSlider,
@@ -46,7 +45,7 @@ class _JointSlider(QWidget):
         layout = QVBoxLayout(self)
         layout.setContentsMargins(4, 2, 4, 2)
 
-        unit = _("UNIT_DEGREES") if joint.type != JointType.PRISMATIC else _("UNIT_METERS")
+        unit = _("UNIT_RADIANS") if joint.type != JointType.PRISMATIC else _("UNIT_METERS")
         self._label = QLabel(f"{joint.name} ({unit})")
         layout.addWidget(self._label)
 
@@ -169,7 +168,12 @@ class ViewportPanel(QWidget):
         root_name = robot.root_link_name()
         by_parent = robot.joints_by_parent()
 
+        added: set[str] = set()
+
         def add_link(name: str, parent_item: QTreeWidgetItem | None) -> None:
+            if name in added:
+                return  # a cycle in the joints must not recurse forever
+            added.add(name)
             item = QTreeWidgetItem([name])
             if parent_item is None:
                 self._link_tree.addTopLevelItem(item)

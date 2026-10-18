@@ -13,8 +13,9 @@
 # =============================================================================
 from __future__ import annotations
 
+import os
+import shutil
 import sys
-import tempfile
 from pathlib import Path
 from typing import Callable
 
@@ -216,9 +217,20 @@ class EditorController(QObject):
         # crash-safety net, not a full undo mechanism, which remains real,
         # deferred future work) so a failed write still leaves a
         # recoverable copy of what was there before.
-        if path.exists():
-            path.replace(path.with_name(path.name + ".bak"))
-        path.write_text(text, encoding="utf-8")
+        # The backup keeps the FIRST original: a later export never overwrites
+        # it, so a bad edit exported twice cannot destroy the source file. The
+        # new text goes to a temporary file in the same folder and replaces
+        # the destination atomically, so a failed write leaves it untouched.
+        backup = path.with_name(path.name + ".bak")
+        if path.exists() and not backup.exists():
+            shutil.copy2(path, backup)
+        temporary = path.with_name(path.name + ".tmp")
+        try:
+            temporary.write_text(text, encoding="utf-8")
+            os.replace(temporary, path)
+        finally:
+            if temporary.exists():
+                temporary.unlink()
 
     @property
     def source_description(self) -> str:

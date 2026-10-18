@@ -32,6 +32,7 @@ import urllib.request
 from pathlib import Path
 
 from hydra_editor_urdf.models import Robot
+from hydra_editor_urdf.source.scan import MESH_EXTENSIONS
 from hydra_editor_urdf.urdf.writer import robot_to_urdf_string
 
 REQUEST_TIMEOUT_S = 15.0
@@ -117,8 +118,8 @@ class StudioClient:
                 if not isinstance(visual.geometry, MeshGeometry):
                     continue
                 resolved = mesh_resolver(visual.geometry.filename)
-                if resolved is None:
-                    continue
+                if resolved is None or Path(resolved).suffix.lower() not in MESH_EXTENSIONS:
+                    continue  # only mesh files are ever read and uploaded
                 out_name = Path(visual.geometry.filename).name
                 if out_name in seen_filenames:
                     continue  # same mesh referenced by more than one visual - upload it once

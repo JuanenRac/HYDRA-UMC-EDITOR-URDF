@@ -124,6 +124,18 @@ def build_mesh_resolver(
     extra_root_paths = [Path(p) for p in extra_roots] if extra_roots else []
     index: dict[str, list[Path]] | None = None  # built lazily - most resolvers are only ever asked for a handful of files
     extra_indexes: list[dict[str, list[Path]]] = []  # one per extra root, also built lazily and in the same order
+    # Folders a resolved mesh may live in. A <mesh filename> is data from a
+    # third party's URDF: it must never lead to a file outside these folders
+    # (".." segments, an absolute path or a file:// URI), nor to a file that
+    # is not a mesh, because the editor reads and uploads whatever it resolves.
+    allowed_roots = [p.resolve() for p in (root, urdf_file_dir, *extra_root_paths)]
+
+    def acceptable(candidate: Path) -> bool:
+        return (
+            candidate.suffix.lower() in MESH_EXTENSIONS
+            and candidate.is_file()
+            and any(candidate.is_relative_to(allowed) for allowed in allowed_roots)
+        )
 
     def resolve(mesh_filename: str) -> Path | None:
         nonlocal index, extra_indexes
@@ -138,7 +150,7 @@ def build_mesh_resolver(
         tail = mesh_filename.split("://", 1)[-1]
 
         candidate = (urdf_file_dir / tail).resolve()
-        if candidate.is_file():
+        if acceptable(candidate):
             return candidate
 
         # Drop a leading package name segment too (package:// URIs put
@@ -159,12 +171,12 @@ def build_mesh_resolver(
             tail_parts = Path(tail).parts
             tail_without_pkg = Path(*tail_parts[1:]) if len(tail_parts) > 1 else Path(tail)
             candidate = (urdf_file_dir / tail_without_pkg).resolve()
-            if candidate.is_file():
+            if acceptable(candidate):
                 return candidate
 
         as_absolute = Path(mesh_filename)
-        if as_absolute.is_absolute() and as_absolute.is_file():
-            return as_absolute
+        if not had_scheme and as_absolute.is_absolute() and acceptable(as_absolute.resolve()):
+            return as_absolute.resolve()
 
         if index is None:
             index = _basename_index(root)

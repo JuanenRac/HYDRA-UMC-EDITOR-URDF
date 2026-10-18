@@ -24,7 +24,7 @@
 
 ### 🖌️ 面向 HYDRA-UMC-STUDIO 模型目录的图形化 URDF 创建/编辑工具
 
-**当前版本：** 0.1.1（`MAJOR.MINOR.PATCH`——该编号的变化方式见下方“生产构建”一节）
+**当前版本：** 0.1.2（`MAJOR.MINOR.PATCH`——该编号的变化方式见下方“生产构建”一节）
 
 ---
 
@@ -87,6 +87,8 @@
 `.stl`（通过 `numpy-stl`）和 `.obj`（一个小型的手写 Wavefront 加载器——仅支持 `v`/`vn`/`f`，n 边形面被三角化）都是一等公民。**不支持 COLLADA（`.dae`）**——它是一种更为庞大的 XML 场景图格式（骨骼动画、多重坐标系、内嵌材质/纹理），若要诚实处理，需要一个真正的解析器，而非对某个“简单”`.dae` 恰好使用的标签进行尽力猜测；引用了此类文件的连杆会得到一条清晰的、具名的错误提示，而不是在视口中静默缺失或使整个导入崩溃。每一个已加载的网格也会应用与 HYDRA-UMC STUDIO 自身的 `useRealScaleSTL()` 和 HYDRA-UMC SUITE 自身网格加载器相同的防御性毫米/米判断：任意轴上大于 5 个真实世界米的连杆，更可能是一个没有单位元数据的毫米级导出文件，而不是一个真正的巨型机器人零件，会自动按 0.001 重新缩放。
 
 ---
+
+网格路径受到限制：`<mesh filename>` 只会解析到已打开文件夹、URDF 所在文件夹或通过"Locate Missing Meshes"添加的文件夹内的 `.stl`、`.obj` 或 `.dae` 文件；指向其他位置的 `..` 段、绝对路径和 `file://` URI 会被忽略，也只有这些文件会被上传。空的、被截断的或格式错误的网格会被报告为未加载，而不会让查看器停止工作。毫米到米的保护会在应用 URDF 的 `scale` 之前缩小任何大于 5 个单位的网格，因此已被 URDF 缩放过的网格可能被缩小两次。编辑器未建模的标签（`<dynamics>`、`<safety_controller>`、`<mimic>`、`<transmission>`、`<gazebo>`、材质纹理）在重新导出 URDF 时不会保留。
 
 ## 📜 URDF 解析与导出
 
@@ -213,7 +215,7 @@ HYDRA-UMC-EDITOR-URDF/
 │   ├── ARCHITECTURE.md
 │   ├── BUILD_AND_RUN.md
 │   └── INTEGRATION_CONTRACT.md
-├── tests/                          # 真实的 pytest 套件(202 个测试)——只测纯逻辑,这里完全没有导入 PySide6
+├── tests/                          # 真实的 pytest 套件(214 个测试)——只测纯逻辑,这里完全没有导入 PySide6
 │   ├── test_urdf_parser.py / test_urdf_writer.py  # URDF XML <-> models.py,包括 parse -> write -> parse 往返测试
 │   ├── test_dof.py                 # 可行性校验、DOF 边界、根/孤立/断开/多父级检测
 │   ├── test_kinematics.py          # 正向运动学,包括已修复的"真实环路导致永久挂起"回归测试
@@ -273,7 +275,7 @@ pip install -r requirements-dev.txt
 python -m pytest tests/ -q
 ```
 
-在一次面向整个生态系统的软件改进审计中发现:本应用自身的纯逻辑(URDF 解析/导出、DOF 可行性校验、正向运动学、惯性估算、网格引用解析、GitHub 拉取、i18n)此前完全没有自动化测试覆盖。已修复:新增 11 个测试模块共 202 个真实测试,其中没有一个会导入 PySide6/PyOpenGL——`requirements-dev.txt` 只安装 `tests/` 真正需要的东西(`numpy` 和 `pytest`),因此整个测试套件无需显示器或 Qt 平台插件即可运行。其中几个测试是针对此前审计中已发现并修复、且已在源码本身留有注释记录的 bug 的明确回归测试(`render/kinematics.py` 中针对真实环路的无限循环防护、`source/scan.py` 的 `had_scheme` 条件、`urdf/dof.py` 的负质量检查)——今后的修改如果悄悄让其中任何一个问题重现,都会被测试直接拦下。CI(`.github/workflows/ci.yml`)在每次推送时都会运行同样的命令。
+说明:本应用自身的纯逻辑(URDF 解析/导出、DOF 可行性校验、正向运动学、惯性估算、网格引用解析、GitHub 拉取、i18n)此前完全没有自动化测试覆盖。已修复:新增 11 个测试模块共 202 个真实测试,其中没有一个会导入 PySide6/PyOpenGL——`requirements-dev.txt` 只安装 `tests/` 真正需要的东西(`numpy` 和 `pytest`),因此整个测试套件无需显示器或 Qt 平台插件即可运行。其中几个测试是针对此前审计中已发现并修复、且已在源码本身留有注释记录的 bug 的明确回归测试(`render/kinematics.py` 中针对真实环路的无限循环防护、`source/scan.py` 的 `had_scheme` 条件、`urdf/dof.py` 的负质量检查)——今后的修改如果悄悄让其中任何一个问题重现,都会被测试直接拦下。CI(`.github/workflows/ci.yml`)在每次推送时都会运行同样的命令。
 
 ### 生产构建
 

@@ -80,7 +80,7 @@ echo
 
 echo "[5/7] Bumping version number..."
 # Odometer-style bump (see bump_version.py): PATCH+1 per real build,
-# carrying into MINOR past 9 (e.g. 1.0.9 -> 1.1.0). Runs for EVERY real
+# carrying into MINOR past 9 (e.g. 0.0.9 -> 0.1.0). Runs for EVERY real
 # packaged build, unconditionally - if you're iterating on this script
 # without wanting a version bump each time, run the actual PyInstaller
 # command by hand instead of through this script. `set -e` above already

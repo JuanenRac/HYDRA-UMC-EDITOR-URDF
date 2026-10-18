@@ -45,7 +45,7 @@ from PySide6.QtGui import QImage, QMouseEvent, QOffscreenSurface, QOpenGLContext
 from PySide6.QtOpenGL import QOpenGLFramebufferObject, QOpenGLFramebufferObjectFormat
 from PySide6.QtOpenGLWidgets import QOpenGLWidget
 
-from hydra_editor_urdf.models import BoxGeometry, CylinderGeometry, Material, MeshGeometry, Robot, SphereGeometry, Visual
+from hydra_editor_urdf.models import BoxGeometry, CylinderGeometry, MeshGeometry, Robot, SphereGeometry, Visual
 from hydra_editor_urdf.render.kinematics import compute_link_world_transforms, default_joint_values, origin_to_matrix
 from hydra_editor_urdf.render.mesh import MalformedMeshFile, Mesh, UnsupportedMeshFormat, load_mesh_file, make_box_mesh, make_cylinder_mesh, make_sphere_mesh
 
@@ -311,7 +311,7 @@ class UrdfGLRenderer:
                 return None
             try:
                 mesh = load_mesh_file(resolved)
-            except (UnsupportedMeshFormat, MalformedMeshFile, OSError):
+            except (UnsupportedMeshFormat, MalformedMeshFile, OSError, ValueError):
                 if missing is not None:
                     missing.append(f"{link_name}: {geometry.filename}" if link_name else geometry.filename)
                 return None

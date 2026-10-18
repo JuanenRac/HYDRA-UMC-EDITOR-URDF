@@ -53,7 +53,7 @@ from hydra_editor_urdf.inertia_calc import estimate_inertial
 from hydra_editor_urdf.models import Inertial, JointLimit, JointType, MeshGeometry, Robot
 from hydra_editor_urdf.render.kinematics import default_joint_values
 from hydra_editor_urdf.render.viewport import OffscreenUrdfRenderer
-from hydra_editor_urdf.server.client import StudioClient, StudioClientError
+from hydra_editor_urdf.server.client import StudioClient
 from hydra_editor_urdf.ui.about_dialog import AUTHOR_EMAIL, AUTHOR_NAME, LICENSE_NAME
 # Reused directly, not reimplemented - both already fix a real "QThread
 # destroyed while still running" crash by tracking every live thread in a
@@ -65,6 +65,7 @@ from hydra_editor_urdf.ui.about_dialog import AUTHOR_EMAIL, AUTHOR_NAME, LICENSE
 from hydra_editor_urdf.ui.panels.source_panel import _GithubFetchThread
 from hydra_editor_urdf.ui.panels.upload_panel import CATEGORIES, _ServerCallThread
 from hydra_editor_urdf.urdf.dof import MAX_SUPPORTED_DOF, MIN_SUPPORTED_DOF
+from hydra_editor_urdf.urdf.save_check import check_before_save
 
 ASSETS_DIR = Path(__file__).resolve().parent / "assets"
 QML_PATH = ASSETS_DIR / "qml" / "EditorDeck.qml"
@@ -490,7 +491,12 @@ class EditorQtBridge(QObject):
         root_name = robot.root_link_name()
         by_parent = robot.joints_by_parent()
 
+        added: set[str] = set()
+
         def add_link(name: str, depth: int) -> None:
+            if name in added:
+                return  # a cycle in the joints must not recurse forever
+            added.add(name)
             rows.append({"name": name, "depth": depth})
             for joint in by_parent.get(name, []):
                 add_link(joint.child, depth + 1)
@@ -528,7 +534,7 @@ class EditorQtBridge(QObject):
     def _rebuild_joint_sliders(self, robot: Robot) -> None:
         rows: list[dict[str, object]] = []
         for joint in robot.movable_joints():
-            unit = _("UNIT_DEGREES") if joint.type != JointType.PRISMATIC else _("UNIT_METERS")
+            unit = _("UNIT_RADIANS") if joint.type != JointType.PRISMATIC else _("UNIT_METERS")
             if joint.limit is not None:
                 lower, upper = joint.limit.lower, joint.limit.upper
             else:
@@ -651,9 +657,17 @@ class EditorQtBridge(QObject):
     def propsScale(self) -> list[float]:
         return list(self._props_scale)
 
+    def _refuse_non_finite(self, *values: float) -> bool:
+        """True (after telling the operator) when any typed value is NaN or infinite, e.g. a decimal comma."""
+        if all(math.isfinite(v) for v in values):
+            return False
+        self._status_message = _("PROPS_NON_FINITE_VALUE")
+        self.changed.emit()
+        return True
+
     @Slot(float, float, float)
     def applyScale(self, x: float, y: float, z: float) -> None:
-        if self._props_selected_mesh_geometry is None:
+        if self._props_selected_mesh_geometry is None or self._refuse_non_finite(x, y, z):
             return
         self._props_selected_mesh_geometry.scale = (x, y, z)
         self._controller.notify_tree_changed()
@@ -681,6 +695,8 @@ class EditorQtBridge(QObject):
     @Slot(int, float, float)
     def applyJoint(self, type_index: int, lower: float, upper: float) -> None:
         if self._controller.robot is None or self._props_selected_joint_name is None:
+            return
+        if self._refuse_non_finite(lower, upper):
             return
         joint = self._controller.robot.joints[self._props_selected_joint_name]
         joint.type = list(JointType)[type_index]
@@ -721,7 +737,7 @@ class EditorQtBridge(QObject):
 
     @Slot(float)
     def calcInertial(self, current_mass: float) -> None:
-        if self._props_selected_visual_geometry is None:
+        if self._props_selected_visual_geometry is None or self._refuse_non_finite(current_mass):
             return
         geometry = self._props_selected_visual_geometry
         mesh_bbox_size: tuple[float, float, float] | None = None
@@ -766,6 +782,8 @@ class EditorQtBridge(QObject):
     @Slot(float, float, float, float)
     def applyInertial(self, mass: float, ixx: float, iyy: float, izz: float) -> None:
         if self._controller.robot is None or self._selected_link is None:
+            return
+        if self._refuse_non_finite(mass, ixx, iyy, izz):
             return
         link = self._controller.robot.links[self._selected_link]
         link.inertial = Inertial(mass=mass, ixx=ixx, iyy=iyy, izz=izz)
@@ -830,6 +848,12 @@ class EditorQtBridge(QObject):
             return
         if self._controller.dof_report is not None and not self._controller.dof_report.is_feasible:
             self._status_message = _("UPLOAD_INFEASIBLE_WARNING")
+            self.changed.emit()
+            return
+
+        problems = check_before_save(self._controller.robot)
+        if problems:
+            self._status_message = "; ".join(problems[:5])
             self.changed.emit()
             return
 

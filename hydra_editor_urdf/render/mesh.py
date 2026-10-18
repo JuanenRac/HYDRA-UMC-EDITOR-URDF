@@ -91,6 +91,10 @@ def _guard_mm_vs_m_scale(vertices: np.ndarray) -> np.ndarray:
     so anywhere the file format can record. A single robot link bigger
     than 5 real-world meters in any axis is far more likely to be a
     millimeter-scale mesh than an actual giant robot part."""
+    if len(vertices) == 0:
+        raise MalformedMeshFile("the mesh has no triangles")
+    if not np.isfinite(vertices).all():
+        raise MalformedMeshFile("the mesh has vertices that are not finite numbers")
     span = vertices.max(axis=0) - vertices.min(axis=0)
     if float(np.max(span)) > 5.0:
         return vertices * 0.001
@@ -124,6 +128,11 @@ def load_obj(path: str | Path) -> Mesh:
     out_normals: list[tuple[float, float, float]] = []
 
     def emit_triangle(idx_a: tuple[int, int | None], idx_b: tuple[int, int | None], idx_c: tuple[int, int | None]) -> None:
+        for v_idx, n_idx in (idx_a, idx_b, idx_c):
+            if not 0 <= v_idx < len(positions):
+                raise MalformedMeshFile(f"{path.name}: a face uses vertex {v_idx + 1}, but the file only defines {len(positions)}.")
+            if n_idx is not None and not 0 <= n_idx < len(normals_in):
+                raise MalformedMeshFile(f"{path.name}: a face uses normal {n_idx + 1}, but the file only defines {len(normals_in)}.")
         pa, pb, pc = positions[idx_a[0]], positions[idx_b[0]], positions[idx_c[0]]
         if idx_a[1] is not None and idx_b[1] is not None and idx_c[1] is not None:
             na, nb, nc = normals_in[idx_a[1]], normals_in[idx_b[1]], normals_in[idx_c[1]]
@@ -288,10 +297,13 @@ def load_mesh_file(path: str | Path) -> Mesh:
     adding a new format later means touching this function alone."""
     path = Path(path)
     suffix = path.suffix.lower()
-    if suffix == ".stl":
-        return load_stl(path)
-    if suffix == ".obj":
-        return load_obj(path)
+    if suffix in (".stl", ".obj"):
+        try:
+            return load_stl(path) if suffix == ".stl" else load_obj(path)
+        except (ValueError, IndexError) as error:
+            # an empty, truncated or hand-edited file must be reported as a
+            # mesh that could not be loaded, never abort the whole render
+            raise MalformedMeshFile(f"{path.name}: {error}") from error
     if suffix == ".dae":
         raise UnsupportedMeshFormat(
             f"{path.name}: COLLADA (.dae) meshes aren't supported yet - convert to .stl or .obj first "

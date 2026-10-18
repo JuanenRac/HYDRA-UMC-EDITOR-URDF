@@ -244,6 +244,10 @@ def parse_urdf_string(xml_text: str) -> Robot:
             "expand yet - run it through the ROS `xacro` tool first (e.g. `xacro model.xacro > model.urdf`) "
             "and import the resulting plain .urdf instead."
         )
+    if "<!DOCTYPE" in xml_text.upper() or "<!ENTITY" in xml_text.upper():
+        # A URDF never needs a DTD or entities; refusing them keeps the parser
+        # safe whatever expat version this build happens to ship.
+        raise UrdfParseError("A URDF must not declare a DOCTYPE or entities.")
     try:
         root = ET.fromstring(xml_text)
     except ET.ParseError as e:

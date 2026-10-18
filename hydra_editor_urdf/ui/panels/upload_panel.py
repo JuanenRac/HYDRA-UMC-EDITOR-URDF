@@ -34,6 +34,7 @@ from PySide6.QtWidgets import (
 from hydra_editor_urdf.app import EditorController
 from hydra_editor_urdf.i18n import _
 from hydra_editor_urdf.server.client import StudioClient, StudioClientError
+from hydra_editor_urdf.urdf.save_check import check_before_save
 
 # Mirrors HYDRA-UMC-STUDIO's own Config > UI > Module Visibility categories
 # (Config.tsx's own moduleOptions - that part is still genuinely STUDIO's,
@@ -180,6 +181,11 @@ class UploadPanel(QWidget):
             return
         if self._controller.dof_report is not None and not self._controller.dof_report.is_feasible:
             QMessageBox.warning(self, _("UPLOAD_ERROR_TITLE"), _("UPLOAD_INFEASIBLE_WARNING"))
+            return
+
+        problems = check_before_save(self._controller.robot)
+        if problems:
+            QMessageBox.warning(self, _("UPLOAD_ERROR_TITLE"), "\n".join(problems[:10]))
             return
 
         client = self._client

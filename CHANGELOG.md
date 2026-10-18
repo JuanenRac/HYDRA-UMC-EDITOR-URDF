@@ -9,6 +9,17 @@ goes up by 1 per build; once `PATCH` would exceed 9 it resets to 0 and
 `MINOR` goes up by 1 instead (e.g. `0.0.9` -> `0.1.0`). `MAJOR` is only ever
 bumped by hand, as a deliberate decision.
 
+## [0.1.2] - Mesh paths stay inside the repository, safer push and export
+
+- **Mesh paths can no longer leave the repository:** a `<mesh filename>` with `..` segments, an absolute path or a `file://` URI used to resolve to any readable file on the operator's computer, and "Push" would read it and upload it to the server. The resolver now only returns `.stl`, `.obj` or `.dae` files inside the opened folder, the URDF folder or a folder added with "Locate Missing Meshes", and the upload skips anything else.
+- **Pushing runs the same checks as exporting:** a non-finite limit, inertia or scale typed in the editor could reach the server. "Push" now refuses a robot that fails the pre-save check, a non-finite joint limit makes the robot infeasible, and the visual deck turns a decimal comma into a point and ignores values that are not numbers.
+- **No more pre-filled credentials in the visual deck:** the user and password fields no longer start as `admin` / `admin`; they show a placeholder like the classic panel.
+- **A cyclic joint chain no longer crashes the link tree** (classic and visual deck).
+- **Broken meshes are skipped instead of stopping the viewer:** empty or truncated STL files, OBJ files without faces, faces that point at missing vertices and non-finite vertices are reported as "mesh could not be loaded".
+- **Safer export:** the file is written to a temporary file and replaced atomically, and the `.bak` copy keeps the first original instead of being overwritten by the next export.
+- **XML hardening:** a URDF that declares a DOCTYPE or entities is refused whatever expat version is installed.
+- **Cleanups:** the radians unit key is renamed (`UNIT_RADIANS`), unused imports are removed, the new "not a valid number" message exists in all 8 languages, and the README (all languages) documents the mesh confinement, the millimetre guard and the tags that are not kept on export (214 tests).
+
 ## [0.1.1] - Deterministic mesh choice; the interface speaks Portuguese
 
 - **Mesh references that match several files:** when a `<mesh filename>` basename is found in more than one place, the file whose path shares the most trailing components with the reference now wins, a reference that names a folder that did not resolve no longer picks the file lying beside the URDF, and ties are broken by path. It used to take whichever file the directory walk listed first, so the same project loaded a different mesh on another file system (`test_scan.py` failed on one of them).

@@ -23,7 +23,7 @@
 
 ### 🖌️ Créateur/Éditeur graphique de URDF pour le catalogue de modèles de HYDRA-UMC-STUDIO
 
-**Version actuelle :** 0.1.1 (`MAJOR.MINOR.PATCH` - voir la section **Build de production** ci-dessous pour comprendre comment ce numéro évolue)
+**Version actuelle :** 0.1.2 (`MAJOR.MINOR.PATCH` - voir la section **Build de production** ci-dessous pour comprendre comment ce numéro évolue)
 
 ---
 
@@ -86,6 +86,8 @@ Le **panneau Viewport** héberge la vraie vue 3D OpenGL ainsi qu'un curseur de m
 `.stl` (via `numpy-stl`) et `.obj` (un petit chargeur Wavefront écrit à la main - uniquement `v`/`vn`/`f`, les faces n-gones triangulées en éventail) sont tous deux de première classe. **COLLADA (`.dae`) n'est pas pris en charge** - c'est un format de scène-graphe XML bien plus vaste (animation squelettique, systèmes de coordonnées multiples, matériaux/textures intégrés) qui nécessiterait un véritable analyseur pour être géré honnêtement, plutôt qu'une estimation au mieux des balises qu'un `.dae` « simple » utilise par hasard ; un lien qui en référence un obtient une erreur claire et nommée plutôt que de manquer silencieusement dans la vue 3D ou de faire planter tout l'import. Chaque maillage chargé reçoit aussi la même garde défensive millimètre-contre-mètre que le propre `useRealScaleSTL()` de HYDRA-UMC STUDIO et le propre chargeur de maillage de HYDRA-UMC SUITE appliquent : un lien de plus de 5 mètres réels sur n'importe quel axe est bien plus probablement un export à l'échelle millimétrique sans métadonnées d'unité qu'une véritable pièce géante de robot, et est redimensionné automatiquement par 0,001.
 
 ---
+
+Les chemins de maillage sont confinés : un `<mesh filename>` n'est résolu que vers un fichier `.stl`, `.obj` ou `.dae` situé dans le dossier ouvert, le dossier de l'URDF ou un dossier ajouté via « Locate Missing Meshes » ; les segments `..`, les chemins absolus et les URI `file://` menant ailleurs sont ignorés, et seuls ces fichiers sont envoyés. Les maillages vides, tronqués ou mal formés sont signalés comme non chargés au lieu d'arrêter la vue. La garde millimètres-vers-mètres redimensionne tout maillage supérieur à 5 unités avant d'appliquer le `scale` de l'URDF ; un maillage déjà mis à l'échelle par l'URDF peut donc être réduit deux fois. Les balises que l'éditeur ne modélise pas (`<dynamics>`, `<safety_controller>`, `<mimic>`, `<transmission>`, `<gazebo>`, textures de matériau) ne sont pas conservées lors de la réexportation d'un URDF.
 
 ## 📜 Analyse et export de URDF
 
@@ -216,7 +218,7 @@ HYDRA-UMC-EDITOR-URDF/
 │   ├── ARCHITECTURE.md
 │   ├── BUILD_AND_RUN.md
 │   └── INTEGRATION_CONTRACT.md
-├── tests/                          # Vraie suite pytest (202 tests) - logique pure uniquement, aucun import de PySide6 ici
+├── tests/                          # Vraie suite pytest (214 tests) - logique pure uniquement, aucun import de PySide6 ici
 │   ├── test_urdf_parser.py / test_urdf_writer.py  # URDF XML <-> models.py, y compris les allers-retours parse -> write -> parse
 │   ├── test_dof.py                 # Validation de faisabilite, limites de DOF, detection racine/orphelin/deconnecte/multi-parent
 │   ├── test_kinematics.py          # Cinematique directe, y compris la regression deja corrigee du cycle reel qui bloquait indefiniment
@@ -279,7 +281,7 @@ pip install -r requirements-dev.txt
 python -m pytest tests/ -q
 ```
 
-Trouvé en auditant le code : la logique pure de cette application (analyse/export URDF, validation de faisabilité DOF, cinématique directe, estimation d'inertie, résolution des références de maillage, récupération GitHub, i18n) n'avait aucune couverture de tests automatisés. Corrigé : 202 vrais tests répartis sur 11 modules de test, dont aucun n'importe PySide6/PyOpenGL - `requirements-dev.txt` installe uniquement ce dont `tests/` a réellement besoin (`numpy` + `pytest`), donc la suite s'exécute sans écran ni plugin de plateforme Qt. Plusieurs tests sont des régressions explicites pour des bugs déjà trouvés et corrigés lors d'un audit précédent et documentés directement dans le code source (la protection contre la boucle infinie sur un vrai cycle de `render/kinematics.py`, le conditionnement `had_scheme` de `source/scan.py`, la vérification de masse négative de `urdf/dof.py`) - une future modification ne peut plus réintroduire silencieusement l'un d'eux sans faire échouer un test. La CI (`.github/workflows/ci.yml`) exécute la même commande à chaque push.
+Note : la logique pure de cette application (analyse/export URDF, validation de faisabilité DOF, cinématique directe, estimation d'inertie, résolution des références de maillage, récupération GitHub, i18n) n'avait aucune couverture de tests automatisés. Corrigé : 202 vrais tests répartis sur 11 modules de test, dont aucun n'importe PySide6/PyOpenGL - `requirements-dev.txt` installe uniquement ce dont `tests/` a réellement besoin (`numpy` + `pytest`), donc la suite s'exécute sans écran ni plugin de plateforme Qt. Plusieurs tests sont des régressions explicites pour des bugs déjà trouvés et corrigés lors d'un audit précédent et documentés directement dans le code source (la protection contre la boucle infinie sur un vrai cycle de `render/kinematics.py`, le conditionnement `had_scheme` de `source/scan.py`, la vérification de masse négative de `urdf/dof.py`) - une future modification ne peut plus réintroduire silencieusement l'un d'eux sans faire échouer un test. La CI (`.github/workflows/ci.yml`) exécute la même commande à chaque push.
 
 ### Build de production
 

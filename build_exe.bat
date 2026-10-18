@@ -57,7 +57,7 @@ echo.
 
 echo [4/6] Bumping version number...
 REM Odometer-style bump (see bump_version.py): PATCH+1 per real build,
-REM carrying into MINOR past 9 (e.g. 1.0.9 -> 1.1.0). This happens for
+REM carrying into MINOR past 9 (e.g. 0.0.9 -> 0.1.0). This happens for
 REM EVERY real packaged build, unconditionally - if you're iterating on
 REM this script without wanting a version bump each time, run the actual
 REM PyInstaller command by hand instead of through this script.

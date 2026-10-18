@@ -17,6 +17,7 @@
 # =============================================================================
 from __future__ import annotations
 
+import math
 from dataclasses import dataclass, field
 
 from hydra_editor_urdf.models import JointType, Robot
@@ -154,6 +155,10 @@ def validate(robot: Robot) -> DofReport:
         # it is just as physically meaningless - no real joint position
         # exists between two bounds that don't overlap - and was
         # previously never checked at all here.
+        elif joint.limit is not None and not all(
+            math.isfinite(v) for v in (joint.limit.lower, joint.limit.upper, joint.limit.effort, joint.limit.velocity)
+        ):
+            reasons.append(f"Joint {joint.name!r} has a <limit> with a value that is not a finite number.")
         elif joint.limit is not None and joint.limit.lower > joint.limit.upper:
             reasons.append(
                 f"Joint {joint.name!r} has an invalid <limit>: lower ({joint.limit.lower}) is greater than "
