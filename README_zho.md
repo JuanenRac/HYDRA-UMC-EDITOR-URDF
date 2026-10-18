@@ -24,7 +24,7 @@
 
 ### 🖌️ 面向 HYDRA-UMC-STUDIO 模型目录的图形化 URDF 创建/编辑工具
 
-**当前版本：** 0.1.3（`MAJOR.MINOR.PATCH`——该编号的变化方式见下方“生产构建”一节）
+**当前版本：** 0.1.4（`MAJOR.MINOR.PATCH`——该编号的变化方式见下方“生产构建”一节）
 
 ---
 
@@ -34,7 +34,7 @@
 
 | | |
 |---|---|
-| 版本 | `0.1.3` |
+| 版本 | `0.1.4` |
 | 成熟度 | 成熟 |
 | 测试 | 202 |
 | 技术栈 | Python / PySide6 / Qt6 / OpenGL |
@@ -226,7 +226,7 @@ HYDRA-UMC-EDITOR-URDF/
 │   ├── ARCHITECTURE.md
 │   ├── BUILD_AND_RUN.md
 │   └── INTEGRATION_CONTRACT.md
-├── tests/                          # 真实的 pytest 套件(214 个测试)——只测纯逻辑,这里完全没有导入 PySide6
+├── tests/                          # 真实的 pytest 套件(330 个测试)——只测纯逻辑,这里完全没有导入 PySide6
 │   ├── test_urdf_parser.py / test_urdf_writer.py  # URDF XML <-> models.py,包括 parse -> write -> parse 往返测试
 │   ├── test_dof.py                 # 可行性校验、DOF 边界、根/孤立/断开/多父级检测
 │   ├── test_kinematics.py          # 正向运动学,包括已修复的"真实环路导致永久挂起"回归测试

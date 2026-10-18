@@ -23,7 +23,7 @@
 
 ### 🖌️ Grafischer URDF-Ersteller/-Editor für den Modellkatalog von HYDRA-UMC-STUDIO
 
-**Aktuelle Version:** 0.1.3 (`MAJOR.MINOR.PATCH` - siehe den Abschnitt **Produktions-Build** weiter unten dafür, wie sich diese Zahl bewegt)
+**Aktuelle Version:** 0.1.4 (`MAJOR.MINOR.PATCH` - siehe den Abschnitt **Produktions-Build** weiter unten dafür, wie sich diese Zahl bewegt)
 
 ---
 
@@ -33,7 +33,7 @@
 
 | | |
 |---|---|
-| Version | `0.1.3` |
+| Version | `0.1.4` |
 | Reifegrad | Etabliert |
 | Tests | 202 |
 | Technik | Python / PySide6 / Qt6 / OpenGL |
@@ -230,7 +230,7 @@ HYDRA-UMC-EDITOR-URDF/
 │   ├── ARCHITECTURE.md
 │   ├── BUILD_AND_RUN.md
 │   └── INTEGRATION_CONTRACT.md
-├── tests/                          # Echte pytest-Suite (214 Tests) - nur reine Logik, hier wird nirgends PySide6 importiert
+├── tests/                          # Echte pytest-Suite (330 Tests) - nur reine Logik, hier wird nirgends PySide6 importiert
 │   ├── test_urdf_parser.py / test_urdf_writer.py  # URDF-XML <-> models.py, einschliesslich parse -> write -> parse Round-Trips
 │   ├── test_dof.py                 # Machbarkeitspruefung, DOF-Grenzen, Erkennung von Wurzel/Waise/getrennt/Mehrfach-Eltern
 │   ├── test_kinematics.py          # Vorwaertskinematik, einschliesslich des bereits behobenen Regressionsfalls des Zyklus, der fuer immer hing

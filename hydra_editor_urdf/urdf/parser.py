@@ -283,4 +283,6 @@ def parse_urdf_file(path: str | Path) -> Robot:
         text = path.read_text(encoding="utf-8")
     except OSError as e:
         raise UrdfParseError(f"Couldn't read {path}: {e}") from e
+    except UnicodeDecodeError as e:
+        raise UrdfParseError(f"{path.name} is not valid UTF-8 text - re-save it as UTF-8 and try again ({e.reason} at byte {e.start}).") from e
     return parse_urdf_string(text)

@@ -83,8 +83,10 @@ def resolve_default_branch(owner: str, repo: str) -> str:
         raise GithubFetchError(f"GitHub API request failed: HTTP {e.code}") from e
     except (urllib.error.URLError, TimeoutError) as e:
         raise GithubFetchError(f"Couldn't reach GitHub: {e}") from e
-    branch = data.get("default_branch")
-    if not branch:
+    except ValueError as e:  # not JSON, or not UTF-8: a proxy or captive-portal page, say
+        raise GithubFetchError("GitHub's answer was not valid JSON.") from e
+    branch = data.get("default_branch") if isinstance(data, dict) else None
+    if not isinstance(branch, str) or not branch:
         raise GithubFetchError(f"GitHub API response for {owner}/{repo} had no default_branch field.")
     return branch
 

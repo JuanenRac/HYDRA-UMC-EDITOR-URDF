@@ -24,7 +24,7 @@
 
 ### 🖌️ HYDRA-UMC-STUDIO モデルカタログ向けグラフィカル URDF 作成/編集ツール
 
-**現在のバージョン：** 0.1.3（`MAJOR.MINOR.PATCH` —— この番号がどう変化するかは下記「プロダクションビルド」セクションを参照）
+**現在のバージョン：** 0.1.4（`MAJOR.MINOR.PATCH` —— この番号がどう変化するかは下記「プロダクションビルド」セクションを参照）
 
 ---
 
@@ -34,7 +34,7 @@
 
 | | |
 |---|---|
-| バージョン | `0.1.3` |
+| バージョン | `0.1.4` |
 | 成熟度 | 確立 |
 | テスト | 202 |
 | 技術 | Python / PySide6 / Qt6 / OpenGL |
@@ -230,7 +230,7 @@ HYDRA-UMC-EDITOR-URDF/
 │   ├── ARCHITECTURE.md
 │   ├── BUILD_AND_RUN.md
 │   └── INTEGRATION_CONTRACT.md
-├── tests/                          # 実際の pytest スイート(214 件のテスト)—— 純粋なロジックのみ、ここでは PySide6 のインポートは一切なし
+├── tests/                          # 実際の pytest スイート(330 件のテスト)—— 純粋なロジックのみ、ここでは PySide6 のインポートは一切なし
 │   ├── test_urdf_parser.py / test_urdf_writer.py  # URDF XML <-> models.py、parse -> write -> parse のラウンドトリップを含む
 │   ├── test_dof.py                 # 実現可能性検証、DOF の境界、ルート/孤立/切断/複数親の検出
 │   ├── test_kinematics.py          # 順運動学、修正済みの「実際のサイクルが永遠にハングする」回帰テストを含む

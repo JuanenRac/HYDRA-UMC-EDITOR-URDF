@@ -9,6 +9,13 @@ goes up by 1 per build; once `PATCH` would exceed 9 it resets to 0 and
 `MINOR` goes up by 1 instead (e.g. `0.0.9` -> `0.1.0`). `MAJOR` is only ever
 bumped by hand, as a deliberate decision.
 
+## [0.1.4] - Hostile files and server answers are reported, not raised
+
+- **URDF files:** a URDF that is not valid UTF-8 (a Latin-1 comment is enough) raised an unhandled `UnicodeDecodeError` while loading; it is now a readable parse error naming the file.
+- **Meshes:** an STL whose header promises billions of triangles, or whose ASCII facet is malformed, raised an `AssertionError` that escaped the mesh loader; both are now a malformed-mesh message and the link is skipped. A binary STL cut short is reported instead of being shown with pieces missing.
+- **Model server:** a login, list, push or download answer that is not a JSON object (a proxy page, `null`, a list), a token or slug that is not text, a download with a mesh list or mesh data that is not valid, or a GitHub answer that is not JSON, is now a readable error. A downloaded model whose name is not a plain folder name (`..`, a path) is refused instead of being written outside the chosen folder, and a bad download no longer leaves a half-written model behind.
+- 116 new tests (330 in all, 54 % of `render/mesh.py` and 99 % of `server/client.py` covered): URDF and mesh parsing of broken input, the model-server client against a local server, the controller's signals and export backups.
+
 ## [0.1.3]
 
 - Build version synchronized with `hydra-umc.project.json` and the repository-native version source.

@@ -22,6 +22,7 @@
 # =============================================================================
 from __future__ import annotations
 
+import struct
 from dataclasses import dataclass
 from pathlib import Path
 
@@ -101,7 +102,26 @@ def _guard_mm_vs_m_scale(vertices: np.ndarray) -> np.ndarray:
     return vertices
 
 
+def _is_truncated_binary_stl(path: Path) -> bool:
+    """True for a binary STL whose header promises more triangles than the
+    file holds. numpy-stl reads such a file without complaint and returns only
+    the triangles that are there, so the viewer would silently show a part with
+    pieces missing. An ASCII STL is not judged by this rule."""
+    try:
+        with path.open("rb") as handle:
+            head = handle.read(2048)
+        size = path.stat().st_size
+    except OSError:
+        return False
+    if len(head) < 84 or (head.startswith(b"solid") and b"facet" in head):
+        return False
+    declared = int.from_bytes(head[80:84], "little")
+    return 84 + 50 * declared > size
+
+
 def load_stl(path: str | Path) -> Mesh:
+    if _is_truncated_binary_stl(Path(path)):
+        raise MalformedMeshFile(f"{Path(path).name}: the file is cut short - its header promises more triangles than it holds.")
     raw = stl_mesh.Mesh.from_file(str(path))
     vertices = _guard_mm_vs_m_scale(raw.vectors.reshape(-1, 3).astype(np.float32))
 
@@ -300,7 +320,7 @@ def load_mesh_file(path: str | Path) -> Mesh:
     if suffix in (".stl", ".obj"):
         try:
             return load_stl(path) if suffix == ".stl" else load_obj(path)
-        except (ValueError, IndexError) as error:
+        except (ValueError, IndexError, AssertionError, struct.error) as error:
             # an empty, truncated or hand-edited file must be reported as a
             # mesh that could not be loaded, never abort the whole render
             raise MalformedMeshFile(f"{path.name}: {error}") from error

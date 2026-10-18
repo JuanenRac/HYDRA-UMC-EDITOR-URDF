@@ -26,6 +26,8 @@
 from __future__ import annotations
 
 import base64
+import binascii
+import http.client
 import json
 import urllib.error
 import urllib.request
@@ -66,16 +68,23 @@ class StudioClient:
         request = urllib.request.Request(url, data=data, headers=headers, method=method)
         try:
             with urllib.request.urlopen(request, timeout=REQUEST_TIMEOUT_S) as resp:
-                return json.loads(resp.read().decode("utf-8"))
+                answer = json.loads(resp.read().decode("utf-8"))
         except urllib.error.HTTPError as e:
+            message = f"HTTP {e.code}"
             try:
                 payload = json.loads(e.read().decode("utf-8"))
-                message = payload.get("error", f"HTTP {e.code}")
-            except (ValueError, UnicodeDecodeError):
-                message = f"HTTP {e.code}"
+                if isinstance(payload, dict) and isinstance(payload.get("error"), str):
+                    message = payload["error"]
+            except (ValueError, OSError, http.client.HTTPException):
+                pass
             raise StudioClientError(f"{self.base_url}{path}: {message}") from e
-        except (urllib.error.URLError, TimeoutError, OSError) as e:
+        except (urllib.error.URLError, TimeoutError, OSError, http.client.HTTPException) as e:
             raise StudioClientError(f"Couldn't reach {self.base_url}: {e}") from e
+        except ValueError as e:  # not JSON, or not UTF-8: a proxy or captive-portal page, say
+            raise StudioClientError(f"{self.base_url}{path}: the answer is not valid JSON") from e
+        if not isinstance(answer, dict):
+            raise StudioClientError(f"{self.base_url}{path}: the answer is not a JSON object")
+        return answer
 
     def login(self, username: str, password: str) -> None:
         """POST /api/login - only an `admin`-role token can actually use
@@ -87,7 +96,7 @@ class StudioClient:
         sees, but the account/token check itself lives in SERVER now."""
         data = self._request("POST", "/api/login", {"username": username, "password": password})
         token = data.get("token")
-        if not token:
+        if not isinstance(token, str) or not token:
             raise StudioClientError("Login succeeded but the server returned no token.")
         self.token = token
 
@@ -136,7 +145,8 @@ class StudioClient:
             "overwrite": overwrite,
         }
         data = self._request("POST", "/api/models/submit", body, auth=True)
-        return data.get("slug", robot.name)
+        slug = data.get("slug", robot.name)
+        return slug if isinstance(slug, str) and slug else robot.name
 
     def pull_model(self, category: str, slug: str, dest_dir: str | Path) -> Path:
         """GET /api/models/:category/:slug/download - writes the URDF +
@@ -144,42 +154,57 @@ class StudioClient:
         file's own path (ready to hand straight to
         app.py's own load_urdf_file()) - this is the "extract, edit,
         resend" round-trip half of the owner's own spec."""
+        # The slug comes from the server's own model list and becomes a folder
+        # name below, so it must be one plain name and nothing else.
+        if not slug or slug in (".", "..") or Path(slug).name != slug or "\\" in slug or ":" in slug:
+            raise StudioClientError(f"The server sent a model name that is not a plain folder name: {slug!r}")
         data = self._request("GET", f"/api/models/{category}/{slug}/download")
         urdf_xml = data.get("urdfXml", "")
-        # See the matching comment on the mesh-filename loop below - same
-        # server-controlled-filename risk applies here, so the same
-        # Path(...).name sanitization applies before it's ever joined onto
-        # out_dir.
-        urdf_filename = Path(data.get("urdfFilename") or f"{slug}.urdf").name or f"{slug}.urdf"
+        if not isinstance(urdf_xml, str):
+            raise StudioClientError("The server's download answer has no URDF text.")
+        # `urdfFilename` and every mesh `filename` come straight from the server's
+        # JSON, unlike every other name this app writes to disk (picked in a
+        # native dialog, or resolved against a real file by source/scan.py). A
+        # malformed or compromised answer such as "../../../startup/evil.dll"
+        # would write outside the model folder like an unsanitised zip entry;
+        # Path(...).name strips any directory part first, so every write lands
+        # inside the folder whatever the server sent.
+        raw_urdf_name = data.get("urdfFilename")
+        urdf_filename = (Path(raw_urdf_name).name if isinstance(raw_urdf_name, str) else "") or f"{slug}.urdf"
         mesh_files = data.get("meshFiles") or []
+        if not isinstance(mesh_files, list):
+            raise StudioClientError("The server's download answer has a mesh list that is not a list.")
+
+        # Check every mesh entry before anything is written, so a bad answer
+        # does not leave half a model on disk.
+        meshes: list[tuple[str, bytes]] = []
+        for mf in mesh_files:
+            if not isinstance(mf, dict):
+                raise StudioClientError("The server's download answer has a mesh entry that is not an object.")
+            filename = mf.get("filename")
+            b64 = mf.get("base64")
+            if not filename or not b64:
+                continue
+            if not isinstance(filename, str) or not isinstance(b64, str):
+                raise StudioClientError("The server's download answer has a mesh entry with a name or data that is not text.")
+            safe_name = Path(filename).name
+            if not safe_name:
+                continue
+            try:
+                content = base64.b64decode(b64, validate=True)
+            except (binascii.Error, ValueError) as e:
+                raise StudioClientError(f"The server sent mesh data for {safe_name} that is not valid base64.") from e
+            meshes.append((safe_name, content))
 
         out_dir = Path(dest_dir) / slug
         out_dir.mkdir(parents=True, exist_ok=True)
         urdf_path = out_dir / urdf_filename
         urdf_path.write_text(urdf_xml, encoding="utf-8")
 
-        if mesh_files:
+        if meshes:
             mesh_dir = out_dir / "meshes"
             mesh_dir.mkdir(exist_ok=True)
-            for mf in mesh_files:
-                filename = mf.get("filename")
-                b64 = mf.get("base64")
-                if not filename or not b64:
-                    continue
-                # BUG: `filename` here comes straight from
-                # the server's own JSON response (GET /api/models/:category/
-                # :slug/download), unlike every OTHER filename this app
-                # writes to disk (which are either operator-picked via a
-                # native QFileDialog, or resolved against a real existing
-                # file by source/scan.py). A malformed/compromised response
-                # returning e.g. "../../../../some_startup_folder/evil.dll"
-                # would write outside mesh_dir the same way an unsanitized
-                # zip-slip would - Path(filename).name strips any directory
-                # component first, so the write always lands inside
-                # mesh_dir regardless of what the server sent.
-                safe_name = Path(filename).name
-                if not safe_name:
-                    continue
-                (mesh_dir / safe_name).write_bytes(base64.b64decode(b64))
+            for safe_name, content in meshes:
+                (mesh_dir / safe_name).write_bytes(content)
 
         return urdf_path
