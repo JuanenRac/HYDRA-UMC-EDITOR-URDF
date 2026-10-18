@@ -709,7 +709,7 @@ class EditorQtBridge(QObject):
             )
         else:
             # See PropertiesPanel._on_apply_joint()'s own "BUG (found in
-            # audit)" comment for why CONTINUOUS is the one exception
+            # fix" comment for why CONTINUOUS is the one exception
             # that keeps its existing limit instead of clearing it.
             if joint.type != JointType.CONTINUOUS:
                 joint.limit = None

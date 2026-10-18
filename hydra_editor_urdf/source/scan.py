@@ -157,7 +157,7 @@ def build_mesh_resolver(
         # the ROS package name as the first path component, which has no
         # meaning as a real directory in a plain downloaded folder) - but
         # ONLY when `mesh_filename` actually had a scheme to begin with.
-        # BUG (found in audit): this used to run unconditionally for ANY
+        # BUG: this used to run unconditionally for ANY
         # multi-segment tail, including a bare relative path like
         # "sub/mesh.stl" or "../meshes/mesh.stl" with no package:// at
         # all - if candidate1 above didn't exist (a broken/moved relative

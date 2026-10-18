@@ -111,7 +111,7 @@ def compute_link_world_transforms(robot: Robot, joint_values: dict[str, float]) 
     already run urdf/dof.py's validate() and refused to render/export a
     tree that failed that check, same as it refuses to upload one).
 
-    BUG (found in audit): this used to append `joint.child` to the
+    BUG: this used to append `joint.child` to the
     frontier unconditionally on every visit, with no "already computed"
     guard - fine for a genuine tree, but urdf/dof.py's own validate()
     can mark a robot infeasible (e.g. a multi-parent link) WITHOUT

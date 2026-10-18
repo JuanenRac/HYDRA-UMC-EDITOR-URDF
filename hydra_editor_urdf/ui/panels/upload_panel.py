@@ -69,7 +69,7 @@ class UploadPanel(QWidget):
         super().__init__(parent)
         self._controller = controller
         self._client: StudioClient | None = None
-        # BUG (found in audit): this used to be a single `_thread`
+        # BUG: this used to be a single `_thread`
         # attribute shared by connect/push/refresh/pull - each of those 4
         # call sites overwrites it with a brand-new QThread. Refresh in
         # particular is triggered automatically right after a successful

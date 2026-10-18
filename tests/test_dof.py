@@ -5,7 +5,7 @@
 #
 # Real unit tests for hydra_editor_urdf/urdf/dof.py - including explicit
 # regression coverage for the negative-mass check already fixed in a
-# prior audit pass (dof.py's own "BUG (found in audit)" comment), so a
+# an earlier fix (dof.py's own "BUG" comment), so a
 # future edit can't silently regress it without a test failing.
 # =============================================================================
 from __future__ import annotations
@@ -202,7 +202,7 @@ def test_multi_parent_link_is_flagged_as_invalid():
     assert not report.is_feasible
 
 
-def test_negative_mass_link_is_flagged_regression_for_prior_audit_fix():
+def test_negative_mass_link_is_flagged_regression_for_an_earlier_fix():
     robot = chain(3)
     robot.links["link0"].inertial = Inertial(mass=-2.0)
     report = validate(robot)

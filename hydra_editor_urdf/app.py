@@ -38,7 +38,7 @@ from hydra_editor_urdf.urdf.writer import robot_to_urdf_string
 # "review the result" would be a bad surprise). See .gitignore's own
 # `work/` entry - never meant to be committed.
 #
-# BUG (found in audit): plain `Path(__file__).resolve().parent.parent`
+# BUG: plain `Path(__file__).resolve().parent.parent`
 # is only "this app's own install/checkout" when running from source.
 # build_exe.bat packages this app with PyInstaller's own --onefile mode
 # (see that script's own [5/6] step) - under --onefile, every bundled
@@ -204,7 +204,7 @@ class EditorController(QObject):
         issues = check_before_save(self.robot, Path(mesh_root) if mesh_root is not None else None)
         if issues:
             raise UrdfSaveError(issues)
-        # BUG (found in audit): this used to call write_text() directly
+        # BUG: this used to call write_text() directly
         # over whatever file the operator picked - if that path already
         # existed (the overwhelmingly common case: "Export" onto the same
         # .urdf just imported, after a live edit) and the process died

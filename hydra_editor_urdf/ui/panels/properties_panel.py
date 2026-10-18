@@ -258,7 +258,7 @@ class PropertiesPanel(QWidget):
                 velocity=joint.limit.velocity if joint.limit is not None else 1.0,
             )
         else:
-            # BUG (found in audit): retyping a joint AWAY from REVOLUTE/
+            # BUG: retyping a joint AWAY from REVOLUTE/
             # PRISMATIC (e.g. to FIXED) used to leave the previous
             # JointLimit object sitting on joint.limit untouched - urdf/
             # writer.py emits a <limit> element whenever joint.limit is

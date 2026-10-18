@@ -5,8 +5,8 @@
 #
 # Real unit tests for hydra_editor_urdf/source/scan.py against a real
 # temp-directory file tree (tmp_path) - including an explicit regression
-# test for the had_scheme gating bug already fixed in a prior audit pass
-# (build_mesh_resolver's own "BUG (found in audit)" comment).
+# test for the had_scheme gating bug already fixed in a an earlier fix
+# (build_mesh_resolver's own "BUG" comment).
 # =============================================================================
 from __future__ import annotations
 
@@ -130,8 +130,8 @@ def test_resolve_returns_none_when_nothing_matches(tmp_path):
     assert resolve("nonexistent.stl") is None
 
 
-def test_bare_relative_path_that_is_broken_does_not_pick_up_an_unrelated_same_named_file_regression_for_prior_audit_fix(tmp_path):
-    # BUG (found in audit) regression: a bare relative path with no
+def test_bare_relative_path_that_is_broken_does_not_pick_up_an_unrelated_same_named_file_regression_for_an_earlier_fix(tmp_path):
+    # BUG regression: a bare relative path with no
     # package:// scheme (e.g. a moved/broken "sub/mesh.stl" reference)
     # must NOT probe urdf_file_dir/<basename> directly - only a real
     # package:// URI is allowed to drop its leading path segment. Before

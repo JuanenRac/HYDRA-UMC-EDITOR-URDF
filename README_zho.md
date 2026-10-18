@@ -275,7 +275,7 @@ pip install -r requirements-dev.txt
 python -m pytest tests/ -q
 ```
 
-说明:本应用自身的纯逻辑(URDF 解析/导出、DOF 可行性校验、正向运动学、惯性估算、网格引用解析、GitHub 拉取、i18n)此前完全没有自动化测试覆盖。已修复:新增 11 个测试模块共 202 个真实测试,其中没有一个会导入 PySide6/PyOpenGL——`requirements-dev.txt` 只安装 `tests/` 真正需要的东西(`numpy` 和 `pytest`),因此整个测试套件无需显示器或 Qt 平台插件即可运行。其中几个测试是针对此前审计中已发现并修复、且已在源码本身留有注释记录的 bug 的明确回归测试(`render/kinematics.py` 中针对真实环路的无限循环防护、`source/scan.py` 的 `had_scheme` 条件、`urdf/dof.py` 的负质量检查)——今后的修改如果悄悄让其中任何一个问题重现,都会被测试直接拦下。CI(`.github/workflows/ci.yml`)在每次推送时都会运行同样的命令。
+说明:本应用自身的纯逻辑(URDF 解析/导出、DOF 可行性校验、正向运动学、惯性估算、网格引用解析、GitHub 拉取、i18n)此前完全没有自动化测试覆盖。已修复:新增 11 个测试模块共 202 个真实测试,其中没有一个会导入 PySide6/PyOpenGL——`requirements-dev.txt` 只安装 `tests/` 真正需要的东西(`numpy` 和 `pytest`),因此整个测试套件无需显示器或 Qt 平台插件即可运行。其中几个测试是针对此前已发现并修复、且已在源码本身留有注释记录的 bug 的明确回归测试(`render/kinematics.py` 中针对真实环路的无限循环防护、`source/scan.py` 的 `had_scheme` 条件、`urdf/dof.py` 的负质量检查)——今后的修改如果悄悄让其中任何一个问题重现,都会被测试直接拦下。CI(`.github/workflows/ci.yml`)在每次推送时都会运行同样的命令。
 
 ### 生产构建
 

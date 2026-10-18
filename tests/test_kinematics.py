@@ -5,8 +5,8 @@
 #
 # Real unit tests for hydra_editor_urdf/render/kinematics.py, including an
 # explicit regression test for the infinite-loop-on-a-real-cycle bug
-# already fixed in a prior audit pass (kinematics.py's own
-# "BUG (found in audit)" comment on compute_link_world_transforms) -
+# already fixed in a an earlier fix (kinematics.py's own
+# "BUG" comment on compute_link_world_transforms) -
 # pytest's own timeout isn't configured in this repo, so the guard here
 # is simply that the call returns at all rather than hanging the test run.
 # =============================================================================
@@ -205,7 +205,7 @@ def test_fixed_joint_value_is_ignored_even_if_supplied():
     assert np.allclose(world["b"], np.eye(4))
 
 
-def test_a_real_cycle_terminates_instead_of_hanging_regression_for_prior_audit_fix():
+def test_a_real_cycle_terminates_instead_of_hanging_regression_for_an_earlier_fix():
     # root -> A -> B via j1, then B -> C via j2, then C -> B via j3
     # closing the loop - the exact repro dof.py's own module doc
     # documents as having hung this function past a 3s watchdog before

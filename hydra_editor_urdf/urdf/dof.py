@@ -165,7 +165,7 @@ def validate(robot: Robot) -> DofReport:
                 f"upper ({joint.limit.upper})."
             )
 
-    # BUG (found in audit): a link's <inertial><mass value="..."/> was
+    # BUG: a link's <inertial><mass value="..."/> was
     # parsed as a plain float (urdf/parser.py's own _parse_inertial())
     # with no check anywhere in this file that it's non-negative. A
     # negative mass isn't just physically meaningless - real ROS tooling

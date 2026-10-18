@@ -60,7 +60,7 @@ class SourcePanel(QWidget):
     def __init__(self, controller: EditorController, parent=None):
         super().__init__(parent)
         self._controller = controller
-        # BUG (found in audit): this used to be a single `_fetch_thread`
+        # BUG: this used to be a single `_fetch_thread`
         # attribute, overwritten on every new fetch. The Fetch button is
         # disabled while a fetch runs so the UI itself can't retrigger
         # one, but the underlying QThread object still only stays alive

@@ -447,7 +447,7 @@ class UrdfViewport(QOpenGLWidget):
 
     # This widget's own way of telling ui/panels/viewport_panel.py "I
     # silently skipped drawing one or more visuals" (see
-    # UrdfGLRenderer._build_visual_mesh()'s own "BUG (found in audit)"
+    # UrdfGLRenderer._build_visual_mesh()'s own "BUG"
     # comment), so that panel can surface it to the operator via
     # EditorController.status_message - the same status-bar path
     # load_failed/robot_loaded already use - instead of the operator only

@@ -8,7 +8,7 @@
 # download - see that project's own docs/REMOTE_API.md and server.ts for
 # the authoritative contract, this comment can drift from it the same way
 # every other client in this ecosystem's own comments admit theirs can).
-# NOTE (docs sync, 12-project audit): this contract used to be implemented
+# NOTE: this contract used to be implemented
 # inside HYDRA-UMC-STUDIO's own process - it now lives in the separate
 # HYDRA-UMC-SERVER repo (STUDIO is a pure static frontend that talks to
 # it over the network). The request/response contract itself (every field
@@ -166,7 +166,7 @@ class StudioClient:
                 b64 = mf.get("base64")
                 if not filename or not b64:
                     continue
-                # BUG (found in audit): `filename` here comes straight from
+                # BUG: `filename` here comes straight from
                 # the server's own JSON response (GET /api/models/:category/
                 # :slug/download), unlike every OTHER filename this app
                 # writes to disk (which are either operator-picked via a
