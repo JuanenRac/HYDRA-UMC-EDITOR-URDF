@@ -1,13 +1,6 @@
 # Changelog
 
-All notable changes to HYDRA-UMC EDITOR-URDF are documented in this file.
-
-Versioning follows the ecosystem-wide `MAJOR.MINOR.PATCH` scheme with an
-"odometer" bump rule applied automatically on every real packaged build (see
-`bump_version.py`, invoked from `build_exe.bat`/`build_exe.sh`): `PATCH`
-goes up by 1 per build; once `PATCH` would exceed 9 it resets to 0 and
-`MINOR` goes up by 1 instead (e.g. `0.0.9` -> `0.1.0`). `MAJOR` is only ever
-bumped by hand, as a deliberate decision.
+All notable changes to this project are documented here.
 
 ## [Unreleased]
 
