@@ -156,8 +156,6 @@ current state of what's implemented vs. planned; no behavior changed.
   pattern for a pure-Python project's real test suite).
 - Verified for real: `python -m pytest tests/ -q` - 177/177 passing.
 
-### Also in this release: Chinese/Japanese language menu entries, `--qtquick` layout fixes
-
 - **Fixed real overlapping-text layout bugs in the `--qtquick` deck.**
   Found from a direct user report of wide elements sitting on top of
   other controls, hiding their functions. Root cause, confirmed with a
@@ -326,20 +324,18 @@ at all before this point.
 - The About dialog (Help menu) now shows the running version.
 - Added `CHANGELOG.md` (this file).
 
-## Earlier history (before version numbering)
+## Earlier history
+
+### Earlier history (before version numbering)
 
 The sections below summarize work completed before version numbering
 existed, drawn from the project's history.
-
-### Project commissioned
 
 Full specification received for a graphical URDF (3D object + kinematics)
 creator/editor for HYDRA-UMC-STUDIO's model catalog. Design direction set:
 reuse HYDRA-UMC-SUITE's proven pattern (Python + PySide6/Qt6, dockable
 Photoshop-style workspace, custom OpenGL viewport) rather than evaluating
 a new framework.
-
-### Application built
 
 Full application implemented: `EditorController` (single owner of "what
 URDF is loaded and where it came from"), a mutable dataclass model tree
@@ -354,15 +350,11 @@ HYDRA-UMC-STUDIO's model submit/list/download API. Five-panel dockable UI
 (Source/DOF/Viewport/Properties/Upload) with 5-language i18n. `tests/`
 exists but was empty at this point.
 
-### Documentation and verification
-
 README.md written from scratch (Overview, design-decision rationale,
 repository structure, development/build instructions). `python -m
 py_compile` and real imports (via HYDRA-UMC-SUITE's venv, same pinned
 PySide6/PyOpenGL/numpy-stl versions) confirmed clean across the full
 package, including the UI/render/mesh chain.
-
-### Line-by-line audit, round 1
 
 Every one of the 26 `.py` modules reviewed line by line, with real
 end-to-end pipeline testing (a synthetic 6-DOF robot referencing real STL
@@ -385,14 +377,10 @@ of `server/client.py` against the real `HYDRA-UMC-STUDIO/server.ts`.
    clearing `joint.limit` on retype (except for `continuous`, where a
    `<limit>` is valid per spec).
 
-### README translated to 5 languages
-
 `README_spa.md`, `README_ita.md`, `README_fra.md`, `README_deu.md` added
 as faithful section-by-section translations, matching the convention
 already used in URTC-FLASHER/URTC-TESTER. License section expanded to
 cover both GPL-3.0 (code) and CC BY-SA 4.0 (documentation).
-
-### Line-by-line audit, round 2
 
 Remaining open items from the previous audit's "reasonable doubts"
 resolved as 2 additional real bugs, each reproduced before and after the
