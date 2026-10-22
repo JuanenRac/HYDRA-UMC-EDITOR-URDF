@@ -9,6 +9,10 @@ goes up by 1 per build; once `PATCH` would exceed 9 it resets to 0 and
 `MINOR` goes up by 1 instead (e.g. `0.0.9` -> `0.1.0`). `MAJOR` is only ever
 bumped by hand, as a deliberate decision.
 
+## [Unreleased]
+
+- Added `tools/hydra_project_tool.py`: the same `validate`, `test`, `version`, `status` and `bump` commands in every repository. The checks run with `HYDRA_UMC_CI=1` and fail if the version changes; only `bump` changes it.
+
 ## [0.1.4] - Hostile files and server answers are reported, not raised
 
 - **URDF files:** a URDF that is not valid UTF-8 (a Latin-1 comment is enough) raised an unhandled `UnicodeDecodeError` while loading; it is now a readable parse error naming the file.
