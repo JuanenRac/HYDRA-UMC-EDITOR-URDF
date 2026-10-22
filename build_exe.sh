@@ -19,7 +19,7 @@ printf '%s\n' "* Email     : electrohobby3d@gmail.com"
 printf '%s\n' "* Copyright : (C) 2026 JuanenRac"
 printf '%s\n' "* License   : GPL-3.0-or-later - see LICENSE"
 printf '%s\n' "* ------------------------------------------------------------------------- *"
-printf '%s\n' "* 1. Increment the project version and synchronise its manifest."
+printf '%s\n' "* 1. Read the project version (building never changes it; use the explicit bump command)."
 printf '%s\n' "* 2. Run this project's declared build, verification and packaging commands."
 printf '%s\n' "* 3. Report the result and keep an interactive terminal open."
 printf '%s\n' "*******************************************************************************"
@@ -59,17 +59,26 @@ echo "      Found."
 echo
 
 echo "[2/7] Creating/activating virtual environment..."
-if [ ! -d .venv ]; then
-    python3 -m venv .venv
+# The venv is made with python3 (or python); the scripts use the python of the venv directly instead of an activate script: the python that is first on the PATH
+# may be a stripped one (for example the one of ESP-IDF) whose venv has none.
+if [ ! -x .venv/bin/python ] && [ ! -x .venv/Scripts/python.exe ]; then
+    (python3 -m venv .venv 2>/dev/null || python -m venv .venv)
 fi
-source .venv/bin/activate
+if [ -x .venv/bin/python ]; then
+    VPY=".venv/bin/python"
+elif [ -x .venv/Scripts/python.exe ]; then
+    VPY=".venv/Scripts/python.exe"
+else
+    echo "ERROR: the venv has no python; delete the .venv folder and run this again." >&2
+    exit 1
+fi
 echo "      Done."
 echo
 
 echo "[3/7] Installing Python dependencies..."
-python3 -m pip install --upgrade pip >/dev/null
-python3 -m pip install -r requirements.txt
-python3 -m pip install pyinstaller
+"$VPY" -m pip install --upgrade pip >/dev/null
+"$VPY" -m pip install -r requirements.txt
+"$VPY" -m pip install pyinstaller
 echo "      Done."
 echo
 
@@ -78,27 +87,11 @@ rm -rf build dist
 echo "      Done."
 echo
 
-echo "[5/7] Bumping version number..."
-# Odometer-style bump (see bump_version.py): PATCH+1 per real build,
-# carrying into MINOR past 9 (e.g. 0.0.9 -> 0.1.0). Runs for EVERY real
-# packaged build, unconditionally - if you're iterating on this script
-# without wanting a version bump each time, run the actual PyInstaller
-# command by hand instead of through this script. `set -e` above already
-# aborts (and the trap above still pauses) if this fails.
 # HYDRA_UMC_SCRIPT_STANDARD_VERSION_STEP
-printf '%s\n' "[1/7] Incrementing project version and synchronising its manifest..."
-python3 bump_version.py || exit 1
-# HYDRA_UMC_SCRIPT_STANDARD_VERSION_CAPTURE_BEFORE
-HYDRA_UMC_VERSION_BEFORE="$(python3 -c 'import json, pathlib, sys; print(json.loads(pathlib.Path(sys.argv[1]).read_text(encoding="utf-8"))["version"])' "$(dirname "$0")/hydra-umc.project.json")"
-python3 "$(dirname "$0")/bump_manifest_version.py" --sync || exit 1
-# HYDRA_UMC_SCRIPT_STANDARD_VERSION_CAPTURE_AFTER
-HYDRA_UMC_VERSION_AFTER="$(python3 -c 'import json, pathlib, sys; print(json.loads(pathlib.Path(sys.argv[1]).read_text(encoding="utf-8"))["version"])' "$(dirname "$0")/hydra-umc.project.json")"
-printf '\n*******************************************************************************\n'
-printf '%s\n' '* VERSION INCREMENT COMPLETED'
-printf '%s\n' "* v${HYDRA_UMC_VERSION_BEFORE:-unknown} -> v${HYDRA_UMC_VERSION_AFTER:-unknown}"
-printf '%s\n' '* Project manifest has been synchronised by the project build flow.'
-printf '%s\n' '*******************************************************************************'
-printf '\n'
+printf '%s\n' "[5/7] Reading the project version (building never changes it)..."
+HYDRA_UMC_VERSION_BUILT="$("$VPY" -c 'import json, pathlib, sys; print(json.loads(pathlib.Path(sys.argv[1]).read_text(encoding="utf-8"))["version"])' "$(dirname "$0")/hydra-umc.project.json")"
+printf '%s\n' "      Building v${HYDRA_UMC_VERSION_BUILT:-unknown} (building never changes the version)"
+echo
 echo "      Done."
 echo
 
@@ -107,8 +100,8 @@ echo "[6/7] Compiling HYDRA-UMC_EDITOR-URDF with PyInstaller..."
 # staging only these 4 Qt plugin subfolders instead of --collect-all
 # PySide6 (a ~3x smaller binary for the same working result), and for
 # the Qt/plugins/ (not plain plugins/) path PySide6 uses on Linux.
-PYSIDE_DIR=$(python3 -c "import PySide6, os; print(os.path.dirname(PySide6.__file__))")
-python3 -m PyInstaller --onefile --noconfirm --name "HYDRA-UMC_EDITOR-URDF" \
+PYSIDE_DIR=$("$VPY" -c "import PySide6, os; print(os.path.dirname(PySide6.__file__))")
+"$VPY" -m PyInstaller --onefile --noconfirm --name "HYDRA-UMC_EDITOR-URDF" \
     --add-data "assets:assets" \
     --add-data "$PYSIDE_DIR/Qt/plugins/platforms:PySide6/Qt/plugins/platforms" \
     --add-data "$PYSIDE_DIR/Qt/plugins/styles:PySide6/Qt/plugins/styles" \
@@ -150,3 +143,4 @@ echo "  Build complete: dist/HYDRA-UMC_EDITOR-URDF is ready to run - no Python n
 echo "  (chmod +x dist/HYDRA-UMC_EDITOR-URDF if it isn't already executable)"
 echo " ==============================================================="
 echo
+printf '%s\n' "Built v${HYDRA_UMC_VERSION_BUILT:-unknown}. Building never changes the version; to raise it run: python tools/hydra_project_tool.py bump"

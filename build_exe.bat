@@ -20,7 +20,7 @@ echo * Email     : electrohobby3d@gmail.com
 echo * Copyright : (C) 2026 JuanenRac
 echo * License   : GPL-3.0-or-later - see LICENSE
 echo * ------------------------------------------------------------------------- *
-echo * 1. Increment the project version and synchronise its manifest.
+echo * 1. Read the project version (building never changes it; use the explicit bump command).
 echo * 2. Run this project's declared build, verification and packaging commands.
 echo * 3. Report the result and keep an interactive terminal open.
 echo *****************************************************************************
@@ -31,17 +31,26 @@ rem Keep the window open for people, never in automation (CI / HYDRA_UMC_CI).
 set "KEEP_OPEN=pause"
 if defined CI set "KEEP_OPEN=ver >nul"
 if "%HYDRA_UMC_CI%"=="1" set "KEEP_OPEN=ver >nul"
-if not exist .venv (
-    python -m venv .venv
+REM The venv is made with the py launcher when there is one (the python that is first on the PATH may be a stripped one, for example the one of ESP-IDF, whose
+REM venv has no activate script), and the scripts use the python of the venv directly instead of activating it.
+set "PYMAKE=python"
+where py >nul 2>nul && set "PYMAKE=py -3"
+if not exist .venv\Scripts\python.exe (
+    %PYMAKE% -m venv .venv
+    if errorlevel 1 goto :error
 )
-call .venv\Scripts\activate.bat
+if not exist .venv\Scripts\python.exe (
+    echo ERROR: .venv has no python.exe; delete the .venv folder and run this again.
+    goto :error
+)
+set "VPY=%CD%\.venv\Scripts\python.exe"
 echo       Done.
 echo.
 
 echo [2/6] Installing Python dependencies...
-python -m pip install --upgrade pip >nul
-python -m pip install -r requirements.txt
-python -m pip install pyinstaller
+"%VPY%" -m pip install --upgrade pip >nul
+"%VPY%" -m pip install -r requirements.txt
+"%VPY%" -m pip install pyinstaller
 echo       Done.
 echo.
 
@@ -59,35 +68,11 @@ if exist dist (
 echo       Done.
 echo.
 
-echo [4/6] Bumping version number...
-REM Odometer-style bump (see bump_version.py): PATCH+1 per real build,
-REM carrying into MINOR past 9 (e.g. 0.0.9 -> 0.1.0). This happens for
-REM EVERY real packaged build, unconditionally - if you're iterating on
-REM this script without wanting a version bump each time, run the actual
-REM PyInstaller command by hand instead of through this script.
 REM HYDRA_UMC_SCRIPT_STANDARD_VERSION_STEP
-echo [1/6] Incrementing project version and synchronising its manifest...
-python bump_version.py
-if errorlevel 1 ( echo NATIVE VERSION BUMP FAILED. & %KEEP_OPEN% & exit /b 1 )
-REM HYDRA_UMC_SCRIPT_STANDARD_VERSION_CAPTURE_BEFORE
-for /f "usebackq delims=" %%V in (`python -c "import json; print(json.load(open(r'%~dp0hydra-umc.project.json', encoding='utf-8'))['version'])"`) do set "HYDRA_UMC_VERSION_BEFORE=%%V"
-python "%~dp0bump_manifest_version.py" --sync
-if errorlevel 1 ( echo VERSION SYNCHRONIZATION FAILED. & %KEEP_OPEN% & exit /b 1 )
-if errorlevel 1 (
-    echo       ERROR: bump_version.py failed - see the output above.
-    %KEEP_OPEN%
-    exit /b 1
-)
-REM HYDRA_UMC_SCRIPT_STANDARD_VERSION_CAPTURE_AFTER
-for /f "usebackq delims=" %%V in (`python -c "import json; print(json.load(open(r'%~dp0hydra-umc.project.json', encoding='utf-8'))['version'])"`) do set "HYDRA_UMC_VERSION_AFTER=%%V"
-if not defined HYDRA_UMC_VERSION_BEFORE set "HYDRA_UMC_VERSION_BEFORE=unknown"
-if not defined HYDRA_UMC_VERSION_AFTER set "HYDRA_UMC_VERSION_AFTER=unknown"
-echo.
-echo *****************************************************************************
-echo * VERSION INCREMENT COMPLETED
-echo * v%HYDRA_UMC_VERSION_BEFORE% ^> v%HYDRA_UMC_VERSION_AFTER%
-echo * Project manifest has been synchronised by the project build flow.
-echo *****************************************************************************
+echo [4/6] Reading the project version (building never changes it)...
+for /f "usebackq delims=" %%V in (`python -c "import json; print(json.load(open(r'%~dp0hydra-umc.project.json', encoding='utf-8'))['version'])"`) do set "HYDRA_UMC_VERSION_BUILT=%%V"
+if not defined HYDRA_UMC_VERSION_BUILT set "HYDRA_UMC_VERSION_BUILT=unknown"
+echo       Building v%HYDRA_UMC_VERSION_BUILT% (building never changes the version)
 echo.
 echo.
 echo       Done.
@@ -98,9 +83,9 @@ REM See HYDRA-UMC-SUITE's own build_exe.bat for the full reasoning behind
 REM staging only these 4 Qt plugin subfolders instead of --collect-all
 REM PySide6 (a ~3x smaller .exe for the same working result).
 if not defined PYSIDE_DIR (
-    for /f "delims=" %%P in ('python -c "import PySide6, os; print(os.path.dirname(PySide6.__file__))"') do set PYSIDE_DIR=%%P
+    for /f "delims=" %%P in ('""%VPY%" -c "import PySide6, os; print(os.path.dirname(PySide6.__file__))""') do set PYSIDE_DIR=%%P
 )
-python -m PyInstaller --onefile --windowed --noconfirm --name "HYDRA-UMC_EDITOR-URDF" ^
+"%VPY%" -m PyInstaller --onefile --windowed --noconfirm --name "HYDRA-UMC_EDITOR-URDF" ^
     --add-data "assets;assets" ^
     --add-data "%PYSIDE_DIR%\plugins\platforms;PySide6\plugins\platforms" ^
     --add-data "%PYSIDE_DIR%\plugins\styles;PySide6\plugins\styles" ^
@@ -145,5 +130,7 @@ echo.
 echo  ===============================================================
 echo   dist\HYDRA-UMC_EDITOR-URDF.exe is ready to run - no Python needed.
 echo  ===============================================================
+echo.
+echo Built v%HYDRA_UMC_VERSION_BUILT%. Building never changes the version; to raise it run: python tools\hydra_project_tool.py bump
 echo.
 %KEEP_OPEN%

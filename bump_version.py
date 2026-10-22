@@ -5,13 +5,13 @@
 # GPL-3.0-or-later - see LICENSE
 #
 # Applies the ecosystem-wide "odometer" version bump to this project's own
-# hydra_editor_urdf/__init__.py before every real build: PATCH goes up by 1;
-# if that would push PATCH past 9, it resets to 0 and MINOR goes up by 1
-# instead (e.g. 0.0.9 -> 0.1.0). MAJOR is never touched by this script - a
-# deliberate manual-only decision, same convention across the ecosystem.
+# hydra_editor_urdf/__init__.py on an explicit bump: PATCH goes up by 1; if
+# that would push PATCH past 9, it resets to 0 and MINOR goes up by 1 instead
+# (e.g. 0.0.9 -> 0.1.0). MAJOR is never touched by this script - a deliberate
+# manual-only decision, same convention across the ecosystem.
 #
-# Called from build_exe.bat/.sh right before PyInstaller runs, so every real
-# packaged build carries a version 1 higher than the last real build. Also
+# Run only by the explicit bump command (`python tools/hydra_project_tool.py
+# bump`); building never runs it, so a build never changes a version. Also
 # runs standalone (`python bump_version.py`), which is how it gets verified
 # in isolation - no PySide6/PyInstaller import needed, just stdlib.
 # =============================================================================

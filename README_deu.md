@@ -183,7 +183,7 @@ HYDRA-UMC-EDITOR-URDF/
 ├── build_exe.bat / build_exe.sh    # Build-Skripte für eigenständige Windows-/Linux-Executables (PyInstaller) - erhöht zuerst die Versionsnummer
 ├── build-test.bat / build-test.sh  # Build-/Kompilierprüfung ohne Versionserhöhung
 ├── HYDRA-UMC_EDITOR-URDF.spec      # PyInstaller-Build-Spec, verwendet von build_exe.bat/.sh
-├── bump_version.py                 # Erhöhung der Version im Kilometerzähler-Stil, aufgerufen von build_exe.bat/.sh vor jedem echten Build
+├── bump_version.py                 # Versionserhöhung im Kilometerzähler-Stil (nur vom expliziten `bump`-Befehl ausgeführt)
 ├── bump_manifest_version.py        # Synchronisiert die Version von hydra-umc.project.json mit der nativen (--sync)
 ├── CHANGELOG.md                    # Versionshistorie
 ├── README.md                       # Diese Datei
@@ -304,9 +304,9 @@ Kompiliert eine eigenständige ausführbare Datei (keine Python-Installation zum
 - **Windows:** `build_exe.bat` ausführen → erzeugt `dist\HYDRA-UMC_EDITOR-URDF.exe`
 - **Linux:** `./build_exe.sh` ausführen (zuvor einmalig `chmod +x build_exe.sh`) → erzeugt `dist/HYDRA-UMC_EDITOR-URDF`
 
-Beide Skripte erstellen/aktivieren ihre eigene `.venv`, installieren `requirements.txt` plus `pyinstaller`, bereinigen ein etwaiges vorheriges `build`/`dist`, **erhöhen die Versionsnummer**, kompilieren und kopieren schließlich `README.md`, `LICENSE` sowie den gesamten Ordner `language/` neben die entstandene Binärdatei (`language/` wird absichtlich **nicht** über `--add-data` in die ausführbare Datei gebündelt, sodass eine `.lng`-Datei danach ohne Neubau bearbeitet oder hinzugefügt werden kann).
+Beide Skripte erstellen/aktivieren ihre eigene `.venv`, installieren `requirements.txt` plus `pyinstaller`, bereinigen ein etwaiges vorheriges `build`/`dist`, kompilieren und kopieren schließlich `README.md`, `LICENSE` sowie den gesamten Ordner `language/` neben die entstandene Binärdatei (`language/` wird absichtlich **nicht** über `--add-data` in die ausführbare Datei gebündelt, sodass eine `.lng`-Datei danach ohne Neubau bearbeitet oder hinzugefügt werden kann).
 
-**Versionierung:** Die Version der App (`hydra_editor_urdf/__version__`, angezeigt im Dialog Hilfe → Über) folgt `MAJOR.MINOR.PATCH`. Jeder reale Lauf von `build_exe.bat`/`build_exe.sh` ruft zuerst `bump_version.py` auf, das eine Erhöhung im Kilometerzähler-Stil anwendet: `PATCH` erhöht sich um 1; sobald `PATCH` 9 überschreiten würde, wird es auf 0 zurückgesetzt und stattdessen `MINOR` um 1 erhöht (z. B. `0.0.9` → `0.1.0`). `MAJOR` wird nie automatisch angefasst - das bleibt eine bewusste, manuelle Entscheidung. Siehe `CHANGELOG.md` für die Versionshistorie.
+**Versionierung:** Die Version der App (`hydra_editor_urdf/__version__`, angezeigt im Dialog Hilfe → Über) folgt `MAJOR.MINOR.PATCH`. Das Bauen mit `build_exe.bat`/`build_exe.sh` ändert sie nie; `python tools/hydra_project_tool.py bump` führt `bump_version.py` aus, das eine Erhöhung im Kilometerzähler-Stil anwendet: `PATCH` erhöht sich um 1; sobald `PATCH` 9 überschreiten würde, wird es auf 0 zurückgesetzt und stattdessen `MINOR` um 1 erhöht (z. B. `0.0.9` → `0.1.0`). `MAJOR` wird nie automatisch angefasst - das bleibt eine bewusste, manuelle Entscheidung. Siehe `CHANGELOG.md` für die Versionshistorie.
 
 Wenn Sie die entsprechenden Schritte lieber von Hand ausführen möchten, statt das Skript zu verwenden - nützlich, um den Build an eine Plattform anzupassen, die die Skripte nicht abdecken, oder um ein PyInstaller-Flag zu debuggen -, sieht der manuelle Ablauf so aus:
 

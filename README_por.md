@@ -175,7 +175,7 @@ HYDRA-UMC-EDITOR-URDF/
 ├── build_exe.bat / build_exe.sh    # Scripts de compilação de executável autónomo para Windows/Linux (PyInstaller) - sobem primeiro a versão
 ├── build-test.bat / build-test.sh  # Verificação de compilação sem alterar versões
 ├── HYDRA-UMC_EDITOR-URDF.spec      # Especificação de compilação do PyInstaller usada pelo build_exe.bat/.sh
-├── bump_version.py                 # Subida de versão estilo odómetro, chamada pelo build_exe.bat/.sh antes de cada compilação real
+├── bump_version.py                 # Subida de versão ao estilo conta-quilómetros (executada só pelo comando `bump` explícito)
 ├── bump_manifest_version.py        # Sincroniza a versão do hydra-umc.project.json com a nativa (--sync)
 ├── CHANGELOG.md                    # Histórico de versões
 ├── README.md                       # Este ficheiro
@@ -285,9 +285,9 @@ Compila um executável autónomo (não é preciso instalação de Python para o 
 - **Windows:** execute `build_exe.bat` → produz `dist\HYDRA-UMC_EDITOR-URDF.exe`
 - **Linux:** execute `./build_exe.sh` (`chmod +x build_exe.sh` uma vez antes) → produz `dist/HYDRA-UMC_EDITOR-URDF`
 
-Ambos os scripts criam/ativam o seu próprio `.venv`, instalam o `requirements.txt` mais o `pyinstaller`, limpam qualquer `build`/`dist` anterior, **sobem o número da versão**, compilam e, por fim, copiam o `README.md`, o `LICENSE` e toda a pasta `language/` para junto do binário resultante (a `language/` deliberadamente **não** é empacotada dentro do executável via `--add-data`, para que um ficheiro `.lng` possa ser editado ou acrescentado depois sem recompilar).
+Ambos os scripts criam o seu próprio `.venv`, instalam o `requirements.txt` mais o `pyinstaller`, limpam qualquer `build`/`dist` anterior, compilam e, por fim, copiam o `README.md`, o `LICENSE` e toda a pasta `language/` para junto do binário resultante (a `language/` deliberadamente **não** é empacotada dentro do executável via `--add-data`, para que um ficheiro `.lng` possa ser editado ou acrescentado depois sem recompilar).
 
-**Versionamento:** a versão da aplicação (`hydra_editor_urdf/__version__`, mostrada na caixa Ajuda → Acerca de) segue `MAJOR.MINOR.PATCH`. Cada execução real do `build_exe.bat`/`build_exe.sh` chama primeiro o `bump_version.py`, que aplica uma subida estilo odómetro: o `PATCH` sobe 1; quando o `PATCH` ultrapassaria 9 volta a 0 e é o `MINOR` que sobe 1 (p. ex. `0.0.9` → `0.1.0`). O `MAJOR` nunca é tocado automaticamente - isso continua a ser uma decisão deliberada e manual. Consulte o `CHANGELOG.md` para o histórico de versões.
+**Versionamento:** a versão da aplicação (`hydra_editor_urdf/__version__`, mostrada na caixa Ajuda → Acerca de) segue `MAJOR.MINOR.PATCH`. Compilar com o `build_exe.bat`/`build_exe.sh` nunca a altera; `python tools/hydra_project_tool.py bump` executa o `bump_version.py`, que aplica uma subida estilo odómetro: o `PATCH` sobe 1; quando o `PATCH` ultrapassaria 9 volta a 0 e é o `MINOR` que sobe 1 (p. ex. `0.0.9` → `0.1.0`). O `MAJOR` nunca é tocado automaticamente - isso continua a ser uma decisão deliberada e manual. Consulte o `CHANGELOG.md` para o histórico de versões.
 
 Se preferir executar à mão os passos equivalentes em vez do script - útil para adaptar a compilação a uma plataforma que os scripts não cobrem, ou para depurar uma flag do PyInstaller - o processo manual é:
 

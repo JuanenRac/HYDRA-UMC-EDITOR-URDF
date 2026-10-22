@@ -179,7 +179,7 @@ HYDRA-UMC-EDITOR-URDF/
 ├── build_exe.bat / build_exe.sh    # Windows/Linux 独立可执行文件构建脚本（PyInstaller）——先递增版本号
 ├── build-test.bat / build-test.sh  # 不递增版本号的构建/编译检查
 ├── HYDRA-UMC_EDITOR-URDF.spec      # build_exe.bat/.sh 使用的 PyInstaller 构建规格
-├── bump_version.py                 # 里程表式版本递增，在每次真正构建前由 build_exe.bat/.sh 调用
+├── bump_version.py                 # 里程表式版本递增（仅由显式 `bump` 命令运行）
 ├── bump_manifest_version.py        # 将 hydra-umc.project.json 的版本与原生版本同步（--sync）
 ├── CHANGELOG.md                    # 版本历史
 ├── README.md                       # 本文件
@@ -297,9 +297,9 @@ python -m pytest tests/ -q
 - **Windows：** 运行 `build_exe.bat` → 生成 `dist\HYDRA-UMC_EDITOR-URDF.exe`
 - **Linux：** 运行 `./build_exe.sh`（首次需先 `chmod +x build_exe.sh`）→ 生成 `dist/HYDRA-UMC_EDITOR-URDF`
 
-两个脚本都会创建/激活自己的 `.venv`，安装 `requirements.txt` 加上 `pyinstaller`，清理任何先前的 `build`/`dist`，**递增版本号**，编译，最后将 `README.md`、`LICENSE` 以及整个 `language/` 文件夹复制到生成的二进制文件旁边（`language/` 刻意**不**通过 `--add-data` 打包进可执行文件内部，因此之后可以编辑或添加一个 `.lng` 文件而无需重新构建）。
+两个脚本都会创建自己的 `.venv`，安装 `requirements.txt` 加上 `pyinstaller`，清理任何先前的 `build`/`dist`，编译，最后将 `README.md`、`LICENSE` 以及整个 `language/` 文件夹复制到生成的二进制文件旁边（`language/` 刻意**不**通过 `--add-data` 打包进可执行文件内部，因此之后可以编辑或添加一个 `.lng` 文件而无需重新构建）。
 
-**版本管理：** 本应用的版本（`hydra_editor_urdf/__version__`，显示在 Help → About 对话框中）遵循 `MAJOR.MINOR.PATCH`。每次真正运行 `build_exe.bat`/`build_exe.sh` 都会先调用 `bump_version.py`，应用一种里程表式的递增：`PATCH` 加 1；一旦 `PATCH` 会超过 9，就重置为 0 并将 `MINOR` 加 1（例如 `0.0.9` → `0.1.0`）。`MAJOR` 从不自动修改——那始终是一个刻意的手动决定。版本历史见 `CHANGELOG.md`。
+**版本管理：** 本应用的版本（`hydra_editor_urdf/__version__`，显示在 Help → About 对话框中）遵循 `MAJOR.MINOR.PATCH`。使用 `build_exe.bat`/`build_exe.sh` 构建不会更改它；`python tools/hydra_project_tool.py bump` 会运行 `bump_version.py`，应用一种里程表式的递增：`PATCH` 加 1；一旦 `PATCH` 会超过 9，就重置为 0 并将 `MINOR` 加 1（例如 `0.0.9` → `0.1.0`）。`MAJOR` 从不自动修改——那始终是一个刻意的手动决定。版本历史见 `CHANGELOG.md`。
 
 如果你更愿意手动执行等效步骤而非使用脚本——这对于在脚本未覆盖的平台上适配构建，或调试某个 PyInstaller 标志很有用——手动流程如下：
 

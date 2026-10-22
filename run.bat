@@ -34,9 +34,9 @@ REM Runs HYDRA-UMC-EDITOR-URDF from source. build_exe.bat produces a standalone
 REM .exe instead; this script is the quick "run it right now" path.
 cd /d "%~dp0"
 
-if exist .venv\Scripts\activate.bat (
-    call .venv\Scripts\activate.bat
-)
+REM The python of the venv is used directly (no activate script); without a venv the python on the PATH is used.
+set "VPY=python"
+if exist .venv\Scripts\python.exe set "VPY=%CD%\.venv\Scripts\python.exe"
 
-python main.py %*
+"%VPY%" main.py %*
 %KEEP_OPEN%

@@ -183,7 +183,7 @@ HYDRA-UMC-EDITOR-URDF/
 ├── build_exe.bat / build_exe.sh    # Windows/Linux 独立実行ファイルビルドスクリプト（PyInstaller）——最初にバージョンを加算
 ├── build-test.bat / build-test.sh  # バージョンを更新しないビルド/コンパイル確認
 ├── HYDRA-UMC_EDITOR-URDF.spec      # build_exe.bat/.sh が使用する PyInstaller ビルド仕様
-├── bump_version.py                 # オドメーター方式のバージョン加算、毎回の実際のビルド前に build_exe.bat/.sh から呼び出される
+├── bump_version.py                 # オドメーター式バージョンインクリメント（明示的な `bump` コマンドのみが実行）
 ├── bump_manifest_version.py        # hydra-umc.project.json のバージョンをネイティブ側と同期（--sync）
 ├── CHANGELOG.md                    # バージョン履歴
 ├── README.md                       # 本ファイル
@@ -303,9 +303,9 @@ PyInstaller を通じて、独立した実行ファイル（実行に Python の
 - **Windows：** `build_exe.bat` を実行 → `dist\HYDRA-UMC_EDITOR-URDF.exe` を生成
 - **Linux：** `./build_exe.sh` を実行（初回のみ先に `chmod +x build_exe.sh`）→ `dist/HYDRA-UMC_EDITOR-URDF` を生成
 
-どちらのスクリプトも、自身の `.venv` を作成/有効化し、`requirements.txt` に加えて `pyinstaller` をインストールし、以前の `build`/`dist` があれば削除し、**バージョン番号を加算**し、コンパイルし、最後に `README.md`、`LICENSE`、そして `language/` フォルダ全体を、生成されたバイナリの隣にコピーします（`language/` は意図的に `--add-data` で実行ファイルの内部にバンドルされていないため、後から再ビルドなしに `.lng` ファイルを編集または追加できます）。
+どちらのスクリプトも、自身の `.venv` を作成し、`requirements.txt` に加えて `pyinstaller` をインストールし、以前の `build`/`dist` があれば削除し、コンパイルし、最後に `README.md`、`LICENSE`、そして `language/` フォルダ全体を、生成されたバイナリの隣にコピーします（`language/` は意図的に `--add-data` で実行ファイルの内部にバンドルされていないため、後から再ビルドなしに `.lng` ファイルを編集または追加できます）。
 
-**バージョン管理：** 本アプリのバージョン（`hydra_editor_urdf/__version__`、Help → About ダイアログに表示）は `MAJOR.MINOR.PATCH` に従います。`build_exe.bat`/`build_exe.sh` の実際の実行のたびに、最初に `bump_version.py` が呼び出され、オドメーター方式の加算が適用されます：`PATCH` が 1 増加し；`PATCH` が 9 を超えると 0 にリセットされ、代わりに `MINOR` が 1 増加します（例：`0.0.9` → `0.1.0`）。`MAJOR` は自動的には決して変更されません——それは常に意図的な手動の判断です。バージョン履歴は `CHANGELOG.md` を参照してください。
+**バージョン管理：** 本アプリのバージョン（`hydra_editor_urdf/__version__`、Help → About ダイアログに表示）は `MAJOR.MINOR.PATCH` に従います。`build_exe.bat`/`build_exe.sh` でビルドしても変更されません。`python tools/hydra_project_tool.py bump` が `bump_version.py` を実行し、オドメーター方式の加算を適用します：`PATCH` が 1 増加し；`PATCH` が 9 を超えると 0 にリセットされ、代わりに `MINOR` が 1 増加します（例：`0.0.9` → `0.1.0`）。`MAJOR` は自動的には決して変更されません——それは常に意図的な手動の判断です。バージョン履歴は `CHANGELOG.md` を参照してください。
 
 スクリプトの代わりに手動で等価な手順を実行したい場合——スクリプトがカバーしていないプラットフォームでビルドを調整する場合や、PyInstaller のフラグをデバッグする場合に便利です——手動プロセスは次のとおりです：
 
