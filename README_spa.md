@@ -232,7 +232,7 @@ HYDRA-UMC-EDITOR-URDF/
 │   ├── ARCHITECTURE.md
 │   ├── BUILD_AND_RUN.md
 │   └── INTEGRATION_CONTRACT.md
-├── tests/                          # Suite real de pytest (330 pruebas) - solo logica pura, sin ningun import de PySide6 aqui
+├── tests/                          # Suite real de pytest (336 pruebas) - solo logica pura, sin ningun import de PySide6 aqui
 │   ├── test_urdf_parser.py / test_urdf_writer.py  # URDF XML <-> models.py, incluyendo round-trips parse -> write -> parse
 │   ├── test_dof.py                 # Validacion de viabilidad, limites de DOF, deteccion de raiz/huerfano/desconectado/multi-padre
 │   ├── test_kinematics.py          # Cinematica directa, incluyendo la regresion ya arreglada del ciclo real que colgaba para siempre

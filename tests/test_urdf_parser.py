@@ -406,3 +406,37 @@ def test_parse_urdf_file_missing_path_is_a_clear_error(tmp_path):
     missing = tmp_path / "does-not-exist.urdf"
     with pytest.raises(UrdfParseError, match="Couldn't read"):
         parse_urdf_file(missing)
+
+
+def _joint_xml(jtype: str, axis_xyz: str | None) -> str:
+    axis = "" if axis_xyz is None else f'<axis xyz="{axis_xyz}"/>'
+    return (
+        '<robot><link name="a"/><link name="b"/>'
+        f'<joint name="j" type="{jtype}"><parent link="a"/><child link="b"/>{axis}</joint></robot>'
+    )
+
+
+def test_a_non_unit_axis_is_read_as_the_direction_it_is():
+    assert parse_urdf_string(_joint_xml("revolute", "0 0 2")).joints["j"].axis == (0.0, 0.0, 1.0)
+    axis = parse_urdf_string(_joint_xml("continuous", "1 1 0")).joints["j"].axis
+    assert axis[0] == pytest.approx(2 ** -0.5) and axis[1] == pytest.approx(2 ** -0.5) and axis[2] == 0.0
+
+
+def test_an_explicit_zero_axis_on_a_moving_joint_is_refused_with_the_joint_named():
+    for jtype in ("revolute", "continuous", "prismatic", "planar"):
+        with pytest.raises(UrdfParseError, match="'j'.*no direction"):
+            parse_urdf_string(_joint_xml(jtype, "0 0 0"))
+
+
+def test_a_zero_axis_on_a_fixed_joint_is_ignored_because_it_is_not_used():
+    assert parse_urdf_string(_joint_xml("fixed", "0 0 0")).joints["j"].axis == (1.0, 0.0, 0.0)
+
+
+def test_unit_axis_helper_handles_zero_non_finite_and_unit_vectors():
+    from hydra_editor_urdf.models import unit_axis
+
+    assert unit_axis((0.0, 0.0, 0.0)) is None
+    assert unit_axis((float("nan"), 0.0, 1.0)) is None
+    assert unit_axis((float("inf"), 0.0, 0.0)) is None
+    assert unit_axis((0.0, 1.0, 0.0)) == (0.0, 1.0, 0.0)
+    assert unit_axis((0.0, -3.0, 0.0)) == (0.0, -1.0, 0.0)

@@ -38,6 +38,7 @@ from hydra_editor_urdf.models import (
     Robot,
     SphereGeometry,
     Visual,
+    unit_axis,
 )
 
 
@@ -218,6 +219,17 @@ def _parse_joint(el: ET.Element) -> Joint:
 
     axis_el = el.find("axis")
     axis = _parse_floats(axis_el.get("xyz") if axis_el is not None else None, 3, (1.0, 0.0, 0.0), field="joint axis")
+    if axis_el is not None and axis_el.get("xyz", "").strip():
+        direction = unit_axis(axis)  # type: ignore[arg-type]
+        if direction is not None:
+            axis = direction  # a URDF reader normalises the axis; so do the preview, the kinematics and the writer
+        elif jtype in (JointType.REVOLUTE, JointType.CONTINUOUS, JointType.PRISMATIC, JointType.PLANAR):
+            raise UrdfParseError(
+                f"Joint {name!r} has an <axis> with no direction (xyz={axis_el.get('xyz')!r}): a {jtype.value} joint "
+                f"needs a non-zero axis"
+            )
+        else:
+            axis = (1.0, 0.0, 0.0)  # a fixed or floating joint does not use its axis
 
     limit_el = el.find("limit")
     limit = None

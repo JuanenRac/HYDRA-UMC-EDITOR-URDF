@@ -163,6 +163,21 @@ class JointLimit:
     velocity: float = 0.0
 
 
+def unit_axis(axis: tuple[float, float, float]) -> tuple[float, float, float] | None:
+    """The direction of `axis` as a unit vector, or None when it has none: a zero-length axis, or one with a
+    non-finite component. URDF consumers normalise the axis they read; a zero axis has no direction to normalise."""
+    import math
+
+    if not all(math.isfinite(c) for c in axis):
+        return None
+    length = math.sqrt(sum(c * c for c in axis))
+    if length < 1e-12:
+        return None
+    if abs(length - 1.0) < 1e-12:
+        return (float(axis[0]), float(axis[1]), float(axis[2]))
+    return (axis[0] / length, axis[1] / length, axis[2] / length)
+
+
 @dataclass
 class Joint:
     name: str

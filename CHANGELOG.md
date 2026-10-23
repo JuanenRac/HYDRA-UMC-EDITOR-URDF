@@ -4,6 +4,7 @@ All notable changes to this project are documented here.
 
 ## [Unreleased]
 
+- **A joint axis is a direction everywhere, not only at export**: the parser reads a non-unit `<axis>` as the unit vector it points along (as URDF readers do), so the preview, the kinematics and the writer agree; an explicit zero-length axis on a revolute, continuous, prismatic or planar joint is refused with the joint named (it used to be accepted and turn the joint into the identity in the preview, and was only caught when saving), and on a fixed or floating joint, which does not use it, it is ignored. The writer writes the axis as a direction (a scaled x axis is the default and is omitted); an axis with no direction in memory is written as it is for the save check to refuse. 6 new tests (336 in all).
 - Building no longer changes the version; raising it is the explicit `bump` command (`python tools/hydra_project_tool.py bump`). The build scripts only report the version they built, and CI fails if a build script runs a bump.
 - The build and run scripts use the Python of the `.venv` directly instead of an activate script, and create the venv with the `py` launcher when there is one; CI fails if a script activates a venv.
 - The banner follows the animated style of the ecosystem banners, with the name, the kind and the technologies of the project.

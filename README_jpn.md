@@ -232,7 +232,7 @@ HYDRA-UMC-EDITOR-URDF/
 │   ├── ARCHITECTURE.md
 │   ├── BUILD_AND_RUN.md
 │   └── INTEGRATION_CONTRACT.md
-├── tests/                          # 実際の pytest スイート(330 件のテスト)—— 純粋なロジックのみ、ここでは PySide6 のインポートは一切なし
+├── tests/                          # 実際の pytest スイート(336 件のテスト)—— 純粋なロジックのみ、ここでは PySide6 のインポートは一切なし
 │   ├── test_urdf_parser.py / test_urdf_writer.py  # URDF XML <-> models.py、parse -> write -> parse のラウンドトリップを含む
 │   ├── test_dof.py                 # 実現可能性検証、DOF の境界、ルート/孤立/切断/複数親の検出
 │   ├── test_kinematics.py          # 順運動学、修正済みの「実際のサイクルが永遠にハングする」回帰テストを含む

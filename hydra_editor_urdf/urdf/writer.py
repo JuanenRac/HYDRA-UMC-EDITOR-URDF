@@ -28,6 +28,7 @@ from hydra_editor_urdf.models import (
     Robot,
     SphereGeometry,
     Visual,
+    unit_axis,
 )
 
 
@@ -123,8 +124,11 @@ def _set_joint(root: ET.Element, joint: Joint) -> None:
     _set_origin(joint_el, joint.origin)
     ET.SubElement(joint_el, "parent").set("link", joint.parent)
     ET.SubElement(joint_el, "child").set("link", joint.child)
-    if joint.axis != (1.0, 0.0, 0.0):
-        ET.SubElement(joint_el, "axis").set("xyz", _fmt(joint.axis))
+    # the axis is written as the direction it is (a URDF reader normalises it anyway); one with no direction is written
+    # as it is, and the save check refuses it
+    axis = unit_axis(joint.axis) or joint.axis
+    if axis != (1.0, 0.0, 0.0):
+        ET.SubElement(joint_el, "axis").set("xyz", _fmt(axis))
     if joint.limit is not None:
         limit_el = ET.SubElement(joint_el, "limit")
         limit_el.set("lower", _fmt_one(joint.limit.lower))

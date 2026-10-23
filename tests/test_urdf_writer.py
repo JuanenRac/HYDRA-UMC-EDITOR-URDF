@@ -217,3 +217,27 @@ def test_multi_link_multi_joint_chain_round_trips_in_full():
     assert reparsed.joints["j2"].type == JointType.PRISMATIC
     assert reparsed.links["shoulder"].inertial.mass == pytest.approx(1.5)
     assert reparsed.root_link_name() == "base"
+
+
+def test_a_non_unit_axis_is_written_as_a_direction_and_a_unit_x_stays_omitted():
+    robot = Robot(
+        name="r",
+        links={"a": Link(name="a"), "b": Link(name="b"), "c": Link(name="c")},
+        joints={
+            "j1": Joint(name="j1", type=JointType.REVOLUTE, parent="a", child="b", axis=(4.0, 0.0, 0.0)),
+            "j2": Joint(name="j2", type=JointType.REVOLUTE, parent="b", child="c", axis=(0.0, 0.0, 5.0)),
+        },
+    )
+    joints = {j.get("name"): j for j in ET.fromstring(robot_to_urdf_string(robot)).findall("joint")}
+    assert joints["j1"].find("axis") is None, "a scaled x axis is the default axis"
+    assert joints["j2"].find("axis").get("xyz") == "0 0 1"
+
+
+def test_an_axis_with_no_direction_is_written_as_it_is_for_the_save_check_to_refuse():
+    robot = Robot(
+        name="r",
+        links={"a": Link(name="a"), "b": Link(name="b")},
+        joints={"j": Joint(name="j", type=JointType.REVOLUTE, parent="a", child="b", axis=(0.0, 0.0, 0.0))},
+    )
+    joint = ET.fromstring(robot_to_urdf_string(robot)).find("joint")
+    assert joint.find("axis").get("xyz") == "0 0 0"
