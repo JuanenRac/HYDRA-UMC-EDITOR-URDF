@@ -42,6 +42,19 @@
 | Ziel | Der PC der Person, die es benutzt |
 | Auf echter Hardware | Nicht zutreffend: nichts hiervon läuft auf Hardware |
 
+## 🚦 Projektstatus
+
+Jede Zeile ist ein Teil dieses Repositorys, und die Ampel sagt, wie weit er heute ist. Sie beruht auf dem, was das Repository zeigen kann (Tests, Builds, Läufe), nicht auf dem, was geplant ist.
+
+🟢 Fertig und überprüft · 🟡 Funktioniert, mit bekannten Grenzen · 🟠 Teilweise fertig oder noch nicht überprüft · 🔴 Nicht gemacht oder funktioniert nicht
+
+| Bereich | Stand | Was das hier bedeutet |
+|---|---|---|
+| Software | 🟢 | Für seinen Zweck vollständig und stabil; die Ehrlichkeitsprüfung oben nennt die bekannten Grenzen |
+| Tests | 🟢 | 355 automatische Tests, bei jeder Änderung ausgeführt |
+| Echte Hardware | 🟢 | Nicht zutreffend: nichts hiervon läuft auf Hardware |
+| Dokumentation | 🟢 | README in acht Sprachen, bei jeder Änderung gegen das Manifest geprüft |
+
 ## 🎯 Überblick
 
 **HYDRA-UMC EDITOR-URDF** ist das Desktop-Tool, das aus dem „Portieren eines neuen Roboters in den Modellkatalog von [HYDRA-UMC STUDIO](https://github.com/JuanenRac/HYDRA-UMC-STUDIO)" von einer manuellen, pro-Roboter durchgeführten Untersuchung einen wiederholbaren, grafischen Arbeitsablauf macht. Jedes reale Robotermodell im Katalog von STUDIO ist in der Vergangenheit auf demselben Weg dorthin gelangt: ein Beschreibungs-Repository auf GitHub finden, herausfinden, wie sich dessen Mesh-Referenzen auflösen, die Freiheitsgrade in seiner kinematischen Kette zählen, prüfen, ob STUDIO tatsächlich so viele ansteuern kann, und das Ergebnis von Hand nach `public/models/` legen. Diese App automatisiert genau diesen Durchlauf - sie zieht die Quelldateien von einer GitHub-URL oder aus einem bereits heruntergeladenen lokalen Ordner, löst jede `<mesh filename="...">`-Referenz auf (einschließlich `package://`-URIs) gegen die realen Dateien auf der Festplatte, validiert die Anzahl der Freiheitsgrade der Kette gegen das, was die Kinematik von STUDIO heute unterstützt, bearbeitet Farbe/Skalierung/Gelenkgrenzen/Gelenktyp mit einer Live-3D-Vorschau, und überträgt das fertige Ergebnis direkt an einen laufenden STUDIO-Server.

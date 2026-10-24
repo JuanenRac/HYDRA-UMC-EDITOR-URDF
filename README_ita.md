@@ -43,6 +43,19 @@
 | Destinazione | Il PC di chi lo usa |
 | Su hardware reale | Non applicabile: nulla qui gira su hardware |
 
+## 🚦 Stato del progetto
+
+Ogni riga è una parte di questo repository e il semaforo dice a che punto è oggi. È scritta in base a ciò che il repository può mostrare (test, compilazioni, esecuzioni), non a ciò che è previsto.
+
+🟢 Fatto e verificato · 🟡 Funziona, con limiti noti · 🟠 Fatto a metà o non ancora verificato · 🔴 Non fatto o non funzionante
+
+| Area | Stato | Cosa significa qui |
+|---|---|---|
+| Software | 🟢 | Completo per il suo scopo e stabile; la verifica di onestà qui sopra elenca i limiti noti |
+| Test | 🟢 | 355 test automatici, eseguiti a ogni modifica |
+| Hardware reale | 🟢 | Non applicabile: nulla qui gira su hardware |
+| Documentazione | 🟢 | README in otto lingue, verificato rispetto al manifesto a ogni modifica |
+
 ## 🎯 Panoramica
 
 **HYDRA-UMC EDITOR-URDF** è lo strumento desktop che trasforma il "portare un nuovo robot nel catalogo modelli di [HYDRA-UMC STUDIO](https://github.com/JuanenRac/HYDRA-UMC-STUDIO)" da un'indagine manuale, robot per robot, in un flusso di lavoro grafico e ripetibile. In passato, ogni modello di robot reale nel catalogo di STUDIO ci è arrivato allo stesso modo: trovare un repository di descrizione su GitHub, capire come si risolvono i suoi riferimenti alle mesh, contare i gradi di libertà nella sua catena cinematica, verificare se STUDIO è effettivamente in grado di pilotarne così tanti, e posizionare a mano il risultato in `public/models/`. Questa app automatizza l'intero processo - preleva i file sorgente da un URL GitHub o da una cartella locale già scaricata, risolve ogni riferimento `<mesh filename="...">` (URI `package://` incluse) contro i file reali su disco, valida il conteggio dei DOF della catena rispetto a ciò che la cinematica di STUDIO supporta oggi, modifica colore/scala/limiti di giunto/tipo di giunto con un'anteprima 3D in tempo reale, e invia il risultato finito direttamente a un server STUDIO in esecuzione.

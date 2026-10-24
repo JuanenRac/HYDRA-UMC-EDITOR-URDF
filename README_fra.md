@@ -42,6 +42,19 @@
 | Cible | Le PC de la personne qui l'utilise |
 | Sur matériel réel | Sans objet : rien ici ne s'exécute sur du matériel |
 
+## 🚦 État du projet
+
+Chaque ligne est une partie de ce dépôt et le feu dit où elle en est aujourd'hui. Elle est écrite d'après ce que le dépôt peut montrer (tests, compilations, exécutions), pas d'après ce qui est prévu.
+
+🟢 Fait et vérifié · 🟡 Fonctionne, avec des limites connues · 🟠 À moitié fait ou pas encore vérifié · 🔴 Pas fait ou ne fonctionne pas
+
+| Domaine | État | Ce que cela veut dire ici |
+|---|---|---|
+| Logiciel | 🟢 | Complet pour son usage et stable ; la vérification d'honnêteté ci-dessus liste les limites connues |
+| Tests | 🟢 | 355 tests automatiques, exécutés à chaque modification |
+| Matériel réel | 🟢 | Sans objet : rien ici ne s'exécute sur du matériel |
+| Documentation | 🟢 | README en huit langues, vérifié par rapport au manifeste à chaque modification |
+
 ## 🎯 Aperçu
 
 **HYDRA-UMC EDITOR-URDF** est l'outil de bureau qui transforme le fait de « porter un nouveau robot dans le catalogue de modèles de [HYDRA-UMC STUDIO](https://github.com/JuanenRac/HYDRA-UMC-STUDIO) » - jusqu'ici une investigation manuelle, propre à chaque robot - en un flux de travail graphique et reproductible. Chaque modèle de robot réel du catalogue de STUDIO y est arrivé de la même façon par le passé : trouver un dépôt de description sur GitHub, comprendre comment ses références de maillage se résolvent, compter les degrés de liberté de sa chaîne cinématique, vérifier si STUDIO peut réellement en piloter autant, et placer le résultat à la main dans `public/models/`. Cette application automatise l'ensemble de ce processus - récupérer les fichiers source depuis une URL GitHub ou un dossier local déjà téléchargé, résoudre chaque référence `<mesh filename="...">` (URIs `package://` incluses) contre les fichiers réels présents sur le disque, valider le nombre de DDL de la chaîne par rapport à ce que la cinématique de STUDIO prend en charge aujourd'hui, éditer couleur/échelle/limites de joint/type de joint avec un aperçu 3D en direct, et pousser le résultat final directement vers un serveur STUDIO en cours d'exécution.

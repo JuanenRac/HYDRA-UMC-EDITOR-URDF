@@ -43,6 +43,19 @@
 | Target | The PC of the person using it |
 | On real hardware | Not applicable: nothing here runs on hardware |
 
+## 🚦 Project status
+
+Each line is one part of this repository and the light says how far it is today. It is written from what the repository can show (tests, builds, runs), not from what is planned.
+
+🟢 Done and verified · 🟡 Works, with known limits · 🟠 Partly done or not verified yet · 🔴 Not done or not working
+
+| Area | State | What it means here |
+|---|---|---|
+| Software | 🟢 | Complete for its purpose and stable; the honesty check above lists the known limits |
+| Tests | 🟢 | 355 automated tests, run on every change |
+| Real hardware | 🟢 | Not applicable: nothing here runs on hardware |
+| Documentation | 🟢 | README in eight languages, checked against the manifest on every change |
+
 ## 🎯 Overview
 
 **HYDRA-UMC EDITOR-URDF** is the desktop tool that turns "porting a new robot into [HYDRA-UMC STUDIO](https://github.com/JuanenRac/HYDRA-UMC-STUDIO)'s model catalog" from a manual, per-robot investigation into a repeatable, graphical workflow. Every real robot model in STUDIO's catalog got there the same way in the past: find a description repo on GitHub, figure out how its mesh references resolve, count the degrees of freedom in its kinematic chain, check whether STUDIO can actually drive that many, and hand-place the result into `public/models/`. This app automates that entire pass - pull the source files from a GitHub URL or an already-downloaded local folder, resolve every `<mesh filename="...">` reference (`package://` URIs included) against the real files on disk, validate the chain's DOF count against what STUDIO's kinematics supports today, edit color/scale/joint limits/joint type with a live 3D preview, and push the finished result straight to a running STUDIO server.

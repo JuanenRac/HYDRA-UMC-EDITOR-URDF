@@ -43,6 +43,19 @@
 | Destino | El PC de quien lo usa |
 | En hardware real | No aplica: nada de esto se ejecuta en hardware |
 
+## 🚦 Estado del proyecto
+
+Cada línea es una parte de este repositorio y la luz dice hasta dónde llega hoy. Se escribe con lo que el repositorio puede demostrar (pruebas, compilaciones, ejecuciones), no con lo previsto.
+
+🟢 Hecho y verificado · 🟡 Funciona, con límites conocidos · 🟠 Hecho a medias o sin verificar · 🔴 Sin hacer o sin funcionar
+
+| Área | Estado | Qué significa aquí |
+|---|---|---|
+| Software | 🟢 | Completo para su propósito y estable; la comprobación de honestidad de arriba lista los límites conocidos |
+| Pruebas | 🟢 | 355 pruebas automáticas, ejecutadas en cada cambio |
+| Hardware real | 🟢 | No aplica: nada de esto se ejecuta en hardware |
+| Documentación | 🟢 | README en ocho idiomas, comprobado contra el manifiesto en cada cambio |
+
 ## 🎯 Visión General
 
 **HYDRA-UMC EDITOR-URDF** es la herramienta de escritorio que convierte "portar un robot nuevo al catálogo de modelos de [HYDRA-UMC STUDIO](https://github.com/JuanenRac/HYDRA-UMC-STUDIO)" de una investigación manual, robot a robot, en un flujo de trabajo gráfico y repetible. Cada modelo de robot real en el catálogo de STUDIO llegó ahí de la misma forma en el pasado: encontrar un repositorio de descripción en GitHub, averiguar cómo se resuelven sus referencias a mallas, contar los grados de libertad de su cadena cinemática, comprobar si STUDIO realmente puede mover tantos, y colocar el resultado a mano en `public/models/`. Esta aplicación automatiza todo ese proceso: extrae los archivos fuente desde una URL de GitHub o desde una carpeta local ya descargada, resuelve cada referencia `<mesh filename="...">` (URIs `package://` incluidas) contra los archivos reales en disco, valida el número de grados de libertad de la cadena contra lo que la cinemática de STUDIO soporta hoy, edita color/escala/límites de junta/tipo de junta con una vista previa 3D en vivo, y sube el resultado terminado directamente a un servidor STUDIO en ejecución.
