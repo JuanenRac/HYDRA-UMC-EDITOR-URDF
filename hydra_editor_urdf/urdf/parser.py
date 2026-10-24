@@ -197,6 +197,46 @@ def _parse_link(el: ET.Element, top_level_materials: dict[str, Material]) -> Lin
     )
 
 
+# The children of each element that the model keeps. Anything else is read past, never stored, and so never written back.
+_KEPT_CHILDREN = {
+    "robot": {"link", "joint", "material"},
+    "link": {"visual", "collision", "inertial"},
+    "joint": {"parent", "child", "origin", "axis", "limit"},
+    "visual": {"origin", "geometry", "material"},
+    "collision": {"origin", "geometry"},
+    "material": {"color"},
+}
+
+
+def find_dropped_elements(root: ET.Element) -> dict[str, int]:
+    """The elements of the file this model has no place for (<dynamics>, <mimic>, <safety_controller>, <transmission>, <gazebo>, the
+    <texture> of a material, ...), by name and count, so the operator is told before a save or a push drops them silently."""
+    dropped: dict[str, int] = {}
+
+    def note(label: str) -> None:
+        dropped[label] = dropped.get(label, 0) + 1
+
+    for child in root:
+        if not isinstance(child.tag, str):
+            continue  # comments and processing instructions
+        if child.tag not in _KEPT_CHILDREN["robot"]:
+            note(f"<{child.tag}>")
+            continue
+        kept = _KEPT_CHILDREN.get(child.tag, set())
+        for grandchild in child:
+            if not isinstance(grandchild.tag, str):
+                continue
+            if grandchild.tag not in kept:
+                note(f"<{child.tag}><{grandchild.tag}>")
+                continue
+            if grandchild.tag in ("visual", "collision", "material"):
+                allowed = _KEPT_CHILDREN[grandchild.tag]
+                for great in grandchild:
+                    if isinstance(great.tag, str) and great.tag not in allowed:
+                        note(f"<{child.tag}><{grandchild.tag}><{great.tag}>")
+    return dropped
+
+
 def _parse_joint(el: ET.Element) -> Joint:
     name = el.get("name")
     type_str = el.get("type")
@@ -241,7 +281,9 @@ def _parse_joint(el: ET.Element) -> Joint:
             velocity=_parse_float(limit_el.get("velocity", 0.0), field=f"joint {name!r} limit velocity"),
         )
 
-    return Joint(name=name, type=jtype, parent=parent, child=child, origin=_parse_origin(el.find("origin")), axis=axis, limit=limit)  # type: ignore[arg-type]
+    mimic_el = el.find("mimic")
+    mimic_of = mimic_el.get("joint") if mimic_el is not None and mimic_el.get("joint") else None
+    return Joint(name=name, type=jtype, parent=parent, child=child, origin=_parse_origin(el.find("origin")), axis=axis, limit=limit, mimic_of=mimic_of)  # type: ignore[arg-type]
 
 
 def parse_urdf_string(xml_text: str) -> Robot:
@@ -270,6 +312,7 @@ def parse_urdf_string(xml_text: str) -> Robot:
 
     robot = Robot(name=root.get("name", "robot"))
     robot.materials = _parse_top_level_materials(root)
+    robot.dropped_elements = find_dropped_elements(root)
 
     for link_el in root.findall("link"):
         link = _parse_link(link_el, robot.materials)

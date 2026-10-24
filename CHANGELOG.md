@@ -4,6 +4,10 @@ All notable changes to this project are documented here.
 
 ## [Unreleased]
 
+- **The elements the editor does not keep are reported when the file is read.** The DOF screen lists, as warnings, every `<transmission>`, `<gazebo>`, `<dynamics>`, `<safety_controller>`, `<mimic>`, texture and other element that the model has no place for and that saving or sending the model therefore leaves out (`Robot.dropped_elements`, by element and count), instead of losing them silently. Passing them through to the written file is not done.
+- **A joint that follows another (`<mimic>`) is not a degree of freedom.** It used to be counted as one, so a 5-DOF arm with a mimic joint looked like a feasible 6-DOF one; it is reported as a follower and still needs its own `<limit>`.
+- **The sliders start where the viewport is posed, and a continuous joint can be jogged.** A continuous joint whose `<limit>` carries only effort and velocity got a slider a millionth of a radian wide; it now offers a full turn each way (`kinematics.jog_range`, shared by the classic and the QML interface), and every slider starts at `default_joint_values`.
+
 - **A joint whose range is one point is a warning.** A REVOLUTE or PRISMATIC joint with `lower` equal to `upper` is a valid URDF that can never move; the DOF screen now lists it after the reasons (`DofReport.warnings`, never counted against feasibility) instead of saying nothing, in the eight languages.
 - **Meshes are read from disk once.** The viewport read every mesh of the robot again at each rebuild (a scale or type edit). Loaded meshes are kept by path, modification time and size, up to 256 MiB, with read-only arrays so the shared original cannot be changed by mistake; a mesh that could not be read is never kept.
 - **The model client sends its token on every call once signed in,** also on the model list, which a server that asks for a sign-in on the host information (`HYDRA_UMC_INFO_AUTH=required`) refuses otherwise.

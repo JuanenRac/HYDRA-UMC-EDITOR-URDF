@@ -18,6 +18,8 @@
 # =============================================================================
 from __future__ import annotations
 
+import math
+
 import numpy as np
 
 from hydra_editor_urdf.models import Joint, JointType, Origin, Robot
@@ -84,6 +86,21 @@ def joint_local_transform(joint: Joint, value: float) -> np.ndarray:
     # unsupported before this is ever reached for a real pose) - no
     # additional motion beyond the static <origin> itself.
     return m
+
+
+def jog_range(joint: Joint) -> tuple[float, float]:
+    """The range a slider offers for a joint: its own <limit> for a REVOLUTE or PRISMATIC joint, a full turn each way for a CONTINUOUS
+    one. A CONTINUOUS joint is unbounded by definition, and its <limit> usually carries only effort and velocity (lower and upper
+    read as 0 and 0), so using them gave a slider a millionth of a radian wide. A degenerate range (upper <= lower) is widened by a
+    millionth so the slider never divides by zero."""
+    if joint.type == JointType.CONTINUOUS or joint.limit is None:
+        return (-math.pi, math.pi)
+    lower, upper = joint.limit.lower, joint.limit.upper
+    if not (math.isfinite(lower) and math.isfinite(upper)):
+        return (-math.pi, math.pi)
+    if upper <= lower:
+        upper = lower + 1e-6
+    return (lower, upper)
 
 
 def default_joint_values(robot: Robot) -> dict[str, float]:

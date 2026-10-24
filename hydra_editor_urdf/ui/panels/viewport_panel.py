@@ -12,7 +12,6 @@
 # =============================================================================
 from __future__ import annotations
 
-import math
 
 from PySide6.QtCore import Qt, Signal
 from PySide6.QtWidgets import (
@@ -30,7 +29,7 @@ from PySide6.QtWidgets import (
 from hydra_editor_urdf.app import EditorController
 from hydra_editor_urdf.i18n import _
 from hydra_editor_urdf.models import Joint, JointType, Robot
-from hydra_editor_urdf.render.kinematics import default_joint_values
+from hydra_editor_urdf.render.kinematics import default_joint_values, jog_range
 from hydra_editor_urdf.render.viewport import UrdfViewport
 
 SLIDER_STEPS = 1000  # QSlider is integer-only - joint radians/meters are mapped onto [0, SLIDER_STEPS]
@@ -39,7 +38,7 @@ SLIDER_STEPS = 1000  # QSlider is integer-only - joint radians/meters are mapped
 class _JointSlider(QWidget):
     value_changed = Signal(str, float)  # (joint_name, value)
 
-    def __init__(self, joint: Joint, parent=None):
+    def __init__(self, joint: Joint, initial: float | None = None, parent=None):
         super().__init__(parent)
         self._joint = joint
         layout = QVBoxLayout(self)
@@ -51,19 +50,14 @@ class _JointSlider(QWidget):
 
         self._slider = QSlider(Qt.Orientation.Horizontal)
         self._slider.setRange(0, SLIDER_STEPS)
-        if joint.limit is not None:
-            self._lower, self._upper = joint.limit.lower, joint.limit.upper
-        else:
-            # CONTINUOUS with no meaningful limit - offer a full turn each
-            # way as a reasonable jog range for a live preview, not a
-            # real hardware limit (CONTINUOUS has none by definition).
-            self._lower, self._upper = -math.pi, math.pi
-        if self._upper <= self._lower:
-            self._upper = self._lower + 1e-6  # degenerate <limit> in the source file - keep the slider usable instead of a divide-by-zero
+        # A full turn each way for a CONTINUOUS joint (it has no real limit), the <limit> otherwise: see kinematics.jog_range.
+        self._lower, self._upper = jog_range(joint)
         self._slider.valueChanged.connect(self._on_slider_changed)
         layout.addWidget(self._slider)
 
-        self.set_value((self._lower + self._upper) / 2.0)
+        # The pose the viewport is actually drawn at (kinematics.default_joint_values), not the middle of the range: they agree for
+        # a joint with a sane limit, but not for a CONTINUOUS joint or a degenerate limit.
+        self.set_value((self._lower + self._upper) / 2.0 if initial is None else initial)
 
     def _on_slider_changed(self, step: int) -> None:
         t = step / SLIDER_STEPS
@@ -198,8 +192,9 @@ class ViewportPanel(QWidget):
             if item.widget():
                 item.widget().deleteLater()
         self._joint_sliders = []
+        starting_pose = default_joint_values(robot)
         for joint in robot.movable_joints():
-            slider = _JointSlider(joint)
+            slider = _JointSlider(joint, starting_pose.get(joint.name))
             slider.value_changed.connect(self._on_jog)
             self._jog_container.addWidget(slider)
             self._joint_sliders.append(slider)

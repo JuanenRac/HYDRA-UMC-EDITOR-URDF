@@ -54,6 +54,7 @@ class DofReport:
     # move, for one); shown after the reasons and never counted in `is_feasible`.
     warnings: list[str] = field(default_factory=list)
     locked_joint_names: list[str] = field(default_factory=list)  # REVOLUTE/PRISMATIC with lower == upper
+    follower_joint_names: list[str] = field(default_factory=list)  # joints with <mimic>: they follow another and are not a DOF
 
 
 def issue_lines(report: DofReport, warning_prefix: str, nothing: str) -> list[str]:
@@ -77,7 +78,11 @@ def _reachable_from(robot: Robot, root: str) -> set[str]:
 
 
 def validate(robot: Robot) -> DofReport:
-    movable = robot.movable_joints()
+    all_movable = robot.movable_joints()
+    # A joint that follows another (<mimic>) is not a degree of freedom of its own: counting it made a 5-DOF arm with a mimic joint
+    # look like a 6-DOF one.
+    movable = [j for j in all_movable if j.mimic_of is None]
+    followers = [j for j in all_movable if j.mimic_of is not None]
     unsupported = [j.name for j in robot.joints.values() if j.type in UNSUPPORTED_JOINT_TYPES]
     root = robot.root_link_name()
 
@@ -158,7 +163,7 @@ def validate(robot: Robot) -> DofReport:
             f"this is the same reason several real 7/8/9-DOF candidate arms were discarded from STUDIO's catalog in the past."
         )
 
-    for joint in movable:
+    for joint in all_movable:
         if joint.type != JointType.CONTINUOUS and joint.limit is None:
             reasons.append(f"Joint {joint.name!r} ({joint.type.value}) has no <limit> - required by the URDF spec for anything but a CONTINUOUS joint.")
         # An inverted range (lower > upper) is not a finiteness
@@ -216,12 +221,24 @@ def validate(robot: Robot) -> DofReport:
         f"Joint {name!r} has lower equal to upper in its <limit>: it can never move (it counts as a DOF but behaves as a fixed joint)."
         for name in locked
     ]
+    for joint in followers:
+        warnings.append(
+            f"Joint {joint.name!r} follows {joint.mimic_of!r} (<mimic>): it is not counted as a degree of freedom, and this editor does not "
+            f"keep the element, so the follower is written back without it."
+        )
+    for element, count in sorted(robot.dropped_elements.items()):
+        if element == "<joint><mimic>":
+            continue  # said above, per joint
+        warnings.append(
+            f"The file has {count} {element} element(s) that this editor does not keep: saving or sending the model leaves them out."
+        )
 
     return DofReport(
         dof_count=dof_count,
         warnings=warnings,
         locked_joint_names=locked,
         movable_joint_names=[j.name for j in movable],
+        follower_joint_names=[j.name for j in followers],
         unsupported_joint_names=unsupported,
         is_feasible=not reasons,
         reasons=reasons,

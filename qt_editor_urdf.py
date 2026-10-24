@@ -51,7 +51,7 @@ from hydra_editor_urdf.gallery import GALLERY
 from hydra_editor_urdf.i18n import _
 from hydra_editor_urdf.inertia_calc import estimate_inertial
 from hydra_editor_urdf.models import Inertial, JointLimit, JointType, MeshGeometry, Robot
-from hydra_editor_urdf.render.kinematics import default_joint_values
+from hydra_editor_urdf.render.kinematics import default_joint_values, jog_range
 from hydra_editor_urdf.render.viewport import OffscreenUrdfRenderer
 from hydra_editor_urdf.server.client import StudioClient
 from hydra_editor_urdf.ui.about_dialog import AUTHOR_EMAIL, AUTHOR_NAME, LICENSE_NAME
@@ -533,27 +533,13 @@ class EditorQtBridge(QObject):
 
     def _rebuild_joint_sliders(self, robot: Robot) -> None:
         rows: list[dict[str, object]] = []
+        starting_pose = default_joint_values(robot)
         for joint in robot.movable_joints():
             unit = _("UNIT_RADIANS") if joint.type != JointType.PRISMATIC else _("UNIT_METERS")
-            if joint.limit is not None:
-                lower, upper = joint.limit.lower, joint.limit.upper
-            else:
-                # CONTINUOUS with no meaningful limit - offer a full turn
-                # each way as a reasonable jog range for a live preview,
-                # same real fallback _JointSlider.__init__ uses.
-                lower, upper = -math.pi, math.pi
-            if upper <= lower:
-                upper = lower + 1e-6  # degenerate <limit> in the source file - keep the slider usable instead of a divide-by-zero
-            # Faithful port note: the classic _JointSlider always starts
-            # at its own midpoint ((lower+upper)/2), independent of
-            # default_joint_values() - which is what the viewport is
-            # ACTUALLY posed at right after load (see _on_robot_loaded
-            # above). That's a real, pre-existing mismatch in the classic
-            # UI (the sliders don't reflect the pose on screen until the
-            # operator first touches one) - reproduced here as-is rather
-            # than silently invented away, since fixing it isn't part of
-            # this port.
-            rows.append({"name": joint.name, "unit": unit, "lower": lower, "upper": upper, "value": (lower + upper) / 2.0})
+            # the same range the classic panel offers (kinematics.jog_range), and the slider starts where the viewport is posed
+            lower, upper = jog_range(joint)
+            value = starting_pose.get(joint.name, (lower + upper) / 2.0)
+            rows.append({"name": joint.name, "unit": unit, "lower": lower, "upper": upper, "value": max(lower, min(upper, value))})
         self._joint_sliders = rows
 
     @Property("QVariantList", notify=changed)

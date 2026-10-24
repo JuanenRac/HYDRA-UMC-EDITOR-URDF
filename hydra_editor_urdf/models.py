@@ -187,6 +187,9 @@ class Joint:
     origin: Origin = field(default_factory=Origin.identity)
     axis: tuple[float, float, float] = (1.0, 0.0, 0.0)
     limit: JointLimit | None = None
+    # `<mimic joint="...">`: the name of the joint this one follows. The editor does not keep the rest of the element (multiplier,
+    # offset) and does not write it back, but a follower is not a degree of freedom of its own, so it must not be counted as one.
+    mimic_of: str | None = field(default=None, compare=False)
 
     @property
     def is_movable(self) -> bool:
@@ -208,6 +211,9 @@ class Robot:
     # here too so writer.py can re-emit the same shared declarations
     # instead of duplicating the rgba inline on every link that uses it.
     materials: dict[str, Material] = field(default_factory=dict)
+    # What the source file had that this model does not keep (and the writer therefore does not write): the element, e.g.
+    # "<transmission>" or "<joint><dynamics>", and how many times. Filled by urdf/parser.py; empty for a robot built by hand.
+    dropped_elements: dict[str, int] = field(default_factory=dict, compare=False)
 
     def joints_by_parent(self) -> dict[str, list[Joint]]:
         result: dict[str, list[Joint]] = {}

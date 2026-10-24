@@ -247,3 +247,37 @@ def test_diamond_reconvergence_keeps_first_processed_writer():
     # preserves Robot.joints' own insertion order and that determinism is
     # the whole point of this being a regression test.
     assert world["tip"][0, 3] == pytest.approx(1.0)
+
+
+# ---- the range a slider offers (HURDF-BUG-013)
+def test_a_continuous_joint_gets_a_full_turn_even_when_its_limit_only_has_effort_and_velocity():
+    from hydra_editor_urdf.models import Joint, JointLimit, JointType
+    from hydra_editor_urdf.render.kinematics import jog_range
+    import math
+
+    spin = Joint(name="spin", type=JointType.CONTINUOUS, parent="a", child="b", limit=JointLimit(0.0, 0.0, 10.0, 2.0))
+    assert jog_range(spin) == (-math.pi, math.pi)
+    unlimited = Joint(name="spin2", type=JointType.CONTINUOUS, parent="a", child="b")
+    assert jog_range(unlimited) == (-math.pi, math.pi)
+
+
+def test_a_revolute_joint_keeps_its_limit_and_a_degenerate_one_is_widened_a_millionth():
+    from hydra_editor_urdf.models import Joint, JointLimit, JointType
+    from hydra_editor_urdf.render.kinematics import jog_range
+
+    arm = Joint(name="j", type=JointType.REVOLUTE, parent="a", child="b", limit=JointLimit(-0.5, 1.5, 1.0, 1.0))
+    assert jog_range(arm) == (-0.5, 1.5)
+    locked = Joint(name="k", type=JointType.REVOLUTE, parent="a", child="b", limit=JointLimit(0.3, 0.3, 1.0, 1.0))
+    lower, upper = jog_range(locked)
+    assert lower == 0.3 and 0.0 < upper - lower <= 2e-6
+    inverted = Joint(name="m", type=JointType.REVOLUTE, parent="a", child="b", limit=JointLimit(1.0, -1.0, 1.0, 1.0))
+    assert jog_range(inverted)[1] > jog_range(inverted)[0]
+
+
+def test_a_limit_that_is_not_a_number_falls_back_to_a_full_turn():
+    from hydra_editor_urdf.models import Joint, JointLimit, JointType
+    from hydra_editor_urdf.render.kinematics import jog_range
+    import math
+
+    broken = Joint(name="n", type=JointType.REVOLUTE, parent="a", child="b", limit=JointLimit(float("nan"), 1.0, 1.0, 1.0))
+    assert jog_range(broken) == (-math.pi, math.pi)
