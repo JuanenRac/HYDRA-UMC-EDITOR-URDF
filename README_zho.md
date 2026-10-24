@@ -202,7 +202,6 @@ HYDRA-UMC-EDITOR-URDF/
 │   ├── HYDRA_UMC_ICON.svg          # 工具栏命令面板使用的动画 HYDRA-UMC 标志
 │   ├── qss/industrial_dark.qss     # 原样复用自 HYDRA-UMC-SUITE
 │   └── qml/EditorDeck.qml          # `--qtquick` 命令面板的 Qt Quick 界面
-│   └── qss/industrial_dark.qss     # 原样复用自 HYDRA-UMC-SUITE
 ├── images/
 │   └── HYDRA_UMC_BANNER.svg        # 媒体与图示
 ├── language/                       # english/spanish/italian/french/german/chinese/japanese/portuguese.lng —— 位于 exe 旁边，未打包
@@ -216,6 +215,7 @@ HYDRA-UMC-EDITOR-URDF/
 │   ├── urdf/
 │   │   ├── parser.py               # URDF XML -> models.py 树（ElementTree，检测到 xacro 并以清晰错误拒绝）
 │   │   ├── writer.py                # models.py 树 -> URDF XML 字符串（导出 + 服务器上传负载）
+│   │   ├── save_check.py            # 在写出前检查机器人,含有不可能或不可用部件的模型会被拒绝并列出需修正之处
 │   │   └── dof.py                  # 自由度计数，针对 STUDIO 3-6 自由度上限的可行性验证
 │   ├── render/
 │   │   ├── mesh.py                 # STL/OBJ 加载、盒体/圆柱体/球体基本几何体生成、毫米/米判断
@@ -250,10 +250,18 @@ HYDRA-UMC-EDITOR-URDF/
 │   ├── test_scan.py                # find_urdf_files()/build_mesh_resolver(),包括已修复的 had_scheme 回归测试
 │   ├── test_local_folder.py / test_github_fetcher.py  # 来源校验;GitHub 网络调用均为模拟,从不真实发起
 │   ├── test_i18n.py                # 针对真实临时文件的配置/语言文件 I/O,从不触碰操作者真实的配置
-│   └── test_gallery.py             # 对手工精选的 GALLERY 列表做结构性检查
+│   ├── test_gallery.py             # 对手工精选的 GALLERY 列表做结构性检查
+│   ├── test_client_server.py       # 客户端对本地服务器: 带网格的推送、各种拒绝以及客户端对其的处理
+│   ├── test_dropped_elements.py    # 文件中有、而模型无处存放的内容会被统计并报告
+│   ├── test_edge_cases.py          # 非 UTF-8 或二进制文件、格式错误的文本、环路和损坏的 STL 网格
+│   ├── test_input_safety.py        # 指向仓库之外的网格路径不会被解析;空的或损坏的 STL 是错误而不是崩溃
+│   └── test_save_check.py          # 保存前的检查 (关节限位、质量以及它拒绝的其他内容)
 ├── tools/
 │   ├── build_test.py               # 不递增版本号的构建/编译检查
-│   └── ci_validate.py              # CI 使用的 manifest/CHANGELOG/docs 校验
+│   ├── ci_validate.py              # CI 使用的 manifest/CHANGELOG/docs 校验
+│   ├── _doc_policy.py              # 家族共享的文档规则 (HYDRA-UMC-SDK 的副本,保持同步)
+│   ├── _readme_parity.py           # 检查八个 README 结构一致 (HYDRA-UMC-SDK 的副本,保持同步)
+│   └── hydra_project_tool.py       # 每个仓库相同的命令: validate、test、ci、version、status、bump
 ├── build/                           # PyInstaller 自身的中间构建目录（已加入 gitignore）
 ├── dist/                            # 编译后的独立可执行文件（build_exe.bat/.sh 的输出，已加入 gitignore）
 └── work/                            # 已拉取的 GitHub 仓库和已拉取的服务器模型的运行时暂存空间（已加入 gitignore）

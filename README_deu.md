@@ -206,7 +206,6 @@ HYDRA-UMC-EDITOR-URDF/
 │   ├── HYDRA_UMC_ICON.svg          # Animiertes HYDRA-UMC-Zeichen des Symbolleisten-Bedienfelds
 │   ├── qss/industrial_dark.qss     # Wörtlich von HYDRA-UMC-SUITE wiederverwendet
 │   └── qml/EditorDeck.qml          # Qt-Quick-UI des `--qtquick`-Kommandopults
-│   └── qss/industrial_dark.qss     # Wörtlich von HYDRA-UMC-SUITE wiederverwendet
 ├── images/
 │   └── HYDRA_UMC_BANNER.svg        # Medien und Diagramme
 ├── language/                       # english/spanish/italian/french/german/japanese/chinese/portuguese.lng - liegt neben der exe, nicht gebündelt
@@ -220,6 +219,7 @@ HYDRA-UMC-EDITOR-URDF/
 │   ├── urdf/
 │   │   ├── parser.py               # URDF-XML -> models.py-Baum (ElementTree, xacro wird erkannt und mit klarer Fehlermeldung abgelehnt)
 │   │   ├── writer.py                # models.py-Baum -> URDF-XML-String (Export + Server-Upload-Payload)
+│   │   ├── save_check.py            # Prüft einen Roboter vor dem Schreiben, damit ein Modell mit einem unmöglichen oder unbrauchbaren Teil mit einer Liste des Nötigen abgelehnt wird
 │   │   └── dof.py                  # DOF-Zählung, Machbarkeitsvalidierung gegen die 3-6-DOF-Obergrenze von STUDIO
 │   ├── render/
 │   │   ├── mesh.py                 # STL/OBJ-Laden, Generierung von Box/Zylinder/Kugel-Primitiven, mm-vs-m-Schutz
@@ -254,10 +254,18 @@ HYDRA-UMC-EDITOR-URDF/
 │   ├── test_scan.py                # find_urdf_files()/build_mesh_resolver(), einschliesslich der bereits behobenen had_scheme-Regression
 │   ├── test_local_folder.py / test_github_fetcher.py  # Quellvalidierung; GitHub-Netzwerkaufrufe simuliert, nie echt
 │   ├── test_i18n.py                # Konfig-/Sprachdatei-I/O gegen echte temporaere Dateien, nie die echte Konfig des Bedieners
-│   └── test_gallery.py             # Strukturpruefungen der von Hand kuratierten GALLERY-Liste
+│   ├── test_gallery.py             # Strukturpruefungen der von Hand kuratierten GALLERY-Liste
+│   ├── test_client_server.py       # Der Client gegen einen lokalen Server: ein Push mit seinen Netzen, die Ablehnungen und was der Client damit tut
+│   ├── test_dropped_elements.py    # Was die Datei enthält und das Modell nicht aufnehmen kann, wird gezählt und gemeldet
+│   ├── test_edge_cases.py          # Dateien, die nicht UTF-8 oder binär sind, fehlerhafter Text, Zyklen und defekte STL-Netze
+│   ├── test_input_safety.py        # Ein Netzpfad, der aus dem Repository herausführt, wird nicht aufgelöst; leere oder defekte STL sind Fehler, keine Abstürze
+│   └── test_save_check.py          # Die Prüfung vor dem Speichern (Gelenkgrenzen, Massen und das übrige, was sie ablehnt)
 ├── tools/
 │   ├── build_test.py               # Build-/Kompilierprüfung ohne Versionserhöhung
-│   └── ci_validate.py              # Manifest-/CHANGELOG-/Doku-Validierung, von der CI genutzt
+│   ├── ci_validate.py              # Manifest-/CHANGELOG-/Doku-Validierung, von der CI genutzt
+│   ├── _doc_policy.py              # Von der Familie geteilte Dokumentationsregeln (Kopie der von HYDRA-UMC-SDK, synchron gehalten)
+│   ├── _readme_parity.py           # Prüfung, dass die acht READMEs dieselbe Struktur haben (Kopie der von HYDRA-UMC-SDK, synchron gehalten)
+│   └── hydra_project_tool.py       # Dieselben Befehle in jedem Repository: validate, test, ci, version, status, bump
 ├── build/                           # PyInstaller-eigenes Zwischenverzeichnis (per gitignore ausgeschlossen)
 ├── dist/                            # Kompiliertes eigenständiges Executable (Ausgabe von build_exe.bat/.sh, per gitignore ausgeschlossen)
 └── work/                            # Laufzeit-Arbeitsbereich für abgerufene GitHub-Repositories und heruntergeladene Server-Modelle (per gitignore ausgeschlossen)

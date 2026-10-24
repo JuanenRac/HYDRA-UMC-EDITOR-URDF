@@ -219,6 +219,7 @@ HYDRA-UMC-EDITOR-URDF/
 │   ├── urdf/
 │   │   ├── parser.py               # URDF XML -> arbre models.py (ElementTree, xacro detecte et rejete avec une erreur claire)
 │   │   ├── writer.py                # Arbre models.py -> chaine XML URDF (export + payload d'upload serveur)
+│   │   ├── save_check.py            # Contrôle un robot avant de l'écrire, pour refuser avec la liste de ce qu'il faut corriger un modèle ayant une pièce impossible ou inutilisable
 │   │   └── dof.py                  # Comptage des DDL, validation de faisabilite par rapport au plafond de 3-6 DDL de STUDIO
 │   ├── render/
 │   │   ├── mesh.py                 # Chargement STL/OBJ, generation de primitives boite/cylindre/sphere, garde mm-contre-m
@@ -253,10 +254,18 @@ HYDRA-UMC-EDITOR-URDF/
 │   ├── test_scan.py                # find_urdf_files()/build_mesh_resolver(), y compris la regression deja corrigee de had_scheme
 │   ├── test_local_folder.py / test_github_fetcher.py  # Validation de source ; appels reseau GitHub simules, jamais reels
 │   ├── test_i18n.py                # E/S config/langue sur de vrais fichiers temporaires, jamais la config reelle de l'operateur
-│   └── test_gallery.py             # Verifications structurelles de la liste GALLERY selectionnee a la main
+│   ├── test_gallery.py             # Verifications structurelles de la liste GALLERY selectionnee a la main
+│   ├── test_client_server.py       # Le client face à un serveur local : un envoi avec ses maillages, les refus et ce que le client en fait
+│   ├── test_dropped_elements.py    # Ce que le fichier contient et que le modèle ne sait pas loger est compté et signalé
+│   ├── test_edge_cases.py          # Fichiers qui ne sont pas en UTF-8 ou sont binaires, texte mal formé, cycles et maillages STL cassés
+│   ├── test_input_safety.py        # Un chemin de maillage qui sort du dépôt n'est pas résolu ; les STL vides ou cassés sont des erreurs, pas des plantages
+│   └── test_save_check.py          # Le contrôle avant l'enregistrement (limites d'articulations, masses et le reste de ce qu'il refuse)
 ├── tools/
 │   ├── build_test.py               # Controle build/compilation sans gestion de version
-│   └── ci_validate.py              # Validation manifest/CHANGELOG/docs utilisee par la CI
+│   ├── ci_validate.py              # Validation manifest/CHANGELOG/docs utilisee par la CI
+│   ├── _doc_policy.py              # Règles de documentation partagées par la famille (copie de celle de HYDRA-UMC-SDK, tenue synchronisée)
+│   ├── _readme_parity.py           # Contrôle que les huit README partagent la même structure (copie de celui de HYDRA-UMC-SDK, tenue synchronisée)
+│   └── hydra_project_tool.py       # Les mêmes commandes dans chaque dépôt : validate, test, ci, version, status, bump
 ├── build/                           # Repertoire intermediaire propre a PyInstaller (ignore par git)
 ├── dist/                            # Executable autonome compile (sortie de build_exe.bat/.sh, ignore par git)
 └── work/                            # Espace de travail temporaire d'execution pour les depots GitHub recuperes et les modeles serveur telecharges (ignore par git)

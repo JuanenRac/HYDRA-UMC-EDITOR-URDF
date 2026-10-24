@@ -206,7 +206,6 @@ HYDRA-UMC-EDITOR-URDF/
 │   ├── HYDRA_UMC_ICON.svg          # ツールバーのコマンドデッキで使用するアニメーション HYDRA-UMC マーク
 │   ├── qss/industrial_dark.qss     # HYDRA-UMC-SUITE からそのまま再利用
 │   └── qml/EditorDeck.qml          # `--qtquick` コマンドデッキの Qt Quick UI
-│   └── qss/industrial_dark.qss     # HYDRA-UMC-SUITE からそのまま再利用
 ├── images/
 │   └── HYDRA_UMC_BANNER.svg        # メディアと図版
 ├── language/                       # english/spanish/italian/french/german/chinese/japanese/portuguese.lng —— exe の隣に置かれ、バンドルされない
@@ -220,6 +219,7 @@ HYDRA-UMC-EDITOR-URDF/
 │   ├── urdf/
 │   │   ├── parser.py               # URDF XML -> models.py ツリー（ElementTree、xacro を検出して明確なエラーで拒否）
 │   │   ├── writer.py                # models.py ツリー -> URDF XML 文字列（エクスポート + サーバーアップロードペイロード）
+│   │   ├── save_check.py            # 書き出す前にロボットを検査し、不可能または使えない部分があるモデルは修正点の一覧付きで拒否する
 │   │   └── dof.py                  # 自由度カウント、STUDIO の 3-6 自由度上限に対する実現可能性検証
 │   ├── render/
 │   │   ├── mesh.py                 # STL/OBJ 読み込み、ボックス/円柱/球のプリミティブ生成、mm 対 m ガード
@@ -254,10 +254,18 @@ HYDRA-UMC-EDITOR-URDF/
 │   ├── test_scan.py                # find_urdf_files()/build_mesh_resolver()、修正済みの had_scheme 回帰テストを含む
 │   ├── test_local_folder.py / test_github_fetcher.py  # ソース検証; GitHub へのネットワーク呼び出しはモック化、実通信は行わない
 │   ├── test_i18n.py                # 設定/言語ファイルの実際の一時ファイルに対する I/O、操作者本人の実際の設定は使わない
-│   └── test_gallery.py             # 手作業で厳選された GALLERY リストの構造チェック
+│   ├── test_gallery.py             # 手作業で厳選された GALLERY リストの構造チェック
+│   ├── test_client_server.py       # ローカルサーバーに対するクライアント: メッシュ付きのプッシュ、拒否、クライアントの対応
+│   ├── test_dropped_elements.py    # ファイルにあってモデルに置き場のない要素を数えて報告する
+│   ├── test_edge_cases.py          # UTF-8 でない・バイナリのファイル、不正なテキスト、循環、壊れた STL メッシュ
+│   ├── test_input_safety.py        # リポジトリの外へ出るメッシュパスは解決しない。空や壊れた STL はクラッシュではなくエラー
+│   └── test_save_check.py          # 保存前の検査 (関節の上下限、質量、その他拒否する項目)
 ├── tools/
 │   ├── build_test.py               # バージョンを更新しないビルド/コンパイル確認
-│   └── ci_validate.py              # CI が使用する manifest/CHANGELOG/docs の検証
+│   ├── ci_validate.py              # CI が使用する manifest/CHANGELOG/docs の検証
+│   ├── _doc_policy.py              # ファミリー共通のドキュメント規則 (HYDRA-UMC-SDK のコピーで、同期を維持)
+│   ├── _readme_parity.py           # 8つの README が同じ構造であることの検査 (HYDRA-UMC-SDK のコピーで、同期を維持)
+│   └── hydra_project_tool.py       # すべてのリポジトリで共通のコマンド: validate、test、ci、version、status、bump
 ├── build/                           # PyInstaller 自身の中間ビルドディレクトリ（gitignore 対象）
 ├── dist/                            # コンパイル済み独立実行ファイル（build_exe.bat/.sh の出力、gitignore 対象）
 └── work/                            # 取得した GitHub リポジトリとプルしたサーバーモデルのランタイム作業領域（gitignore 対象）

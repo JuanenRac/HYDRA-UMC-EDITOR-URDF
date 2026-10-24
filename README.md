@@ -237,6 +237,7 @@ HYDRA-UMC-EDITOR-URDF/
 │   ├── urdf/
 │   │   ├── parser.py               # URDF XML -> models.py tree (ElementTree, xacro detected and rejected with a clear error)
 │   │   ├── writer.py                # models.py tree -> URDF XML string (export + server upload payload)
+│   │   ├── save_check.py            # Checks a robot before it is written out, so a model with an impossible or unusable part is refused with a list of what to fix
 │   │   └── dof.py                  # DOF counting, feasibility validation against STUDIO's 3-6 DOF ceiling
 │   ├── render/
 │   │   ├── mesh.py                 # STL/OBJ loading, box/cylinder/sphere primitive generation, mm-vs-m guard
@@ -271,10 +272,18 @@ HYDRA-UMC-EDITOR-URDF/
 │   ├── test_scan.py                # find_urdf_files()/build_mesh_resolver(), including the fixed had_scheme regression
 │   ├── test_local_folder.py / test_github_fetcher.py  # Source validation; GitHub network calls mocked, never real
 │   ├── test_i18n.py                # Config/language file I/O against real temp files, never the operator's real config
-│   └── test_gallery.py             # Structural checks on the hand-curated GALLERY list
+│   ├── test_gallery.py             # Structural checks on the hand-curated GALLERY list
+│   ├── test_client_server.py       # The client against a local server: a push with its meshes, the refusals and what the client does with them
+│   ├── test_dropped_elements.py    # What the file has that the model has no place for is counted and reported
+│   ├── test_edge_cases.py          # Files that are not UTF-8 or are binary, malformed text, cycles and broken STL meshes
+│   ├── test_input_safety.py        # A mesh path that climbs out of the repository is not resolved; empty or broken STL files are errors, not crashes
+│   └── test_save_check.py          # The check before saving (joint limits, masses and the other things it refuses)
 ├── tools/
 │   ├── build_test.py               # Build/compile check without bumping version
-│   └── ci_validate.py              # Manifest/CHANGELOG/docs validation used by CI
+│   ├── ci_validate.py              # Manifest/CHANGELOG/docs validation used by CI
+│   ├── _doc_policy.py              # Documentation rules shared by the family (a copy of HYDRA-UMC-SDK's, kept in sync)
+│   ├── _readme_parity.py           # Check that the eight READMEs share one structure (a copy of HYDRA-UMC-SDK's, kept in sync)
+│   └── hydra_project_tool.py       # The same commands in every repository: validate, test, ci, version, status, bump
 ├── build/                           # PyInstaller's own intermediate work directory (gitignored)
 ├── dist/                            # Compiled standalone executable (build_exe.bat/.sh output, gitignored)
 └── work/                            # Runtime scratch space for fetched GitHub repos and pulled server models (gitignored)
