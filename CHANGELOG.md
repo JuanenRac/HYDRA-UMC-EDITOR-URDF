@@ -2,21 +2,31 @@
 
 All notable changes to this project are documented here.
 
-## [Unreleased]
+## [0.1.5] - A joint that follows another (`<mimic>`) is not a degree of freedom and a joint whose range is one point is a warning
 
-- **The elements the editor does not keep are reported when the file is read.** The DOF screen lists, as warnings, every `<transmission>`, `<gazebo>`, `<dynamics>`, `<safety_controller>`, `<mimic>`, texture and other element that the model has no place for and that saving or sending the model therefore leaves out (`Robot.dropped_elements`, by element and count), instead of losing them silently. Passing them through to the written file is not done.
-- **A joint that follows another (`<mimic>`) is not a degree of freedom.** It used to be counted as one, so a 5-DOF arm with a mimic joint looked like a feasible 6-DOF one; it is reported as a follower and still needs its own `<limit>`.
-- **The sliders start where the viewport is posed, and a continuous joint can be jogged.** A continuous joint whose `<limit>` carries only effort and velocity got a slider a millionth of a radian wide; it now offers a full turn each way (`kinematics.jog_range`, shared by the classic and the QML interface), and every slider starts at `default_joint_values`.
+### Firmware and protocol
 
 - **A joint whose range is one point is a warning.** A REVOLUTE or PRISMATIC joint with `lower` equal to `upper` is a valid URDF that can never move; the DOF screen now lists it after the reasons (`DofReport.warnings`, never counted against feasibility) instead of saying nothing, in the eight languages.
-- **Meshes are read from disk once.** The viewport read every mesh of the robot again at each rebuild (a scale or type edit). Loaded meshes are kept by path, modification time and size, up to 256 MiB, with read-only arrays so the shared original cannot be changed by mistake; a mesh that could not be read is never kept.
-- **The model client sends its token on every call once signed in,** also on the model list, which a server that asks for a sign-in on the host information (`HYDRA_UMC_INFO_AUTH=required`) refuses otherwise.
+
+### Programs and windows
+
+- **The elements the editor does not keep are reported when the file is read.** The DOF screen lists, as warnings, every `<transmission>`, `<gazebo>`, `<dynamics>`, `<safety_controller>`, `<mimic>`, texture and other element that the model has no place for and that saving or sending the model therefore leaves out (`Robot.dropped_elements`, by element and count), instead of losing them silently. Passing them through to the written file is not done.
+- **The sliders start where the viewport is posed, and a continuous joint can be jogged.** A continuous joint whose `<limit>` carries only effort and velocity got a slider a millionth of a radian wide; it now offers a full turn each way (`kinematics.jog_range`, shared by the classic and the QML interface), and every slider starts at `default_joint_values`.
+
+### Tests, builds and checks
+
 - New tests for the client against a local server that keeps the contract (token on every call, name collision and overwrite, a round trip with its meshes, an expired token, a hostile download), for the warning and for the mesh cache (355 in all).
 - **A joint axis is a direction everywhere, not only at export**: the parser reads a non-unit `<axis>` as the unit vector it points along (as URDF readers do), so the preview, the kinematics and the writer agree; an explicit zero-length axis on a revolute, continuous, prismatic or planar joint is refused with the joint named (it used to be accepted and turn the joint into the identity in the preview, and was only caught when saving), and on a fixed or floating joint, which does not use it, it is ignored. The writer writes the axis as a direction (a scaled x axis is the default and is omitted); an axis with no direction in memory is written as it is for the save check to refuse. 6 new tests (336 in all).
 - Building no longer changes the version; raising it is the explicit `bump` command (`python tools/hydra_project_tool.py bump`). The build scripts only report the version they built, and CI fails if a build script runs a bump.
 - The build and run scripts use the Python of the `.venv` directly instead of an activate script, and create the venv with the `py` launcher when there is one; CI fails if a script activates a venv.
-- The banner follows the animated style of the ecosystem banners, with the name, the kind and the technologies of the project.
 - Added `tools/hydra_project_tool.py`: the same `validate`, `test`, `version`, `status` and `bump` commands in every repository. The checks run with `HYDRA_UMC_CI=1` and fail if the version changes; only `bump` changes it.
+
+### Other changes
+
+- **A joint that follows another (`<mimic>`) is not a degree of freedom.** It used to be counted as one, so a 5-DOF arm with a mimic joint looked like a feasible 6-DOF one; it is reported as a follower and still needs its own `<limit>`.
+- **Meshes are read from disk once.** The viewport read every mesh of the robot again at each rebuild (a scale or type edit). Loaded meshes are kept by path, modification time and size, up to 256 MiB, with read-only arrays so the shared original cannot be changed by mistake; a mesh that could not be read is never kept.
+- **The model client sends its token on every call once signed in,** also on the model list, which a server that asks for a sign-in on the host information (`HYDRA_UMC_INFO_AUTH=required`) refuses otherwise.
+- The banner follows the animated style of the ecosystem banners, with the name, the kind and the technologies of the project.
 
 ## [0.1.4] - Hostile files and server answers are reported, not raised
 

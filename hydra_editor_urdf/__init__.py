@@ -13,4 +13,4 @@
 #
 # Like every project of this ecosystem it starts at MAJOR 0.
 # =============================================================================
-__version__ = "0.1.4"
+__version__ = "0.1.5"

@@ -25,7 +25,7 @@
 
 ### 🖌️ Criador/editor gráfico de URDF para o catálogo de modelos do HYDRA-UMC-STUDIO
 
-**Versão atual:** 0.1.4 (`MAJOR.MINOR.PATCH` - ver a secção **Compilação de produção** abaixo para saber como este número se move)
+**Versão atual:** 0.1.5 (`MAJOR.MINOR.PATCH` - ver a secção **Compilação de produção** abaixo para saber como este número se move)
 
 ---
 
@@ -40,7 +40,7 @@
 
 | | |
 |---|---|
-| Versão | `0.1.4` |
+| Versão | `0.1.5` |
 | Maturidade | Estabelecido |
 | Testes | 355 |
 | Tecnologia | Python / PySide6 / Qt6 / OpenGL |
