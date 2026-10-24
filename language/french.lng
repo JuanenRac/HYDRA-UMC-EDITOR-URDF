@@ -26,6 +26,7 @@ DOF_ISSUES_LABEL=Problèmes trouvés
 DOF_VERDICT_FEASIBLE=Faisable - {dof} DDL, dans la plage prise en charge par STUDIO.
 DOF_VERDICT_INFEASIBLE=Non faisable tel quel - {dof} DDL.
 DOF_NO_ISSUES=Aucun problème - prêt à être envoyé.
+DOF_WARNING_PREFIX=Avertissement : 
 UNIT_RADIANS=rad
 UNIT_METERS=m
 VIEWPORT_LINKS_LABEL=Liaisons

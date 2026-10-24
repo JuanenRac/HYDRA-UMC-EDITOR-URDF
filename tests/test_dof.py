@@ -225,3 +225,60 @@ def test_empty_robot_has_no_root_and_zero_dof():
     assert report.dof_count == 0
     assert report.root_link_name is None
     assert not report.is_feasible
+
+
+# ---- a joint whose range is a single point: a warning, not a refusal -------------------------------------------
+
+def _chain_with_limits(limits: list[tuple[float, float]]):
+    from hydra_editor_urdf.models import Joint, JointLimit, JointType, Link, Origin, Robot
+
+    robot = Robot(name="r")
+    parent = "base"
+    robot.links[parent] = Link(name=parent)
+    for index, (lower, upper) in enumerate(limits):
+        child = f"l{index}"
+        robot.links[child] = Link(name=child)
+        robot.joints[f"j{index}"] = Joint(
+            name=f"j{index}", type=JointType.REVOLUTE, parent=parent, child=child,
+            origin=Origin.identity(), axis=(0.0, 0.0, 1.0), limit=JointLimit(lower=lower, upper=upper, effort=1.0, velocity=1.0),
+        )
+        parent = child
+    return robot
+
+
+def test_a_joint_with_lower_equal_to_upper_is_a_warning_and_the_robot_stays_feasible() -> None:
+    from hydra_editor_urdf.urdf.dof import validate
+
+    report = validate(_chain_with_limits([(-1.0, 1.0), (0.5, 0.5), (-1.0, 1.0)]))
+    assert report.is_feasible is True
+    assert report.reasons == []
+    assert report.locked_joint_names == ["j1"]
+    assert len(report.warnings) == 1 and "'j1'" in report.warnings[0]
+
+
+def test_a_normal_chain_has_no_warning() -> None:
+    from hydra_editor_urdf.urdf.dof import validate
+
+    report = validate(_chain_with_limits([(-1.0, 1.0), (0.0, 2.0), (-3.0, 3.0)]))
+    assert report.warnings == [] and report.locked_joint_names == []
+
+
+def test_an_inverted_range_is_still_a_reason_and_not_a_warning() -> None:
+    from hydra_editor_urdf.urdf.dof import validate
+
+    report = validate(_chain_with_limits([(-1.0, 1.0), (2.0, 1.0), (-1.0, 1.0)]))
+    assert report.is_feasible is False
+    assert report.warnings == []
+
+
+def test_the_screen_lists_reasons_then_warnings_and_says_so_when_there_is_nothing() -> None:
+    from hydra_editor_urdf.urdf.dof import issue_lines, validate
+
+    clean = validate(_chain_with_limits([(-1.0, 1.0)] * 3))
+    assert issue_lines(clean, "Warning: ", "Nothing") == ["Nothing"]
+    locked = validate(_chain_with_limits([(0.0, 0.0), (-1.0, 1.0), (-1.0, 1.0)]))
+    lines = issue_lines(locked, "Warning: ", "Nothing")
+    assert len(lines) == 1 and lines[0].startswith("Warning: Joint 'j0'")
+    broken = validate(_chain_with_limits([(0.0, 0.0), (2.0, 1.0), (-1.0, 1.0)]))
+    lines = issue_lines(broken, "Warning: ", "Nothing")
+    assert "invalid <limit>" in lines[0] and lines[1].startswith("Warning: ")

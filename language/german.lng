@@ -26,6 +26,7 @@ DOF_ISSUES_LABEL=Gefundene Probleme
 DOF_VERDICT_FEASIBLE=Machbar - {dof} Freiheitsgrade, innerhalb des von STUDIO unterstützten Bereichs.
 DOF_VERDICT_INFEASIBLE=So nicht machbar - {dof} Freiheitsgrade.
 DOF_NO_ISSUES=Keine Probleme - bereit zum Hochladen.
+DOF_WARNING_PREFIX=Warnung: 
 UNIT_RADIANS=rad
 UNIT_METERS=m
 VIEWPORT_LINKS_LABEL=Glieder

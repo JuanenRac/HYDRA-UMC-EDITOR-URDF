@@ -616,3 +616,80 @@ def test_unsupported_mesh_formats_are_named() -> None:
         load_mesh_file("robot.dae")
     with pytest.raises(UnsupportedMeshFormat, match="unrecognized"):
         load_mesh_file("robot.ply")
+
+
+# ------------------------------------------------------------- the cache of loaded meshes
+
+
+def _write_ascii_stl(path: Path, triangles: int) -> None:
+    lines = ["solid t"]
+    for i in range(triangles):
+        lines += ["facet normal 0 0 1", " outer loop", f"  vertex {i} 0 0", f"  vertex {i + 1} 0 0", f"  vertex {i} 1 0", " endloop", "endfacet"]
+    lines.append("endsolid t")
+    path.write_text("\n".join(lines) + "\n")
+
+
+def test_a_mesh_is_read_from_disk_once_until_the_file_changes(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+    from hydra_editor_urdf.render import mesh as mesh_module
+
+    mesh_module.clear_mesh_cache()
+    path = tmp_path / "a.stl"
+    _write_ascii_stl(path, 2)
+    reads: list[str] = []
+    real = mesh_module._read_mesh_file
+    monkeypatch.setattr(mesh_module, "_read_mesh_file", lambda p: reads.append(str(p)) or real(p))
+    first = mesh_module.load_mesh_file(path)
+    second = mesh_module.load_mesh_file(path)
+    assert first is second and first.triangle_count == 2
+    assert len(reads) == 1
+    _write_ascii_stl(path, 3)  # another size on disk
+    third = mesh_module.load_mesh_file(path)
+    assert third.triangle_count == 3 and len(reads) == 2
+
+
+def test_the_shared_mesh_cannot_be_changed_in_place_and_scaling_gives_a_new_one(tmp_path: Path) -> None:
+    from hydra_editor_urdf.render import mesh as mesh_module
+
+    mesh_module.clear_mesh_cache()
+    path = tmp_path / "a.stl"
+    _write_ascii_stl(path, 1)
+    mesh = mesh_module.load_mesh_file(path)
+    with pytest.raises(ValueError):
+        mesh.vertices[0, 0] = 99.0
+    scaled = mesh.scaled((2.0, 2.0, 2.0))
+    assert scaled is not mesh and scaled.vertices[1, 0] == mesh.vertices[1, 0] * 2
+    assert mesh_module.load_mesh_file(path).vertices[1, 0] == mesh.vertices[1, 0]
+
+
+def test_a_mesh_that_cannot_be_read_is_not_kept_and_is_reported_every_time(tmp_path: Path) -> None:
+    from hydra_editor_urdf.render import mesh as mesh_module
+
+    mesh_module.clear_mesh_cache()
+    path = tmp_path / "bad.stl"
+    path.write_bytes(b"not a mesh at all")
+    for _ in range(2):
+        with pytest.raises(MalformedMeshFile):
+            mesh_module.load_mesh_file(path)
+    assert len(mesh_module._mesh_cache) == 0
+    with pytest.raises(OSError):
+        mesh_module.load_mesh_file(tmp_path / "missing.stl")
+
+
+def test_the_cache_keeps_to_its_budget_and_drops_the_oldest(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+    from hydra_editor_urdf.render import mesh as mesh_module
+
+    mesh_module.clear_mesh_cache()
+    paths = []
+    for i in range(4):
+        path = tmp_path / f"m{i}.stl"
+        _write_ascii_stl(path, 10)
+        paths.append(path)
+    one = mesh_module._mesh_bytes(mesh_module.load_mesh_file(paths[0]))
+    mesh_module.clear_mesh_cache()
+    monkeypatch.setattr(mesh_module, "MESH_CACHE_BYTES", one * 2 + 1)
+    for path in paths:
+        mesh_module.load_mesh_file(path)
+    assert len(mesh_module._mesh_cache) == 2
+    assert mesh_module._mesh_cache_bytes <= one * 2 + 1
+    kept = {key[0] for key in mesh_module._mesh_cache}
+    assert kept == {str(paths[2].resolve()), str(paths[3].resolve())}

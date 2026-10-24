@@ -26,6 +26,7 @@ DOF_ISSUES_LABEL=Problemi trovati
 DOF_VERDICT_FEASIBLE=Fattibile - {dof} GDL, entro l'intervallo supportato da STUDIO.
 DOF_VERDICT_INFEASIBLE=Non fattibile così com'è - {dof} GDL.
 DOF_NO_ISSUES=Nessun problema - pronto per il caricamento.
+DOF_WARNING_PREFIX=Avviso: 
 UNIT_RADIANS=rad
 UNIT_METERS=m
 VIEWPORT_LINKS_LABEL=Link

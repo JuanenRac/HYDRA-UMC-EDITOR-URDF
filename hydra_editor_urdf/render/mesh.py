@@ -23,6 +23,7 @@
 from __future__ import annotations
 
 import struct
+from collections import OrderedDict
 from dataclasses import dataclass
 from pathlib import Path
 
@@ -311,11 +312,55 @@ def make_sphere_mesh(radius: float, segments: int = 16, rings: int = 12) -> Mesh
     return Mesh(vertices=np.array(verts, dtype=np.float32), normals=np.array(norms, dtype=np.float32))
 
 
+# The meshes read from disk, kept by (path, modification time, size) so a rebuild of the viewport after an edit of
+# a scale or a type does not read every mesh of the robot again. A mesh that is edited on disk has another time or
+# size and is read again; a mesh that could not be read is never kept. The arrays are read-only: whoever scales a
+# mesh gets a new one (`Mesh.scaled`), and the shared original can never be changed by mistake.
+MESH_CACHE_BYTES = 256 * 1024 * 1024
+_mesh_cache: "OrderedDict[tuple[str, int, int], Mesh]" = OrderedDict()
+_mesh_cache_bytes = 0
+
+
+def _mesh_bytes(mesh: Mesh) -> int:
+    return int(mesh.vertices.nbytes + mesh.normals.nbytes)
+
+
+def clear_mesh_cache() -> None:
+    """Forgets every mesh read from disk (used by the checks, and when memory must be given back)."""
+    global _mesh_cache_bytes
+    _mesh_cache.clear()
+    _mesh_cache_bytes = 0
+
+
 def load_mesh_file(path: str | Path) -> Mesh:
-    """Dispatches on file extension - the one entry point
-    render/kinematics.py's mesh cache and source/scan.py both use, so
-    adding a new format later means touching this function alone."""
+    """The mesh in a file, from the cache when the file has not changed since it was read (see above); the one entry
+    point render/kinematics.py's mesh cache and source/scan.py both use."""
+    global _mesh_cache_bytes
     path = Path(path)
+    try:
+        stat = path.stat()
+        key = (str(path.resolve()), stat.st_mtime_ns, stat.st_size)
+    except OSError:
+        return _read_mesh_file(path)  # the error of the read says what is wrong with the path
+    cached = _mesh_cache.get(key)
+    if cached is not None:
+        _mesh_cache.move_to_end(key)
+        return cached
+    mesh = _read_mesh_file(path)
+    mesh.vertices.flags.writeable = False
+    mesh.normals.flags.writeable = False
+    size = _mesh_bytes(mesh)
+    if size <= MESH_CACHE_BYTES:
+        _mesh_cache[key] = mesh
+        _mesh_cache_bytes += size
+        while _mesh_cache_bytes > MESH_CACHE_BYTES and len(_mesh_cache) > 1:
+            _, evicted = _mesh_cache.popitem(last=False)
+            _mesh_cache_bytes -= _mesh_bytes(evicted)
+    return mesh
+
+
+def _read_mesh_file(path: Path) -> Mesh:
+    """Dispatches on file extension - adding a new format later means touching this function alone."""
     suffix = path.suffix.lower()
     if suffix in (".stl", ".obj"):
         try:

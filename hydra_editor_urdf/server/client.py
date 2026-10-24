@@ -61,9 +61,11 @@ class StudioClient:
         url = f"{self.base_url}{path}"
         data = json.dumps(body).encode("utf-8") if body is not None else None
         headers = {"Content-Type": "application/json"}
-        if auth:
-            if not self.token:
-                raise StudioClientError("Not logged in - call login() first.")
+        if auth and not self.token:
+            raise StudioClientError("Not logged in - call login() first.")
+        # A signed-in client presents its token on every call, also on the reads a server leaves open by default:
+        # a server that asks for a sign-in on the model list (HYDRA_UMC_INFO_AUTH=required) answers 401 otherwise.
+        if self.token:
             headers["Authorization"] = f"Bearer {self.token}"
         request = urllib.request.Request(url, data=data, headers=headers, method=method)
         try:
@@ -102,8 +104,9 @@ class StudioClient:
 
     def list_models(self) -> list[dict]:
         """GET /api/models - every model already submitted, regardless of
-        whether THIS client submitted it. No auth needed, matches the
-        rest of this ecosystem's own GET-is-open convention."""
+        whether THIS client submitted it. No sign-in is needed on a
+        server that leaves the list open; once logged in, the token is
+        sent anyway so a server that asks for it still answers."""
         data = self._request("GET", "/api/models")
         models = data.get("models")
         return models if isinstance(models, list) else []

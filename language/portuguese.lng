@@ -26,6 +26,7 @@ DOF_ISSUES_LABEL=Problemas encontrados
 DOF_VERDICT_FEASIBLE=Viável - {dof} GDL, dentro do intervalo suportado pelo STUDIO.
 DOF_VERDICT_INFEASIBLE=Não é viável tal como está - {dof} GDL.
 DOF_NO_ISSUES=Sem problemas - pronto para enviar.
+DOF_WARNING_PREFIX=Aviso: 
 UNIT_RADIANS=rad
 UNIT_METERS=m
 VIEWPORT_LINKS_LABEL=Links

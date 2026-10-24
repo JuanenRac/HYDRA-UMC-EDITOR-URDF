@@ -28,7 +28,7 @@
 
 ---
 
-**Honesty check - what actually runs today:** the pure-logic core - URDF parsing/export (`urdf/parser.py`, `urdf/writer.py`), DOF feasibility validation (`urdf/dof.py`), forward kinematics (`render/kinematics.py`), inertia estimation (`inertia_calc.py`), mesh-reference resolution and GitHub-zipball fetching (`source/scan.py`, `source/github_fetcher.py`, `source/local_folder.py`), the in-memory model (`models.py`), the gallery list (`gallery.py`) and the i18n loader (`i18n.py`) - is real and covered by 202 passing tests (`tests/`), none of which import PySide6/PyOpenGL. `test_github_fetcher.py` mocks every network call - a real GitHub zipball download has been run manually, never as part of the automated suite. The Qt/OpenGL layer (`render/viewport.py`'s `UrdfGLRenderer`, `render/mesh.py`, every `ui/*` panel, and the `--qtquick` deck's `OffscreenUrdfRenderer`) is real, working code but has no automated test coverage at all - it needs a real display/Qt platform plugin, which CI doesn't have, so it's verified by hand, not by a test suite. `server/client.py`'s `StudioClient` (login/push/pull against HYDRA-UMC-SERVER's `server.ts`) is real HTTP code with no automated test either. xacro expansion and COLLADA (`.dae`) mesh loading are explicit, named non-features (a clear error, not a silent misparse) - see the Honesty note in the Overview below and the URDF Parsing/Mesh Loading sections for why. See `CHANGELOG.md` for exactly what has shipped so far.
+**Honesty check - what actually runs today:** the pure-logic core - URDF parsing/export (`urdf/parser.py`, `urdf/writer.py`), DOF feasibility validation (`urdf/dof.py`), forward kinematics (`render/kinematics.py`), inertia estimation (`inertia_calc.py`), mesh-reference resolution and GitHub-zipball fetching (`source/scan.py`, `source/github_fetcher.py`, `source/local_folder.py`), the in-memory model (`models.py`), the gallery list (`gallery.py`) and the i18n loader (`i18n.py`) - is real and covered by 355 passing tests (`tests/`), none of which import PySide6/PyOpenGL. `test_github_fetcher.py` mocks every network call - a real GitHub zipball download has been run manually, never as part of the automated suite. The Qt/OpenGL layer (`render/viewport.py`'s `UrdfGLRenderer`, `render/mesh.py`, every `ui/*` panel, and the `--qtquick` deck's `OffscreenUrdfRenderer`) is real, working code but has no automated test coverage at all - it needs a real display/Qt platform plugin, which CI doesn't have, so it's verified by hand, not by a test suite. `server/client.py`'s `StudioClient` (login/push/pull against HYDRA-UMC-SERVER's `server.ts`) is real HTTP code, tested against a small local server that keeps the contract of `server.ts` (the token on every call, a name collision, the download of a model, a hostile answer). xacro expansion and COLLADA (`.dae`) mesh loading are explicit, named non-features (a clear error, not a silent misparse) - see the Honesty note in the Overview below and the URDF Parsing/Mesh Loading sections for why. See `CHANGELOG.md` for exactly what has shipped so far.
 
 > **Safety and security status:** this ecosystem is not a certified safety system. There is no hardware E-STOP path, no firmware-enforced limits or interlocks and no verified motion command yet; firmware images are checked with CRC32 and a shared-key HMAC-SHA256, not with an asymmetric signature; TLS and mutual TLS are optional and off by default; no custom board has been populated or tested yet. Read the [security baseline](https://github.com/JuanenRac/HYDRA-UMC-DOCS/blob/main/docs/SECURITY_BASELINE.md) and the [threat model](https://github.com/JuanenRac/HYDRA-UMC-DOCS/blob/main/docs/THREAT_MODEL.md) before relying on any statement here for the safety of a person.
 
@@ -38,7 +38,7 @@
 |---|---|
 | Version | `0.1.4` |
 | Maturity | Established |
-| Tests | 202 |
+| Tests | 355 |
 | Stack | Python / PySide6 / Qt6 / OpenGL |
 | Target | The PC of the person using it |
 | On real hardware | Not applicable: nothing here runs on hardware |
@@ -249,7 +249,7 @@ HYDRA-UMC-EDITOR-URDF/
 │   ├── ARCHITECTURE.md
 │   ├── BUILD_AND_RUN.md
 │   └── INTEGRATION_CONTRACT.md
-├── tests/                          # Real pytest suite (336 tests) - pure logic only, no PySide6 import anywhere here
+├── tests/                          # Real pytest suite (355 tests) - pure logic only, no PySide6 import anywhere here
 │   ├── test_urdf_parser.py / test_urdf_writer.py  # URDF XML <-> models.py, including parse -> write -> parse round-trips
 │   ├── test_dof.py                 # Feasibility validation, DOF boundaries, root/orphan/disconnected/multi-parent detection
 │   ├── test_kinematics.py          # Forward kinematics, including the fixed real-cycle-hangs-forever regression
@@ -310,7 +310,7 @@ pip install -r requirements-dev.txt
 python -m pytest tests/ -q
 ```
 
-Note: this app's own pure logic (URDF parsing/export, DOF feasibility, forward kinematics, inertia estimation, mesh-reference resolution, GitHub fetching, i18n) had zero automated test coverage. Fixed: 202 real tests across 11 test modules, none of which import PySide6/PyOpenGL - `requirements-dev.txt` installs only what `tests/` actually needs (`numpy` + `pytest`), so the suite runs without a display or a Qt platform plugin. Several tests are explicit regressions for bugs already found and fixed earlier and documented inline in the source itself (`render/kinematics.py`'s infinite-loop-on-a-real-cycle guard, `source/scan.py`'s `had_scheme` gating, `urdf/dof.py`'s negative-mass check) - a future edit can't silently reintroduce any of them without a test failing. CI (`.github/workflows/ci.yml`) runs the same command on every push.
+Note: this app's own pure logic (URDF parsing/export, DOF feasibility, forward kinematics, inertia estimation, mesh-reference resolution, GitHub fetching, i18n) had zero automated test coverage. Fixed: 355 real tests across 15 test modules, none of which import PySide6/PyOpenGL - `requirements-dev.txt` installs only what `tests/` actually needs (`numpy` + `pytest`), so the suite runs without a display or a Qt platform plugin. Several tests are explicit regressions for bugs already found and fixed earlier and documented inline in the source itself (`render/kinematics.py`'s infinite-loop-on-a-real-cycle guard, `source/scan.py`'s `had_scheme` gating, `urdf/dof.py`'s negative-mass check) - a future edit can't silently reintroduce any of them without a test failing. CI (`.github/workflows/ci.yml`) runs the same command on every push.
 
 ### Production Build
 

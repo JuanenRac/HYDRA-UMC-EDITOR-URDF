@@ -16,7 +16,7 @@ from PySide6.QtWidgets import QLabel, QListWidget, QVBoxLayout, QWidget
 
 from hydra_editor_urdf.app import EditorController
 from hydra_editor_urdf.i18n import _
-from hydra_editor_urdf.urdf.dof import MAX_SUPPORTED_DOF, MIN_SUPPORTED_DOF, DofReport
+from hydra_editor_urdf.urdf.dof import MAX_SUPPORTED_DOF, MIN_SUPPORTED_DOF, DofReport, issue_lines
 
 
 class DofPanel(QWidget):
@@ -53,7 +53,5 @@ class DofPanel(QWidget):
             self._verdict_label.setText(_("DOF_VERDICT_INFEASIBLE", dof=report.dof_count))
             self._verdict_label.setStyleSheet("color: #e05252; font-weight: bold;")
 
-        for reason in report.reasons:
-            self._issues_list.addItem(reason)
-        if not report.reasons:
-            self._issues_list.addItem(_("DOF_NO_ISSUES"))
+        for line in issue_lines(report, _("DOF_WARNING_PREFIX"), _("DOF_NO_ISSUES")):
+            self._issues_list.addItem(line)

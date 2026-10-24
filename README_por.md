@@ -29,7 +29,7 @@
 
 ---
 
-**Verificação de honestidade - o que realmente funciona hoje:** o núcleo de lógica pura - leitura/exportação de URDF (`urdf/parser.py`, `urdf/writer.py`), validação da viabilidade de GDL (`urdf/dof.py`), cinemática direta (`render/kinematics.py`), estimativa de inércia (`inertia_calc.py`), resolução de referências a malhas e descarga de zipballs do GitHub (`source/scan.py`, `source/github_fetcher.py`, `source/local_folder.py`), o modelo em memória (`models.py`), a lista da galeria (`gallery.py`) e o carregador de i18n (`i18n.py`) - é real e coberto por 202 testes a passar (`tests/`), nenhum dos quais importa PySide6/PyOpenGL. O `test_github_fetcher.py` simula todas as chamadas de rede - uma descarga real de zipball do GitHub foi executada manualmente, nunca como parte da suíte automática. A camada Qt/OpenGL (o `UrdfGLRenderer` do `render/viewport.py`, o `render/mesh.py`, cada painel de `ui/*` e o `OffscreenUrdfRenderer` do painel `--qtquick`) é código real e funcional, mas não tem qualquer cobertura de testes automáticos - precisa de um ecrã real/plugin de plataforma Qt, que o CI não tem, pelo que é verificada à mão, não por uma suíte de testes. O `StudioClient` do `server/client.py` (login/push/pull contra o `server.ts` do HYDRA-UMC-SERVER) é código HTTP real, também sem teste automático. A expansão de xacro e o carregamento de malhas COLLADA (`.dae`) são não-funcionalidades explícitas e nomeadas (um erro claro, não uma má interpretação silenciosa) - ver a nota de honestidade na Visão geral abaixo e as secções Leitura de URDF/Carregamento de malhas para saber porquê. Consulte o `CHANGELOG.md` para saber exatamente o que já foi entregue.
+**Verificação de honestidade - o que realmente funciona hoje:** o núcleo de lógica pura - leitura/exportação de URDF (`urdf/parser.py`, `urdf/writer.py`), validação da viabilidade de GDL (`urdf/dof.py`), cinemática direta (`render/kinematics.py`), estimativa de inércia (`inertia_calc.py`), resolução de referências a malhas e descarga de zipballs do GitHub (`source/scan.py`, `source/github_fetcher.py`, `source/local_folder.py`), o modelo em memória (`models.py`), a lista da galeria (`gallery.py`) e o carregador de i18n (`i18n.py`) - é real e coberto por 355 testes a passar (`tests/`), nenhum dos quais importa PySide6/PyOpenGL. O `test_github_fetcher.py` simula todas as chamadas de rede - uma descarga real de zipball do GitHub foi executada manualmente, nunca como parte da suíte automática. A camada Qt/OpenGL (o `UrdfGLRenderer` do `render/viewport.py`, o `render/mesh.py`, cada painel de `ui/*` e o `OffscreenUrdfRenderer` do painel `--qtquick`) é código real e funcional, mas não tem qualquer cobertura de testes automáticos - precisa de um ecrã real/plugin de plataforma Qt, que o CI não tem, pelo que é verificada à mão, não por uma suíte de testes. O `StudioClient` do `server/client.py` (login/push/pull contra o `server.ts` do HYDRA-UMC-SERVER) é código HTTP real, testado contra um pequeno servidor local que respeita o contrato do `server.ts` (o token em cada chamada, uma colisão de nome, a transferência de um modelo, uma resposta hostil). A expansão de xacro e o carregamento de malhas COLLADA (`.dae`) são não-funcionalidades explícitas e nomeadas (um erro claro, não uma má interpretação silenciosa) - ver a nota de honestidade na Visão geral abaixo e as secções Leitura de URDF/Carregamento de malhas para saber porquê. Consulte o `CHANGELOG.md` para saber exatamente o que já foi entregue.
 
 ---
 
@@ -42,7 +42,7 @@
 |---|---|
 | Versão | `0.1.4` |
 | Maturidade | Estabelecido |
-| Testes | 202 |
+| Testes | 355 |
 | Tecnologia | Python / PySide6 / Qt6 / OpenGL |
 | Destino | O PC de quem o usa |
 | Em hardware real | Não aplicável: nada aqui corre em hardware |
@@ -223,7 +223,7 @@ HYDRA-UMC-EDITOR-URDF/
 │   ├── ARCHITECTURE.md
 │   ├── BUILD_AND_RUN.md
 │   └── INTEGRATION_CONTRACT.md
-├── tests/                          # Suíte pytest real (336 testes) - só lógica pura, sem importar PySide6 em lado nenhum
+├── tests/                          # Suíte pytest real (355 testes) - só lógica pura, sem importar PySide6 em lado nenhum
 │   ├── test_urdf_parser.py / test_urdf_writer.py  # XML URDF <-> models.py, incluindo idas e voltas leitura -> escrita -> leitura
 │   ├── test_dof.py                 # Validação de viabilidade, limites de GDL, deteção de raiz/órfão/desligado/multi-pai
 │   ├── test_kinematics.py          # Cinemática direta, incluindo a regressão corrigida do ciclo real que bloqueava para sempre
@@ -276,7 +276,7 @@ pip install -r requirements-dev.txt
 python -m pytest tests/ -q
 ```
 
-Nota: a lógica pura desta aplicação (leitura/exportação de URDF, viabilidade de GDL, cinemática direta, estimativa de inércia, resolução de referências a malhas, descarga do GitHub, i18n) tinha cobertura de testes automáticos zero. Corrigido: 202 testes reais em 11 módulos de teste, nenhum dos quais importa PySide6/PyOpenGL - o `requirements-dev.txt` instala apenas o que os `tests/` realmente precisam (`numpy` + `pytest`), pelo que a suíte corre sem ecrã nem plugin de plataforma Qt. Vários testes são regressões explícitas de erros já encontrados e corrigidos anteriormente e documentados em linha no próprio código-fonte (a proteção contra ciclo infinito num ciclo real do `render/kinematics.py`, a condição `had_scheme` do `source/scan.py`, a verificação de massa negativa do `urdf/dof.py`) - uma edição futura não pode reintroduzir nenhum deles em silêncio sem que um teste falhe. O CI (`.github/workflows/ci.yml`) executa o mesmo comando a cada push.
+Nota: a lógica pura desta aplicação (leitura/exportação de URDF, viabilidade de GDL, cinemática direta, estimativa de inércia, resolução de referências a malhas, descarga do GitHub, i18n) tinha cobertura de testes automáticos zero. Corrigido: 355 testes reais em 15 módulos de teste, nenhum dos quais importa PySide6/PyOpenGL - o `requirements-dev.txt` instala apenas o que os `tests/` realmente precisam (`numpy` + `pytest`), pelo que a suíte corre sem ecrã nem plugin de plataforma Qt. Vários testes são regressões explícitas de erros já encontrados e corrigidos anteriormente e documentados em linha no próprio código-fonte (a proteção contra ciclo infinito num ciclo real do `render/kinematics.py`, a condição `had_scheme` do `source/scan.py`, a verificação de massa negativa do `urdf/dof.py`) - uma edição futura não pode reintroduzir nenhum deles em silêncio sem que um teste falhe. O CI (`.github/workflows/ci.yml`) executa o mesmo comando a cada push.
 
 ### Compilação de produção
 

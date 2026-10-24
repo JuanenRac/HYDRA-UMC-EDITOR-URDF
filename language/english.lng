@@ -26,6 +26,7 @@ DOF_ISSUES_LABEL=Issues found
 DOF_VERDICT_FEASIBLE=Feasible - {dof} DOF, within STUDIO's supported range.
 DOF_VERDICT_INFEASIBLE=Not feasible as-is - {dof} DOF.
 DOF_NO_ISSUES=No issues - ready to upload.
+DOF_WARNING_PREFIX=Warning: 
 UNIT_RADIANS=rad
 UNIT_METERS=m
 VIEWPORT_LINKS_LABEL=Links

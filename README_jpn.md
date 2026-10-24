@@ -28,7 +28,7 @@
 
 ---
 
-**正直な現状確認 - 今日実際に動くもの:** 純粋なロジックのコア - URDF のパース/エクスポート(`urdf/parser.py`、`urdf/writer.py`)、DOF 実現可能性検証(`urdf/dof.py`)、順運動学(`render/kinematics.py`)、慣性推定(`inertia_calc.py`)、メッシュ参照解決と GitHub zipball 取得(`source/scan.py`、`source/github_fetcher.py`、`source/local_folder.py`)、インメモリモデル(`models.py`)、ギャラリー一覧(`gallery.py`)、そして i18n ローダー(`i18n.py`)は本物であり、`tests/` 内の 202 件のテストに合格しており、そのいずれも PySide6/PyOpenGL をインポートしていない。`test_github_fetcher.py` はすべてのネットワーク呼び出しをモック化している - 実際の GitHub zipball ダウンロードは手動で実行されたことはあるが、自動化されたテストスイートの一部として実行されたことは一度もない。Qt/OpenGL 層(`render/viewport.py` の `UrdfGLRenderer`、`render/mesh.py`、各 `ui/*` パネル、そして `--qtquick` デッキの `OffscreenUrdfRenderer`)は本物の動作するコードだが、自動テストのカバレッジは一切ない - 実際のディスプレイ/Qt プラットフォームプラグインが必要であり、CI にはそれがないため、テストスイートではなく手作業で検証されている。`server/client.py` の `StudioClient`(HYDRA-UMC-SERVER の `server.ts` に対するログイン/プッシュ/プル)も同様に本物の HTTP コードであり、自動テストは一切ない。xacro の展開と COLLADA(`.dae`)メッシュの読み込みは、明示的に名前が付けられた未実装機能である(サイレントな誤解析ではなく明確なエラーを返す) - その理由については下記の概要にある正直さについての注記、および URDF パース/メッシュ読み込みの各セクションを参照。これまでに何が実際に出荷されたかは `CHANGELOG.md` を参照。
+**正直な現状確認 - 今日実際に動くもの:** 純粋なロジックのコア - URDF のパース/エクスポート(`urdf/parser.py`、`urdf/writer.py`)、DOF 実現可能性検証(`urdf/dof.py`)、順運動学(`render/kinematics.py`)、慣性推定(`inertia_calc.py`)、メッシュ参照解決と GitHub zipball 取得(`source/scan.py`、`source/github_fetcher.py`、`source/local_folder.py`)、インメモリモデル(`models.py`)、ギャラリー一覧(`gallery.py`)、そして i18n ローダー(`i18n.py`)は本物であり、`tests/` 内の 355 件のテストに合格しており、そのいずれも PySide6/PyOpenGL をインポートしていない。`test_github_fetcher.py` はすべてのネットワーク呼び出しをモック化している - 実際の GitHub zipball ダウンロードは手動で実行されたことはあるが、自動化されたテストスイートの一部として実行されたことは一度もない。Qt/OpenGL 層(`render/viewport.py` の `UrdfGLRenderer`、`render/mesh.py`、各 `ui/*` パネル、そして `--qtquick` デッキの `OffscreenUrdfRenderer`)は本物の動作するコードだが、自動テストのカバレッジは一切ない - 実際のディスプレイ/Qt プラットフォームプラグインが必要であり、CI にはそれがないため、テストスイートではなく手作業で検証されている。`server/client.py` の `StudioClient`(HYDRA-UMC-SERVER の `server.ts` に対するログイン/プッシュ/プル)は本物の HTTP コードであり、`server.ts` の契約を守る小さなローカルサーバーに対してテストされている(すべての呼び出しでのトークン、名前の衝突、モデルのダウンロード、悪意のある応答)。xacro の展開と COLLADA(`.dae`)メッシュの読み込みは、明示的に名前が付けられた未実装機能である(サイレントな誤解析ではなく明確なエラーを返す) - その理由については下記の概要にある正直さについての注記、および URDF パース/メッシュ読み込みの各セクションを参照。これまでに何が実際に出荷されたかは `CHANGELOG.md` を参照。
 
 > **安全性とセキュリティの現状:** このエコシステムは認証された安全システムではありません。ハードウェアの E-STOP 経路、ファームウェアが強制する制限やインターロック、検証済みの動作コマンドはまだありません。ファームウェアイメージは CRC32 と共有鍵の HMAC-SHA256 で検査しており、非対称署名ではありません。TLS と相互 TLS は任意で、既定では無効です。独自基板はまだ実装も試験もされていません。ここに書かれた内容を人の安全のために頼る前に、[セキュリティベースライン](https://github.com/JuanenRac/HYDRA-UMC-DOCS/blob/main/docs/SECURITY_BASELINE.md)と[脅威モデル](https://github.com/JuanenRac/HYDRA-UMC-DOCS/blob/main/docs/THREAT_MODEL.md)をお読みください。
 
@@ -38,7 +38,7 @@
 |---|---|
 | バージョン | `0.1.4` |
 | 成熟度 | 確立 |
-| テスト | 202 |
+| テスト | 355 |
 | 技術 | Python / PySide6 / Qt6 / OpenGL |
 | 対象 | 利用者の PC |
 | 実機での確認 | 対象外：ここにあるものはハードウェア上では動きません |
@@ -232,7 +232,7 @@ HYDRA-UMC-EDITOR-URDF/
 │   ├── ARCHITECTURE.md
 │   ├── BUILD_AND_RUN.md
 │   └── INTEGRATION_CONTRACT.md
-├── tests/                          # 実際の pytest スイート(336 件のテスト)—— 純粋なロジックのみ、ここでは PySide6 のインポートは一切なし
+├── tests/                          # 実際の pytest スイート(355 件のテスト)—— 純粋なロジックのみ、ここでは PySide6 のインポートは一切なし
 │   ├── test_urdf_parser.py / test_urdf_writer.py  # URDF XML <-> models.py、parse -> write -> parse のラウンドトリップを含む
 │   ├── test_dof.py                 # 実現可能性検証、DOF の境界、ルート/孤立/切断/複数親の検出
 │   ├── test_kinematics.py          # 順運動学、修正済みの「実際のサイクルが永遠にハングする」回帰テストを含む
@@ -294,7 +294,7 @@ pip install -r requirements-dev.txt
 python -m pytest tests/ -q
 ```
 
-注:このアプリ自身の純粋なロジック(URDF のパース/エクスポート、DOF 実現可能性検証、順運動学、慣性推定、メッシュ参照解決、GitHub 取得、i18n)には自動テストのカバレッジが一切ありませんでした。修正済み:11 のテストモジュールにまたがる 202 件の実際のテストを追加——どれも PySide6/PyOpenGL をインポートしないため、`requirements-dev.txt` は `tests/` が実際に必要とするもの(`numpy` と `pytest`)だけをインストールし、ディスプレイや Qt プラットフォームプラグインなしでスイート全体が実行できます。いくつかのテストは、以前に既に見つかって修正され、ソースコード自体にコメントとして記録済みのバグ(`render/kinematics.py` の実際のサイクルでの無限ループ防止、`source/scan.py` の `had_scheme` 条件分岐、`urdf/dof.py` の負の質量チェック)に対する明示的な回帰テストです——今後の変更がテストを失敗させることなくこれらのいずれかを静かに再発させることはできません。CI(`.github/workflows/ci.yml`)はプッシュのたびに同じコマンドを実行します。
+注:このアプリ自身の純粋なロジック(URDF のパース/エクスポート、DOF 実現可能性検証、順運動学、慣性推定、メッシュ参照解決、GitHub 取得、i18n)には自動テストのカバレッジが一切ありませんでした。修正済み:15 のテストモジュールにまたがる 355 件の実際のテストを追加——どれも PySide6/PyOpenGL をインポートしないため、`requirements-dev.txt` は `tests/` が実際に必要とするもの(`numpy` と `pytest`)だけをインストールし、ディスプレイや Qt プラットフォームプラグインなしでスイート全体が実行できます。いくつかのテストは、以前に既に見つかって修正され、ソースコード自体にコメントとして記録済みのバグ(`render/kinematics.py` の実際のサイクルでの無限ループ防止、`source/scan.py` の `had_scheme` 条件分岐、`urdf/dof.py` の負の質量チェック)に対する明示的な回帰テストです——今後の変更がテストを失敗させることなくこれらのいずれかを静かに再発させることはできません。CI(`.github/workflows/ci.yml`)はプッシュのたびに同じコマンドを実行します。
 
 ### プロダクションビルド
 

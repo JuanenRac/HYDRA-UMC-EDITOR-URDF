@@ -26,6 +26,7 @@ DOF_ISSUES_LABEL=見つかった問題
 DOF_VERDICT_FEASIBLE=実現可能——{dof} 自由度、STUDIO のサポート範囲内です。
 DOF_VERDICT_INFEASIBLE=現状では実現不可能——{dof} 自由度。
 DOF_NO_ISSUES=問題なし——アップロード可能です。
+DOF_WARNING_PREFIX=警告:
 UNIT_RADIANS=rad
 UNIT_METERS=m
 VIEWPORT_LINKS_LABEL=リンク

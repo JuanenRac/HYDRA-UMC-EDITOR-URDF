@@ -64,7 +64,7 @@ from hydra_editor_urdf.ui.about_dialog import AUTHOR_EMAIL, AUTHOR_NAME, LICENSE
 # reuses the SAME fix rather than a second, drifting copy of it.
 from hydra_editor_urdf.ui.panels.source_panel import _GithubFetchThread
 from hydra_editor_urdf.ui.panels.upload_panel import CATEGORIES, _ServerCallThread
-from hydra_editor_urdf.urdf.dof import MAX_SUPPORTED_DOF, MIN_SUPPORTED_DOF
+from hydra_editor_urdf.urdf.dof import MAX_SUPPORTED_DOF, MIN_SUPPORTED_DOF, issue_lines
 from hydra_editor_urdf.urdf.save_check import check_before_save
 
 ASSETS_DIR = Path(__file__).resolve().parent / "assets"
@@ -370,7 +370,7 @@ class EditorQtBridge(QObject):
         report = self._controller.dof_report
         if report is None:
             return []
-        return list(report.reasons) if report.reasons else [_("DOF_NO_ISSUES")]
+        return issue_lines(report, _("DOF_WARNING_PREFIX"), _("DOF_NO_ISSUES"))
 
     # --- shared load/edit handlers ---------------------------------------
 

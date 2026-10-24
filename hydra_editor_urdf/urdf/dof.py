@@ -50,6 +50,17 @@ class DofReport:
     disconnected_link_names: list[str] = field(default_factory=list)  # a real chain of >1 link, but reachable from no root
     multi_parent_link_names: list[str] = field(default_factory=list)  # appear as <child> of >1 <joint> - invalid per the URDF spec (a link has at most one parent)
     unknown_link_names: list[str] = field(default_factory=list)  # named as a joint's parent/child but no <link> with that name exists at all
+    # Things worth knowing that do not make the robot infeasible (a joint whose range is a single point can never
+    # move, for one); shown after the reasons and never counted in `is_feasible`.
+    warnings: list[str] = field(default_factory=list)
+    locked_joint_names: list[str] = field(default_factory=list)  # REVOLUTE/PRISMATIC with lower == upper
+
+
+def issue_lines(report: DofReport, warning_prefix: str, nothing: str) -> list[str]:
+    """The lines the DOF screen lists: the reasons the robot is not feasible, then the warnings (each with
+    `warning_prefix`), or `nothing` when there is neither."""
+    lines = list(report.reasons) + [warning_prefix + warning for warning in report.warnings]
+    return lines or [nothing]
 
 
 def _reachable_from(robot: Robot, root: str) -> set[str]:
@@ -191,8 +202,25 @@ def validate(robot: Robot) -> DofReport:
             f"breaks real ROS consumers (robot_state_publisher/Gazebo/MoveIt): {', '.join(negative_mass_links)}."
         )
 
+    # A REVOLUTE/PRISMATIC joint with lower == upper is accepted (it is a valid, if odd, URDF) but it can never move:
+    # a slider over it has no span and a scale that depends on it degenerates. Said as a warning, never a refusal.
+    locked = [
+        j.name
+        for j in movable
+        if j.type != JointType.CONTINUOUS
+        and j.limit is not None
+        and all(math.isfinite(v) for v in (j.limit.lower, j.limit.upper))
+        and j.limit.lower == j.limit.upper
+    ]
+    warnings = [
+        f"Joint {name!r} has lower equal to upper in its <limit>: it can never move (it counts as a DOF but behaves as a fixed joint)."
+        for name in locked
+    ]
+
     return DofReport(
         dof_count=dof_count,
+        warnings=warnings,
+        locked_joint_names=locked,
         movable_joint_names=[j.name for j in movable],
         unsupported_joint_names=unsupported,
         is_feasible=not reasons,
