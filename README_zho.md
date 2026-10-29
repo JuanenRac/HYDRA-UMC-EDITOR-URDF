@@ -1,36 +1,38 @@
+<!-- =============================================================================
+HYDRA-UMC-EDITOR-URDF - Desktop URDF creator and editor for the model catalogue of HYDRA-UMC-STUDIO
+Copyright (C) JuanenRac (Electro Hobby 3D) <electrohobby3d@gmail.com>
+GPL-3.0-or-later - see LICENSE
+============================================================================= -->
+
 <p align="center">
   <img src="images/HYDRA_UMC_BANNER.svg" alt="HYDRA-UMC-EDITOR-URDF banner" width="100%">
 </p>
-# 🦾 HYDRA-UMC EDITOR-URDF
 
-<p align="center">
-  <a href="README.md">🇺🇸 English</a> |
-  <a href="README_spa.md">🇪🇸 Español</a> |
-  <a href="README_fra.md">🇫🇷 Français</a> |
-  <a href="README_ita.md">🇮🇹 Italiano</a> |
-  <a href="README_deu.md">🇩🇪 Deutsch</a> |
-  🇨🇳 <b>简体中文</b> |
-  <a href="README_jpn.md">🇯🇵 日本語</a>
-</p>
+# 🖌️ HYDRA-UMC-EDITOR-URDF
 
-
-<p align="center">
-  <img src="https://img.shields.io/badge/License-GPL%203.0--or--later-blue.svg" alt="GPL 3.0 or later">
-  <img src="https://img.shields.io/badge/Language-Python%203.11-3776AB.svg" alt="Python">
-  <img src="https://img.shields.io/badge/Framework-PySide6-41CD52.svg" alt="PySide6">
-  <img src="https://img.shields.io/badge/Format-URDF-red.svg" alt="URDF">
-</p>
-
+<p align="center"><a href="README.md">🇺🇸 English</a> | <a href="README_spa.md">🇪🇸 Español</a> | <a href="README_fra.md">🇫🇷 Français</a> | <a href="README_ita.md">🇮🇹 Italiano</a> | <a href="README_deu.md">🇩🇪 Deutsch</a> | 🇨🇳 <b>简体中文</b> | <a href="README_jpn.md">🇯🇵 日本語</a> | <a href="README_por.md">🇵🇹 Português</a></p>
 
 ### 🖌️ 面向 HYDRA-UMC-STUDIO 模型目录的图形化 URDF 创建/编辑工具
 
-**当前版本：** 0.1.5（`MAJOR.MINOR.PATCH`——该编号的变化方式见下方“生产构建”一节）
+<p align="center">
+  <img src="https://img.shields.io/badge/License-GPL%203.0--or--later-blue.svg" alt="GPL 3.0 or later">
+  <img src="https://img.shields.io/badge/Language-Python%203.11-3776AB.svg" alt="Language">
+  <img src="https://img.shields.io/badge/Framework-PySide6-41CD52.svg" alt="Framework">
+  <img src="https://img.shields.io/badge/Format-URDF-red.svg" alt="Format">
+  <img src="https://img.shields.io/badge/Tests-366%20passing-2ea44f.svg" alt="Tests">
+  <img src="https://img.shields.io/badge/Version-0.1.5-0f6cbd.svg" alt="Version">
+  <img src="https://img.shields.io/badge/Maturity-established-2EA44F.svg" alt="Maturity">
+</p>
 
 ---
 
-**诚实核查 - 今天真正能运行的部分：** 纯逻辑核心 - URDF 解析/导出(`urdf/parser.py`、`urdf/writer.py`)、DOF 可行性验证(`urdf/dof.py`)、正向运动学(`render/kinematics.py`)、惯量估算(`inertia_calc.py`)、网格引用解析与 GitHub 压缩包下载(`source/scan.py`、`source/github_fetcher.py`、`source/local_folder.py`)、内存中的模型(`models.py`)、画廊列表(`gallery.py`)以及 i18n 加载器(`i18n.py`)——都是真实的，并由 355 个通过的测试(`tests/`)覆盖，其中没有一个测试导入 PySide6/PyOpenGL。`test_github_fetcher.py` 模拟了所有网络调用——真实的 GitHub 压缩包下载曾手动运行过，但从未纳入自动化测试套件。Qt/OpenGL 层(`render/viewport.py` 中的 `UrdfGLRenderer`、`render/mesh.py`、每一个 `ui/*` 面板，以及 `--qtquick` 面板的 `OffscreenUrdfRenderer`)是真实可运行的代码，但完全没有自动化测试覆盖——它需要真实的显示设备/Qt 平台插件，而 CI 环境没有，因此只能手动验证，而非通过测试套件验证。`server/client.py` 中的 `StudioClient`(针对 HYDRA-UMC-SERVER 的 `server.ts` 进行登录/推送/拉取)是真实的 HTTP 代码，已针对遵守 `server.ts` 契约的小型本地服务器进行测试(每次调用携带令牌、名称冲突、模型下载、恶意响应)。xacro 展开和 COLLADA(`.dae`)网格加载是明确声明、有名有姓的未实现功能(会给出清晰的错误，而不是静默解析错误)——原因见下方概述中的诚实说明，以及 URDF 解析/网格加载各节。具体已交付的内容请见 `CHANGELOG.md`。
+---
+
+**诚实核查 - 今天真正能运行的部分：** 纯逻辑核心 - URDF 解析/导出(`urdf/parser.py`、`urdf/writer.py`)、DOF 可行性验证(`urdf/dof.py`)、正向运动学(`render/kinematics.py`)、惯量估算(`inertia_calc.py`)、网格引用解析与 GitHub 压缩包下载(`source/scan.py`、`source/github_fetcher.py`、`source/local_folder.py`)、内存中的模型(`models.py`)、画廊列表(`gallery.py`)以及 i18n 加载器(`i18n.py`)——都是真实的，并由 366 个通过的测试(`tests/`)覆盖，其中没有一个测试导入 PySide6/PyOpenGL。`test_github_fetcher.py` 模拟了所有网络调用——真实的 GitHub 压缩包下载曾手动运行过，但从未纳入自动化测试套件。Qt/OpenGL 层(`render/viewport.py` 中的 `UrdfGLRenderer`、`render/mesh.py`、每一个 `ui/*` 面板，以及 `--qtquick` 面板的 `OffscreenUrdfRenderer`)是真实可运行的代码，但完全没有自动化测试覆盖——它需要真实的显示设备/Qt 平台插件，而 CI 环境没有，因此只能手动验证，而非通过测试套件验证。`server/client.py` 中的 `StudioClient`(针对 HYDRA-UMC-SERVER 的 `server.ts` 进行登录/推送/拉取)是真实的 HTTP 代码，已针对遵守 `server.ts` 契约的小型本地服务器进行测试(每次调用携带令牌、名称冲突、模型下载、恶意响应)。xacro 展开和 COLLADA(`.dae`)网格加载是明确声明、有名有姓的未实现功能(会给出清晰的错误，而不是静默解析错误)——原因见下方概述中的诚实说明，以及 URDF 解析/网格加载各节。具体已交付的内容请见 `CHANGELOG.md`。
 
 > **安全与安防现状:**本生态系统不是经认证的安全系统。目前尚无硬件 E-STOP 通路,没有由固件强制执行的限位或联锁,也没有经过验证的运动指令;固件映像使用 CRC32 和共享密钥的 HMAC-SHA256 校验,而非非对称签名;TLS 与双向 TLS 均为可选项,默认关闭;自制电路板尚未组装或测试。在依赖此处任何说法来保障人身安全之前,请先阅读[安全基线](https://github.com/JuanenRac/HYDRA-UMC-DOCS/blob/main/docs/SECURITY_BASELINE.md)和[威胁模型](https://github.com/JuanenRac/HYDRA-UMC-DOCS/blob/main/docs/THREAT_MODEL.md)。
+
+---
 
 ## 📋 速览
 
@@ -38,10 +40,12 @@
 |---|---|
 | 版本 | `0.1.5` |
 | 成熟度 | 成熟 |
-| 测试 | 355 |
+| 测试 | 366 (`python -m pytest tests -q`) |
 | 技术栈 | Python / PySide6 / Qt6 / OpenGL |
 | 目标 | 使用者的电脑 |
 | 真实硬件 | 不适用：这里的内容不在硬件上运行 |
+
+**跳转：** [概述](#-概述) · [架构](#-架构) · [功能](#-功能) · [安全与防护](#-安全与防护) · [接口](#-接口) · [配置](#-配置) · [快速开始](#-快速开始) · [测试](#-测试) · [故障排除](#-故障排除) · [仓库结构](#-仓库结构) · [相关项目](#-相关项目)
 
 ## 🚦 项目状态
 
@@ -52,7 +56,7 @@
 | 领域 | 状态 | 在这里的含义 |
 |---|---|---|
 | 软件 | 🟢 | 就其用途而言已完整且稳定；上面的诚实性检查列出了已知限制 |
-| 测试 | 🟢 | 355 项自动测试，每次变更都会运行 |
+| 测试 | 🟢 | 366 项自动测试，每次变更都会运行 |
 | 真实硬件 | 🟢 | 不适用：这里的内容不在硬件上运行 |
 | 文档 | 🟢 | 八种语言的 README，每次变更都会与清单核对 |
 
@@ -64,9 +68,19 @@
 
 **诚实说明，与本生态系统其余文档所采用的惯例一致：** 本应用不展开 [xacro](http://wiki.ros.org/xacro) 宏，也不加载 COLLADA（`.dae`）网格。两者都是明确命名的限制（一条清晰的错误信息，而非静默的解析错误或视口中缺失的连杆），而非半成品式的尝试——具体原因见下方“URDF 解析”和“网格加载”两节。
 
----
+## 🧩 在 HYDRA-UMC 中的角色
 
-## 📥 源加载——GitHub 或本地文件夹
+**HYDRA-UMC-EDITOR-URDF** 是桌面工具，它把向 HYDRA-UMC-STUDIO 模型目录移植新机器人这件事，从手工调查变成可重复的流程。它从 GitHub 仓库或本地文件夹加载 URDF，判断机器人是否符合 STUDIO 支持的 3 到 6 个自由度，在实时 3D 视图中显示，可对连杆改色、缩放并设置新的关节限位，然后导出 URDF 或推送到 HYDRA-UMC-SERVER。
+
+## 🏛️ 架构
+
+<p align="center">
+  <img src="images/architecture.svg" alt="HYDRA-UMC-EDITOR-URDF architecture" width="100%">
+</p>
+
+## ✨ 功能
+
+### 源加载——GitHub 或本地文件夹
 
 有两种方式将本应用指向一个机器人的源文件，两者最终都进入同一条导入路径：
 
@@ -78,9 +92,7 @@
 
 **网格引用解析**是本生态系统过去每一次人工移植机器人时实际做的、不那么光鲜的工作：一个 URDF 的 `<mesh filename="package://some_pkg/meshes/link1.stl"/>`，一旦文件位于一个普通的下载文件夹中而非一个实时的 ROS 工作区（在那里 `package://` 通过 ROS 包索引解析），基本上就不再是一个可以直接打开的路径了。解析器依次尝试：（1）将该引用视为相对于 URDF 自身文件夹的路径，（2）去掉开头 `package://` 风格包名片段后的同一引用，（3）如果它本身恰好已经是绝对路径，则作为绝对路径处理，以及（4）在源文件夹下任意位置按纯文件名匹配——这才是真正处理一个真实 `package://` URI 的方式，因为该 scheme 和包名在实时 ROS 工作区之外毫无意义，但网格自身的文件名依然是可以找到的。
 
----
-
-## ✅ 自由度可行性验证
+### 自由度可行性验证
 
 这是本生态系统过去每一次为 STUDIO 目录添加机器人时都要手动做出的同一个判断的自动化版本：**STUDIO 自身的运动学目前支持 3、4、5 和 6 自由度的串联链**（其 `RobotState.joints` 是一个固定的 `j1..j6` 映射）——过去调研过的一些真实、许可证清晰的候选机械臂,最终被发现是 7、8 或 9 自由度,正是因为这个原因被放弃的,而不是假设性的。每次导入时（以及每次可能改变自由度数量的实时编辑之后——例如重新指定某个关节的类型），本应用都会遍历实际的父/子关节图并报告：
 
@@ -91,9 +103,7 @@
 
 判定结果及背后的每一条原因都会实时呈现在自由度面板中，上传面板会拒绝将一个不可行的机器人推送到服务器。
 
----
-
-## 🎨 带真实 3D 预览的实时编辑
+### 带真实 3D 预览的实时编辑
 
 属性面板会编辑视口面板连杆树中当前选中的连杆，每一次编辑都会就地修改已加载的模型，并通过一个信号（`EditorController.notify_tree_changed`）重新验证/重新渲染——没有任何面板需要知道视口或自由度报告是如何响应自己那次编辑的：
 
@@ -106,9 +116,7 @@
 
 **Z 轴朝上，而非 Y 轴朝上**——与 HYDRA-UMC SUITE 自身视口惯例的唯一刻意差异：URDF 本身就是一种 Z 轴朝上的格式（重力方向是 `-Z`，源文件中的每一个 `<origin>`/`<axis>` 都是基于此假设编写的），本应用的任务是忠实地按其自身惯例显示和编辑一个 URDF，而不是将其重新定向到某个下游查看器（STUDIO 的 Three.js 场景、SUITE 自身的 OpenGL 场景）碰巧偏好的方向。
 
----
-
-## 🗂️ 网格加载
+### 网格加载
 
 `.stl`（通过 `numpy-stl`）和 `.obj`（一个小型的手写 Wavefront 加载器——仅支持 `v`/`vn`/`f`，n 边形面被三角化）都是一等公民。**不支持 COLLADA（`.dae`）**——它是一种更为庞大的 XML 场景图格式（骨骼动画、多重坐标系、内嵌材质/纹理），若要诚实处理，需要一个真正的解析器，而非对某个“简单”`.dae` 恰好使用的标签进行尽力猜测；引用了此类文件的连杆会得到一条清晰的、具名的错误提示，而不是在视口中静默缺失或使整个导入崩溃。每一个已加载的网格也会应用与 HYDRA-UMC STUDIO 自身的 `useRealScaleSTL()` 和 HYDRA-UMC SUITE 自身网格加载器相同的防御性毫米/米判断：任意轴上大于 5 个真实世界米的连杆，更可能是一个没有单位元数据的毫米级导出文件，而不是一个真正的巨型机器人零件，会自动按 0.001 重新缩放。
 
@@ -116,7 +124,7 @@
 
 网格路径受到限制：`<mesh filename>` 只会解析到已打开文件夹、URDF 所在文件夹或通过"Locate Missing Meshes"添加的文件夹内的 `.stl`、`.obj` 或 `.dae` 文件；指向其他位置的 `..` 段、绝对路径和 `file://` URI 会被忽略，也只有这些文件会被上传。空的、被截断的或格式错误的网格会被报告为未加载，而不会让查看器停止工作。毫米到米的保护会在应用 URDF 的 `scale` 之前缩小任何大于 5 个单位的网格，因此已被 URDF 缩放过的网格可能被缩小两次。编辑器未建模的标签（`<dynamics>`、`<safety_controller>`、`<mimic>`、`<transmission>`、`<gazebo>`、材质纹理）在重新导出 URDF 时不会保留。
 
-## 📜 URDF 解析与导出
+### URDF 解析与导出
 
 通过标准库自身的 `xml.etree.ElementTree` 进行纯 XML 处理——对于这样一种简单的格式，不需要 `lxml` 依赖。内存中的模型（`hydra_editor_urdf/models.py`）是一棵刻意保持简单、可变、自研的数据类树，而非对现有 Python URDF 库（如 `urdfpy` 或 `yourdfpy`）的包装：本应用需要以交互方式*编辑*这棵树并实时重新渲染每一次更改，这不是一个以只读解析为主的库所擅长的场景，完全拥有这个模型能让它保持小巧、可检查，且不受第三方依赖自身发布节奏的影响。字段名称和默认值紧密遵循真实的 [URDF XML 规范](http://wiki.ros.org/urdf/XML)，因此解析器/写入器这一对始终是一个薄而直观的 XML↔对象映射。
 
@@ -124,9 +132,7 @@
 
 导出（`urdf/writer.py`）会从头重新序列化当前的内存树，而非修补原始的源 XML 文本，因此每一次实时编辑——无论由哪个面板做出——都会通过同一条代码路径，恰好一次地反映在“导出 URDF”菜单操作和发送到 STUDIO 服务器的负载中。
 
----
-
-## 🖥️ 可停靠工作区
+### 可停靠工作区
 
 真正的 `QDockWidget` 面板——拖动使其浮动、拖回停靠、合并为标签页、拆分工作区——与 HYDRA-UMC SUITE 自身主窗口已经采用的机制和理由相同：Qt 自身的停靠系统已经完全实现了类 Photoshop/Fusion-360 工作区所需的功能，一个手写实现只会带来更多的 bug 而重新发明它。5 个面板，以一种合理的默认布局排列，之后可以完全重新排列：
 
@@ -136,9 +142,7 @@
 - **属性**——针对所选连杆的重新着色/重新缩放/重新指定类型与限位。
 - **上传**——连接到 STUDIO 服务器，推送或拉取。
 
----
-
-## ☁️ 服务器往返
+### 服务器往返
 
 使用标准库自身的 `urllib.request` 与 HYDRA-UMC-SERVER 自身的模型提交契约通信（该项目自身 `server.ts` 中的 `POST /api/models/submit`、`GET /api/models`、`GET /api/models/:category/:slug/download`，受其自身的 **Config > Models > "Accept model submissions"** 开关控制）——为一个只需要 4 个端点、而非一条持久实时连接的项目引入 `httpx`/`requests` 不值得。每次调用都在后台 `QThread` 上运行，因此一个缓慢或不可达的服务器永远不会冻结 UI。这个契约曾经存在于 HYDRA-UMC-STUDIO 自身进程内部，后来该项目拆分为一个纯前端（STUDIO）加一个独立的无头式后端（HYDRA-UMC-SERVER，见下方“相关项目”）——本应用不硬编码任何一个名字，操作员只需将**上传**面板的主机/端口字段指向真实后端实际运行的位置即可。
 
@@ -146,15 +150,11 @@
 - **推送** —— 将当前机器人重新序列化为 URDF XML，并将其视觉部分引用的每一个网格文件（通过导入时构建的同一个网格解析器解析）以 base64 编码内联到请求体中，并标记上操作员选择的类别（对应 STUDIO 自身 Config > UI > Module Visibility 的类别：Robot 3-6DOF、CNC、Pick & Place、Laser、Vacuum Table、XY Table、Heated Bed、ATC Tools——一个 URDF 本身没有任何字段能说明它属于其中哪一类）。名称冲突会以服务器自身的 409 响应返回；由操作员决定是勾选**覆盖**重新提交还是重命名，本应用从不自行猜测。
 - **拉取** —— 将一个已提交模型的 URDF + 网格重新下载到本地工作文件夹，并直接加载进编辑器中——这是本应用自身用途的“提取、编辑、重新发送”往返流程的另一半，让一个已存在的目录条目可以在无需重新回到其原始源仓库的情况下进行修饰。
 
----
-
-## 🌐 多语言界面
+### 多语言界面
 
 界面在**英语、西班牙语、意大利语、法语、德语、简体中文、日语和葡萄牙语**（`language/*.lng`）之间全面翻译，使用与本生态系统中每一个其他 Python 工具（URTC Flasher、URTC Tester、HYDRA-UMC SUITE）完全相同的纯 `KEY=Value` 文件机制——此处并未重新发明，因为该机制本身不带有任何项目特定的逻辑。语言切换在应用重启后生效，而非实时重新翻译每一个已构建的控件，遵循同样的惯例。`language/` 位于可执行文件**旁边**，而非通过 PyInstaller 的 `--add-data` 打包进其内部，因此翻译者无需重新构建即可编辑或添加一个 `.lng` 文件。
 
----
-
-## 🎛️ 主题
+### 主题
 
 可停靠工作区顶部工具栏是一个真正的 `QToolBar`/`QLabel`/`QToolButton` 命令控制台，
 而不是独立的 Qt Quick/QML 界面——早期通过 QQuickWidget 嵌入的版本（与
@@ -178,107 +178,47 @@ python main.py --qtquick
 
 一个完全独立的 QML `ApplicationWindow`（`qt_editor_urdf.py` + `assets/qml/EditorDeck.qml`），从未嵌入经典的 `QMainWindow` 中——与 HYDRA-UMC-OS-REBUILDER、HYDRA-UMC-UPDATER、URTC-TESTER、URTC-FLASHER 和 HYDRA-UMC-SUITE 已经使用的、经过验证的同一种模式一致，与经典入口点并行启动，而不是取代它。它忠实还原了经典可停靠工作区的真实空间布局（左侧 Source 和 DOF 以标签页形式呈现，Viewport 和 Properties 并排，Upload 横跨底部）以及其 5 个面板的每一项真实功能——从 GitHub/图库/本地文件夹加载、实时 DOF 校验、带可点击链接树和每关节点动滑块的可旋转/平移/缩放 3D 预览、颜色/缩放/关节限位/质量与惯量编辑，以及与 STUDIO 服务器之间真正的连接/推送/拉取往返——全部通过同一个 `EditorController`，没有任何一项被重复实现。3D 预览通过一个专用的 `OffscreenUrdfRenderer` 复用经典视口自身真实的渲染代码（`render/viewport.py` 的 `UrdfGLRenderer`），采用与 HYDRA-UMC-SUITE 自身 Qt Quick Viewport 面板相同的真实 `QOpenGLContext`/`QOffscreenSurface`/帧缓冲方案，通过 `QQuickImageProvider` 传入 QML。
 
----
+## 🔒 安全与防护
 
-## 📂 仓库结构
+| 威胁 | 防御 | 位置 |
+|---|---|---|
+| 跳出文件夹的网格路径 | `<mesh filename>` 只会解析为已打开文件夹、URDF 所在文件夹或通过“定位缺失网格”添加的文件夹内的 `.stl`、`.obj` 或 `.dae` 文件；指向别处的 `..`、绝对路径和 `file://` URI 会被忽略，上传的也只有这些文件 | `source/scan.py`, `render/mesh.py` |
+| 损坏、为空或恶意的网格或 URDF 文件 | 空的、被截断的或格式错误的网格会被报告为未加载，而不会使查看器停止；非 UTF-8 或二进制的文件、格式错误的文本以及连杆树中的循环会被拒绝并给出提示；大于 5 个单位的网格会被当作毫米重新缩放一次 | `render/mesh.py`, `urdf/parser.py`, `tests/test_edge_cases.py` |
+| 卡住或并非来自 GitHub 的下载 | 只会获取符合 GitHub URL 模式的地址，以 zipball 形式下载，每个请求限时 20 秒，且不调用 `git`；适用 GitHub 自身每个地址每小时 60 次请求的限制 | `source/github_fetcher.py` |
+| STUDIO 无法运行的机器人，或带有不可能数值的已保存模型 | 可行性检查接受 3 到 6 个自由度，并拒绝浮动关节和平面关节、孤立连杆、断开或有多个父节点的树；保存前会运行检查（关节限位、质量），导出时会保留备份 | `urdf/dof.py`, `urdf/save_check.py` |
+| 向未要求的服务器推送模型 | 由服务器决定：必须开启“接受模型提交”（Config > Models），并且账户必须是管理员；每次调用限时 15 秒，在后台线程中运行；已存在的名称在勾选“覆盖”之前会被拒绝 | `server/client.py` |
 
-```text
-HYDRA-UMC-EDITOR-URDF/
-├── main.py                        # 入口点——QApplication、主题、最大化启动、F11 全屏切换；--qtquick 切换到下方面板
-├── qt_editor_urdf.py               # Qt Quick 前端 —— 独立的 `--qtquick` 命令面板，将未改动的 EditorController 接入 QML
-├── run.bat / run.sh                # 便捷启动脚本——若存在 .venv 则激活，运行 main.py，不会自行关闭窗口
-├── requirements.txt                # PySide6、PyOpenGL、numpy-stl、numpy（已锁定版本）
-├── requirements-dev.txt            # 仅 numpy + pytest——tests/ 真正需要的东西,不含 PySide6
-├── build_exe.bat / build_exe.sh    # Windows/Linux 独立可执行文件构建脚本（PyInstaller）——先递增版本号
-├── build-test.bat / build-test.sh  # 不递增版本号的构建/编译检查
-├── HYDRA-UMC_EDITOR-URDF.spec      # build_exe.bat/.sh 使用的 PyInstaller 构建规格
-├── bump_version.py                 # 里程表式版本递增（仅由显式 `bump` 命令运行）
-├── bump_manifest_version.py        # 将 hydra-umc.project.json 的版本与原生版本同步（--sync）
-├── CHANGELOG.md                    # 版本历史
-├── README.md                       # 本文件
-├── README_spa.md / README_ita.md / README_fra.md / README_deu.md / README_zho.md / README_jpn.md / README_por.md  # <- 翻译
-├── LICENSE                         # GPL-3.0-or-later
-├── assets/
-│   ├── HYDRA_UMC_ICON.svg          # 工具栏命令面板使用的动画 HYDRA-UMC 标志
-│   ├── qss/industrial_dark.qss     # 原样复用自 HYDRA-UMC-SUITE
-│   └── qml/EditorDeck.qml          # `--qtquick` 命令面板的 Qt Quick 界面
-├── images/
-│   └── HYDRA_UMC_BANNER.svg        # 媒体与图示
-├── language/                       # english/spanish/italian/french/german/chinese/japanese/portuguese.lng —— 位于 exe 旁边，未打包
-├── hydra_editor_urdf/
-│   ├── __init__.py                 # __version__ —— 唯一权威来源，由 About 对话框读取，由 bump_version.py 重写
-│   ├── app.py                      # EditorController —— “当前加载了什么”的唯一持有者，每个面板监听的 Qt 信号
-│   ├── models.py                   # 自研的 URDF 对象树（Robot/Link/Joint/Visual/Geometry/Material/…）
-│   ├── gallery.py                  # 经过验证的真实公开机器人描述仓库的初始列表
-│   ├── inertia_calc.py             # 基本几何体的闭式转动惯量公式
-│   ├── i18n.py                     # language/*.lng 加载器、配置持久化——从 HYDRA-UMC-SUITE 自身的 i18n.py 移植
-│   ├── urdf/
-│   │   ├── parser.py               # URDF XML -> models.py 树（ElementTree，检测到 xacro 并以清晰错误拒绝）
-│   │   ├── writer.py                # models.py 树 -> URDF XML 字符串（导出 + 服务器上传负载）
-│   │   ├── save_check.py            # 在写出前检查机器人,含有不可能或不可用部件的模型会被拒绝并列出需修正之处
-│   │   └── dof.py                  # 自由度计数，针对 STUDIO 3-6 自由度上限的可行性验证
-│   ├── render/
-│   │   ├── mesh.py                 # STL/OBJ 加载、盒体/圆柱体/球体基本几何体生成、毫米/米判断
-│   │   ├── kinematics.py           # 针对任意已导入树的通用正向运动学（Z 轴朝上，URDF 自身的惯例）
-│   │   └── viewport.py             # UrdfGLRenderer（GLSL 3.3 核心着色器、环绕相机、逐连杆 GPU 缓冲区）+ 经典 QOpenGLWidget 包装 + 供 `--qtquick` 面板使用的 OffscreenUrdfRenderer
-│   ├── source/
-│   │   ├── scan.py                 # 查找 .urdf/.xacro 文件，构建感知 package:// 的网格文件名解析器
-│   │   ├── github_fetcher.py       # GitHub zip 包下载与解压（urllib + zipfile，无 git 依赖）
-│   │   └── local_folder.py         # 本地文件夹验证——github_fetcher.py 的薄型对应物
-│   ├── server/
-│   │   └── client.py               # StudioClient —— 针对 HYDRA-UMC-SERVER 的 server.ts（两个仓库拆分前是 STUDIO 自身的后端）进行 login/list_models/push_model/pull_model
-│   └── ui/
-│       ├── main_window.py          # QMainWindow —— 可停靠工作区、菜单栏、语言切换器、状态栏
-│       ├── about_dialog.py         # 真实的 About 对话框，对应 STUDIO 自身的 About.tsx 和 SUITE 自身的 about_dialog.py
-│       ├── theme.py                 # 应用 assets/qss/industrial_dark.qss
-│       └── panels/
-│           ├── source_panel.py     # GitHub URL / 本地文件夹输入，找到的 URDF 列表
-│           ├── dof_panel.py        # 可行性判定读出
-│           ├── viewport_panel.py   # 3D 视口宿主、连杆树、点动滑块
-│           ├── properties_panel.py # 重新着色 / 重新缩放 / 重新指定类型与限位编辑器
-│           └── upload_panel.py     # 服务器连接/推送/拉取
-├── docs/
-│   ├── ARCHITECTURE.md
-│   ├── BUILD_AND_RUN.md
-│   └── INTEGRATION_CONTRACT.md
-├── tests/                          # 真实的 pytest 套件(355 个测试)——只测纯逻辑,这里完全没有导入 PySide6
-│   ├── test_urdf_parser.py / test_urdf_writer.py  # URDF XML <-> models.py,包括 parse -> write -> parse 往返测试
-│   ├── test_dof.py                 # 可行性校验、DOF 边界、根/孤立/断开/多父级检测
-│   ├── test_kinematics.py          # 正向运动学,包括已修复的"真实环路导致永久挂起"回归测试
-│   ├── test_inertia_calc.py        # 长方体/圆柱/球体的闭式张量,对照独立计算的教科书数值
-│   ├── test_models.py              # Robot.root_link_name()/joints_by_parent()/movable_joints()
-│   ├── test_scan.py                # find_urdf_files()/build_mesh_resolver(),包括已修复的 had_scheme 回归测试
-│   ├── test_local_folder.py / test_github_fetcher.py  # 来源校验;GitHub 网络调用均为模拟,从不真实发起
-│   ├── test_i18n.py                # 针对真实临时文件的配置/语言文件 I/O,从不触碰操作者真实的配置
-│   ├── test_gallery.py             # 对手工精选的 GALLERY 列表做结构性检查
-│   ├── test_client_server.py       # 客户端对本地服务器: 带网格的推送、各种拒绝以及客户端对其的处理
-│   ├── test_dropped_elements.py    # 文件中有、而模型无处存放的内容会被统计并报告
-│   ├── test_edge_cases.py          # 非 UTF-8 或二进制文件、格式错误的文本、环路和损坏的 STL 网格
-│   ├── test_input_safety.py        # 指向仓库之外的网格路径不会被解析;空的或损坏的 STL 是错误而不是崩溃
-│   └── test_save_check.py          # 保存前的检查 (关节限位、质量以及它拒绝的其他内容)
-├── tools/
-│   ├── build_test.py               # 不递增版本号的构建/编译检查
-│   ├── ci_validate.py              # CI 使用的 manifest/CHANGELOG/docs 校验
-│   ├── _doc_policy.py              # 家族共享的文档规则 (HYDRA-UMC-SDK 的副本,保持同步)
-│   ├── _readme_parity.py           # 检查八个 README 结构一致 (HYDRA-UMC-SDK 的副本,保持同步)
-│   └── hydra_project_tool.py       # 每个仓库相同的命令: validate、test、ci、version、status、bump
-├── build/                           # PyInstaller 自身的中间构建目录（已加入 gitignore）
-├── dist/                            # 编译后的独立可执行文件（build_exe.bat/.sh 的输出，已加入 gitignore）
-└── work/                            # 已拉取的 GitHub 仓库和已拉取的服务器模型的运行时暂存空间（已加入 gitignore）
+**它绝不做的事：** 连接机器人、移动机器人，或对导出的 URDF 向下游使用者作出任何保证。使用该文件的人必须自行检查。
+
+## 🔌 接口
+
+| 主题或路由 | 内容 |
+|---|---|
+| URDF file or folder / GitHub address | 打开的对象：磁盘上的文件夹，或以 zip 下载的公开 GitHub 仓库；`.xacro` 文件会被拒绝并给出说明，`.dae` 网格会被标明为不支持 |
+| URDF export | 整棵树由 `urdf/writer.py` 从模型重新写出，因此每次编辑在文件中恰好出现一次；被覆盖的文件会先备份 |
+| `POST /api/login` | 登录；只有 `admin` 令牌能到达提交路由，客户端也能适应连列出模型都要求登录的服务器 |
+| `POST /api/models/submit`, `GET /api/models`, `GET /api/models/:category/:slug/download` | 连同内嵌网格推送 URDF、列出目录，并把已提交的模型拉回本地工作文件夹 |
+
+## ⚙️ 配置
+
+只有一个小配置文件和固定的依赖项；不会从环境中读取其他内容。
+
+| 变量 | 默认值 | 设置内容 |
+|---|---|---|
+| `hydra_editor_urdf_config.json` | `{"language": ...}` | 窗口的语言，是 `language/` 中八个 `.lng` 文件之一；该文件位于程序旁边 |
+| `requirements.txt` | 固定 | numpy 2.5.2、numpy-stl 4.0.0、PyOpenGL 3.1.10 和 PySide6 6.11.1 |
+| `MIN_SUPPORTED_DOF`, `MAX_SUPPORTED_DOF` | 3, 6 | STUDIO 能运行的自由度，位于 `urdf/dof.py`；STUDIO 改变时在那里修改 |
+
+## 🚀 快速开始
+
+需要 Python 3.11 或更高版本以及支持 OpenGL 3.3 的显卡驱动。依赖包在 `requirements.txt` 中固定，不需要安装 `git`：GitHub 源以 zip 形式下载。
+
+```bash
+pip install -r requirements.txt  # installs PySide6, PyOpenGL, numpy and numpy-stl at the pinned versions
+python main.py                   # starts the editor (run.bat or run.sh do the same inside a .venv when there is one)
+python main.py --qtquick         # the separate Qt Quick command deck
+python -m pytest tests -q        # runs the tests (pip install -r requirements-dev.txt first)
 ```
-
-说明：早期曾尝试通过 `QQuickWidget` 将一个 Qt Quick/QML 命令面板
-（`assets/qml/CommandDeck.qml`、`ui/qtquick_deck.py`）直接嵌入此
-`QMainWindow` 真实的 `QDockWidget` 布局中——始终无法正确合成（纯黑
-显示，控制台无报错），因此被回退；上文的工具栏命令面板由纯粹的
-`QToolBar`/`QLabel`/`QToolButton` 部件组成。这个应用今天真正拥有的
-Qt Quick 命令面板（上文列出的 `qt_editor_urdf.py` /
-`assets/qml/EditorDeck.qml`）是另一个更晚出现的独立 `--qtquick` 窗口——
-完整经过见上文的 **🎛️ 主题** 和 `CHANGELOG.md`。
-
----
-
-## 🛠️ 开发环境
 
 ### 系统要求
 - [Python](https://www.python.org/) 3.11 或更高版本
@@ -302,6 +242,12 @@ python main.py
 
 以最大化方式启动（并非真正的操作系统级全屏，因此原生窗口标题栏和控件保持可见）——按 **F11** 切换真正的无边框全屏及返回。
 
+## 🧪 测试
+
+运行 `python -m pytest tests -q` 会执行 366 个自动测试。 不需要硬件，也不需要这台机器以外的任何东西。
+
+CI 运行 `HYDRA_UMC_CI=1 python tools/ci_validate.py`，检查清单、文档、八个 README 和图片。
+
 ### 自动化测试
 
 ```bash
@@ -309,7 +255,9 @@ pip install -r requirements-dev.txt
 python -m pytest tests/ -q
 ```
 
-说明:本应用自身的纯逻辑(URDF 解析/导出、DOF 可行性校验、正向运动学、惯性估算、网格引用解析、GitHub 拉取、i18n)此前完全没有自动化测试覆盖。已修复:新增 15 个测试模块共 355 个真实测试,其中没有一个会导入 PySide6/PyOpenGL——`requirements-dev.txt` 只安装 `tests/` 真正需要的东西(`numpy` 和 `pytest`),因此整个测试套件无需显示器或 Qt 平台插件即可运行。其中几个测试是针对此前已发现并修复、且已在源码本身留有注释记录的 bug 的明确回归测试(`render/kinematics.py` 中针对真实环路的无限循环防护、`source/scan.py` 的 `had_scheme` 条件、`urdf/dof.py` 的负质量检查)——今后的修改如果悄悄让其中任何一个问题重现,都会被测试直接拦下。CI(`.github/workflows/ci.yml`)在每次推送时都会运行同样的命令。
+说明:本应用自身的纯逻辑(URDF 解析/导出、DOF 可行性校验、正向运动学、惯性估算、网格引用解析、GitHub 拉取、i18n)此前完全没有自动化测试覆盖。已修复:新增 15 个测试模块共 366 个真实测试,其中没有一个会导入 PySide6/PyOpenGL——`requirements-dev.txt` 只安装 `tests/` 真正需要的东西(`numpy` 和 `pytest`),因此整个测试套件无需显示器或 Qt 平台插件即可运行。其中几个测试是针对此前已发现并修复、且已在源码本身留有注释记录的 bug 的明确回归测试(`render/kinematics.py` 中针对真实环路的无限循环防护、`source/scan.py` 的 `had_scheme` 条件、`urdf/dof.py` 的负质量检查)——今后的修改如果悄悄让其中任何一个问题重现,都会被测试直接拦下。CI(`.github/workflows/ci.yml`)在每次推送时都会运行同样的命令。
+
+## 🏗️ 构建与发布
 
 ### 生产构建
 
@@ -319,8 +267,6 @@ python -m pytest tests/ -q
 - **Linux：** 运行 `./build_exe.sh`（首次需先 `chmod +x build_exe.sh`）→ 生成 `dist/HYDRA-UMC_EDITOR-URDF`
 
 两个脚本都会创建自己的 `.venv`，安装 `requirements.txt` 加上 `pyinstaller`，清理任何先前的 `build`/`dist`，编译，最后将 `README.md`、`LICENSE` 以及整个 `language/` 文件夹复制到生成的二进制文件旁边（`language/` 刻意**不**通过 `--add-data` 打包进可执行文件内部，因此之后可以编辑或添加一个 `.lng` 文件而无需重新构建）。
-
-**版本管理：** 本应用的版本（`hydra_editor_urdf/__version__`，显示在 Help → About 对话框中）遵循 `MAJOR.MINOR.PATCH`。使用 `build_exe.bat`/`build_exe.sh` 构建不会更改它；`python tools/hydra_project_tool.py bump` 会运行 `bump_version.py`，应用一种里程表式的递增：`PATCH` 加 1；一旦 `PATCH` 会超过 9，就重置为 0 并将 `MINOR` 加 1（例如 `0.0.9` → `0.1.0`）。`MAJOR` 从不自动修改——那始终是一个刻意的手动决定。版本历史见 `CHANGELOG.md`。
 
 如果你更愿意手动执行等效步骤而非使用脚本——这对于在脚本未覆盖的平台上适配构建，或调试某个 PyInstaller 标志很有用——手动流程如下：
 
@@ -373,7 +319,70 @@ cp -r language dist/language
 
 在 Linux 上，运行编译好的二进制文件需要系统自身的 OpenGL 运行时（`libGL.so.1`——例如 Debian/Ubuntu 上的 `libgl1`、Fedora 上的 `mesa-libGL`、Arch 上的 `libglvnd`），加上 Qt 自身 XCB 平台插件所需的 `libxkbcommon-x11-0`/`xcb-util-cursor`；`build_exe.sh` 会预先检查 `libGL.so.1`，如果缺失会为每个发行版打印正确的安装命令，而不是让失败深藏在一次 PyInstaller 运行内部。
 
----
+## 🩺 故障排除
+
+| 你看到 | 原因 | 处理 |
+|---|---|---|
+| 提到 xacro 的错误，或视图中缺少连杆 | 文件使用了不会被展开的 `<xacro:...>` 宏，或连杆指向不会被加载的 `.dae` 网格 | 先用 ROS 的 `xacro` 工具展开 xacro，并把网格导出为 `.stl` 或 `.obj` |
+| 打开仓库后连杆没有网格 | 网格路径在已打开的文件夹内无法解析，或网格为空或格式错误 | 使用“定位缺失网格”添加包含它们的文件夹 |
+| DOF 面板提示机器人不可行 | 机器人的自由度少于 3 或多于 6，有浮动或平面关节、孤立连杆，或树断开或有多个父节点 | 阅读判定下列出的原因，并在“属性”面板中编辑关节类型和限位 |
+| 推送被拒绝：409、401，或“不接受提交” | 名称已存在（409）、账户不是管理员或会话已失效（401），或服务器关闭了“接受模型提交” | 勾选“覆盖”以替换，以管理员身份登录，或在服务器的 Config > Models 中开启提交 |
+
+## 📂 仓库结构
+
+<p align="center">
+  <img src="images/repository-structure.svg" alt="Repository structure of HYDRA-UMC-EDITOR-URDF" width="100%">
+</p>
+
+<details>
+<summary>目录树的文本版本</summary>
+
+```text
+HYDRA-UMC-EDITOR-URDF/
+├── hydra_editor_urdf/
+│   ├── __init__.py                  __version__ —— 唯一权威来源，由 About 对话框读取，由 bump_version.py 重写
+│   ├── app.py                       EditorController —— “当前加载了什么”的唯一持有者，每个面板监听的 Qt 信号
+│   ├── models.py                    自研的 URDF 对象树（Robot/Link/Joint/Visual/Geometry/Material/…）
+│   ├── gallery.py                   经过验证的真实公开机器人描述仓库的初始列表
+│   ├── inertia_calc.py              基本几何体的闭式转动惯量公式
+│   ├── i18n.py                      language/*.lng 加载器、配置持久化——从 HYDRA-UMC-SUITE 自身的 i18n.py 移植
+│   ├── urdf/                        解析器、写出器、DOF 和保存检查
+│   ├── render/                      网格、正向运动学、OpenGL 视图
+│   ├── source/                      GitHub 下载和本地文件夹
+│   ├── server/                      HYDRA-UMC-SERVER 的客户端
+│   └── ui/                          窗口、停靠面板、对话框和主题
+├── assets/                          图标、深色主题和 Qt Quick 面板
+├── images/                          横幅和 README 的图片
+├── language/                        english/spanish/italian/french/german/chinese/japanese/portuguese.lng —— 位于 exe 旁边，未打包
+├── docs/                            项目文档
+├── tests/                           真实的 pytest 套件(355 个测试)——只测纯逻辑,这里完全没有导入 PySide6
+├── tools/                           项目工具和 CI 检查
+├── .github/                         CI 工作流和 Issue 模板
+├── main.py                          入口点——QApplication、主题、最大化启动、F11 全屏切换；--qtquick 切换到下方面板
+├── qt_editor_urdf.py                Qt Quick 前端 —— 独立的 `--qtquick` 命令面板，将未改动的 EditorController 接入 QML
+├── run.bat / run.sh                 便捷启动脚本——若存在 .venv 则激活，运行 main.py，不会自行关闭窗口
+├── requirements.txt                 PySide6、PyOpenGL、numpy-stl、numpy（已锁定版本）
+├── requirements-dev.txt             仅 numpy + pytest——tests/ 真正需要的东西,不含 PySide6
+├── build_exe.bat / build_exe.sh     Windows/Linux 独立可执行文件构建脚本（PyInstaller）——先递增版本号
+├── build-test.bat / build-test.sh   不递增版本号的构建/编译检查
+├── HYDRA-UMC_EDITOR-URDF.spec       build_exe.bat/.sh 使用的 PyInstaller 构建规格
+├── bump_version.py                  显式提升版本
+├── bump_manifest_version.py         将 hydra-umc.project.json 的版本与原生版本同步（--sync）
+├── CHANGELOG.md                     版本历史
+├── LICENSE                          GPL-3.0-or-later
+├── hydra-umc.project.json           清单：版本、成熟度、系列
+└── test.sh                          不修改内容的构建检查
+```
+
+</details>
+
+## 🗺️ 路线图与已知限制
+
+xacro 宏不会被展开，COLLADA（`.dae`）网格不会被加载；两者都会给出明确的错误。机器人必须符合 3 到 6 个自由度才会被 STUDIO 接受。与服务器的往返只在本地测试服务器上试过，没有在真实的 HYDRA-UMC-SERVER 上试过。Qt Quick 命令面板是单独的 `--qtquick` 窗口，不属于可停靠的工作区。
+
+## 🌍 语言
+
+本 README 和仓库文档提供八种语言：英语、西班牙语、德语、法语、意大利语、日语、中文和葡萄牙语（葡萄牙）。它们同时编写，并由 CI 检查八个文件拥有相同的章节和相同的链接。
 
 ## 🔗 相关项目
 
@@ -466,36 +475,31 @@ cp -r language dist/language
 - **[HYDRA-UMC-OPS-AGENT](https://github.com/JuanenRac/HYDRA-UMC-OPS-AGENT)** — 维护事件协调器：一个低权限的边缘角色采集经过脱敏的库存/健康快照，一个控制面角色以只读方式渲染它，并请求某个 AI 提供方给出诊断建议——从不应用补丁，也从不部署任何内容。
 - **[HYDRA-UMC-DEV-SERVER](https://github.com/JuanenRac/HYDRA-UMC-DEV-SERVER)** — 可复现的开发主机（Raspberry Pi 5 / CM5），保存整个生态系统的源代码，并在持久队列下运行有界的构建/测试任务；这是专用的开发角色，明确区别于运行中的 CM5。
 
----
+## 📚 文档
 
-## 📚 文档与社区
+更多阅读：
 
-- **[docs/ARCHITECTURE.md](docs/ARCHITECTURE.md)** —— 编辑器自身的内部结构：为什么解析、可行性校验、网格解析和 3D 预览是相互独立的通路，以及本应用刻意**不**做的事情（不会自行连接机器人、上传 URDF 或下达运动指令）。
-- **[docs/BUILD_AND_RUN.md](docs/BUILD_AND_RUN.md)** —— 非破坏性的 `build-test.bat`/`.sh` 校验流程与真正打包的 `build_exe.bat`/`.sh` 之间的区别，以及命令控制台如今究竟是什么（`QToolBar`，而非 Qt Quick/QML —— 参见上方**主题**一节）。
-- **[docs/INTEGRATION_CONTRACT.md](docs/INTEGRATION_CONTRACT.md)** —— 下游消费一个已导出 URDF 文件的一方必须自行校验的内容；本项目自身不提供任何网络端点或硬件控制权限。
-- **[CONTRIBUTING.md](CONTRIBUTING.md)** —— 提交 Pull Request 所需的技术栈和编码规范。
-- **[CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md)** —— 本社区所期望的行为准则。
-- **[SECURITY.md](SECURITY.md)** —— 如何报告漏洞，以及本项目真实的安全关注重点。
-- **[SUPPORT.md](SUPPORT.md)** —— 在哪里提问和报告缺陷。
-- **[LICENSE.md](LICENSE.md)** —— 本项目自身的许可证。
+* [docs/SOURCE_MAP.md](docs/SOURCE_MAP.md) - 编辑器的每个源文件及一行说明
+* [docs/LICENSING.md](docs/LICENSING.md) - 代码、文档和网格的许可方式
+* **[docs/ARCHITECTURE.md](docs/ARCHITECTURE.md)** —— 编辑器自身的内部结构：为什么解析、可行性校验、网格解析和 3D 预览是相互独立的通路，以及本应用刻意**不**做的事情（不会自行连接机器人、上传 URDF 或下达运动指令）。
+* **[docs/BUILD_AND_RUN.md](docs/BUILD_AND_RUN.md)** —— 非破坏性的 `build-test.bat`/`.sh` 校验流程与真正打包的 `build_exe.bat`/`.sh` 之间的区别，以及命令控制台如今究竟是什么（`QToolBar`，而非 Qt Quick/QML —— 参见上方**主题**一节）。
+* **[docs/INTEGRATION_CONTRACT.md](docs/INTEGRATION_CONTRACT.md)** —— 下游消费一个已导出 URDF 文件的一方必须自行校验的内容；本项目自身不提供任何网络端点或硬件控制权限。
+* [生态系统的安全基线](https://github.com/JuanenRac/HYDRA-UMC-DOCS/blob/main/docs/SECURITY_BASELINE.md)
+* [生态系统的威胁模型](https://github.com/JuanenRac/HYDRA-UMC-DOCS/blob/main/docs/THREAT_MODEL.md)
+* [本仓库的更新日志](CHANGELOG.md)
+* [本仓库的许可证](LICENSE.md)
+
+## 🤝 参与贡献与社区
+
+* 提交 pull request 之前，请运行 `HYDRA_UMC_CI=1 py -3 tools/ci_validate.py`（或 `HYDRA_UMC_CI=1 python3 tools/ci_validate.py`）：它必须输出 `CI_VALIDATION=PASS`。此检查不要运行 `build.sh` 或 `build.bat`；构建不是检查。
+* 八个 README 由 HYDRA-UMC-DOCS 中的同一个源生成；请勿手工编辑。修改源文件，再用 `tools/make_readmes.py` 重新生成。
+* 不要在 README 中声称尚未运行过的内容：属实时请写“仅模拟”或“尚未在硬件上试过”。
+* 请参阅 [CONTRIBUTING.md](CONTRIBUTING.md)、[行为准则](CODE_OF_CONDUCT.md)、[SECURITY.md](SECURITY.md) 和 [SUPPORT.md](SUPPORT.md)。
 
 ## 👤 作者
-**JuanenRac** (Electro Hobby 3D)
-📧 electrohobby3d@gmail.com
-📺 [youtube.com/@electrohobby3d](https://youtube.com/@electrohobby3d)
+
+**JuanenRac (Electro Hobby 3D)** · electrohobby3d@gmail.com
 
 ## 📜 许可证
 
-HYDRA-UMC EDITOR-URDF 版权所有 (c) 2026 JuanenRac（Electro Hobby 3D）。分发本项目或其衍生作品时必须包含此声明。
-
-本项目由源代码及其自身的文档组成，两者依据不同的许可证提供——各自适合其实际所涵盖的内容：
-
-1. 源代码（`hydra_editor_urdf/`、`main.py`，以及通过 `build_exe.bat`/`build_exe.sh` 从中构建的任何二进制文件）依据 **GNU 通用公共许可证 v3.0（GPL-3.0-or-later）** 提供。完整文本见 https://www.gnu.org/licenses/gpl-3.0.html。
-
-2. 文档（本 README 及其自身的翻译版本——`README_spa.md`、`README_ita.md`、`README_fra.md`、`README_deu.md`、`README_zho.md`、`README_jpn.md`、`README_por.md`）依据 **知识共享 署名-相同方式共享 4.0 国际许可协议（CC BY-SA 4.0）** 提供。完整文本见 https://creativecommons.org/licenses/by-sa/4.0/。
-
-本应用自身不附带任何第三方机器人网格资产——与 HYDRA-UMC STUDIO 的 `public/models/` 不同，本编辑器加载的每一个网格都来自操作员所指向的任意源仓库或本地文件夹，遵循该来源自身的原始许可证。在将一个模型提交到一个正在运行的 STUDIO 服务器之前（本编辑器的导出功能所对接的正是该服务器自身 `public/models/<slug>/ATTRIBUTION.txt` 的惯例），审查并保留该上游许可证/署名信息，仍然是操作员自己的责任——本应用无法自动检测或强制执行某个源仓库的许可条款。
-
-本编辑器是 [HYDRA-UMC STUDIO](https://github.com/JuanenRac/HYDRA-UMC-STUDIO) 目录的模型创作工具——其自身服务端的许可事宜参见该仓库，本仓库自身的许可证并不延伸至该仓库,反之亦然。
-
-如果你基于本项目进行开发，请留意这种许可证划分：这里的代码更改应保持 GPL-3.0-or-later，文档衍生品（本 README 及其翻译版本）应保持 CC BY-SA 4.0，任何经过本编辑器（导入、编辑或导出）的网格资产都应保持在其自身原始源仓库所携带的许可证之下，并附带指向该来源的署名。
+GPL-3.0-or-later - [LICENSE](LICENSE).

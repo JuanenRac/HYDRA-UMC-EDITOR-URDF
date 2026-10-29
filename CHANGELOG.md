@@ -4,6 +4,8 @@ All notable changes to this project are documented here.
 
 ## [Unreleased]
 
+- **README in the universal layout:** the README and its seven translations follow the layout that the four families share (22 sections in a fixed order), with an architecture picture and a repository-structure picture drawn from `docs/architecture.json` and `docs/structure.json`; the CI validator checks both pictures and the file tree.
+
 - **The layout of the README is checked in the CI:** the validator runs `tools/universal_readme_check.py` and lists, as a warning, what differs from the universal layout of the README.
 
 ## [0.1.5] - A joint that follows another (`<mimic>`) is not a degree of freedom and a joint whose range is one point is a warning
@@ -343,7 +345,7 @@ at all before this point.
 
 - Added `__version__` to `hydra_editor_urdf/__init__.py`, starting at
   `0.0.0`.
-- Added `bump_version.py` (odometer-style PATCH/MINOR bump) and wired it
+- Added `bump_version.py` (PATCH/MINOR bump) and wired it
   into `build_exe.bat`/`build_exe.sh` as a step that runs automatically
   right before every real PyInstaller build.
 - The About dialog (Help menu) now shows the running version.

@@ -1,36 +1,38 @@
+<!-- =============================================================================
+HYDRA-UMC-EDITOR-URDF - Desktop URDF creator and editor for the model catalogue of HYDRA-UMC-STUDIO
+Copyright (C) JuanenRac (Electro Hobby 3D) <electrohobby3d@gmail.com>
+GPL-3.0-or-later - see LICENSE
+============================================================================= -->
+
 <p align="center">
   <img src="images/HYDRA_UMC_BANNER.svg" alt="HYDRA-UMC-EDITOR-URDF banner" width="100%">
 </p>
-# 🦾 HYDRA-UMC EDITOR-URDF
 
-<p align="center">
-  <a href="README.md">🇺🇸 English</a> |
-  <a href="README_spa.md">🇪🇸 Español</a> |
-  <a href="README_fra.md">🇫🇷 Français</a> |
-  🇮🇹 <b>Italiano</b> |
-  <a href="README_deu.md">🇩🇪 Deutsch</a> |
-  <a href="README_zho.md">🇨🇳 简体中文</a> |
-  <a href="README_jpn.md">🇯🇵 日本語</a>
-</p>
+# 🖌️ HYDRA-UMC-EDITOR-URDF
 
-
-<p align="center">
-  <img src="https://img.shields.io/badge/Licenza-GPL%203.0--or--later-blue.svg" alt="GPL 3.0 or later">
-  <img src="https://img.shields.io/badge/Linguaggio-Python%203.11-3776AB.svg" alt="Python">
-  <img src="https://img.shields.io/badge/Framework-PySide6-41CD52.svg" alt="PySide6">
-  <img src="https://img.shields.io/badge/Formato-URDF-red.svg" alt="URDF">
-</p>
-
+<p align="center"><a href="README.md">🇺🇸 English</a> | <a href="README_spa.md">🇪🇸 Español</a> | <a href="README_fra.md">🇫🇷 Français</a> | 🇮🇹 <b>Italiano</b> | <a href="README_deu.md">🇩🇪 Deutsch</a> | <a href="README_zho.md">🇨🇳 简体中文</a> | <a href="README_jpn.md">🇯🇵 日本語</a> | <a href="README_por.md">🇵🇹 Português</a></p>
 
 ### 🖌️ Creatore/Editor grafico di URDF per il Catalogo Modelli di HYDRA-UMC-STUDIO
 
-**Versione attuale:** 0.1.5 (`MAJOR.MINOR.PATCH` - vedi la sezione **Build di Produzione** più sotto per come si muove questo numero)
+<p align="center">
+  <img src="https://img.shields.io/badge/License-GPL%203.0--or--later-blue.svg" alt="GPL 3.0 or later">
+  <img src="https://img.shields.io/badge/Language-Python%203.11-3776AB.svg" alt="Language">
+  <img src="https://img.shields.io/badge/Framework-PySide6-41CD52.svg" alt="Framework">
+  <img src="https://img.shields.io/badge/Format-URDF-red.svg" alt="Format">
+  <img src="https://img.shields.io/badge/Tests-366%20passing-2ea44f.svg" alt="Tests">
+  <img src="https://img.shields.io/badge/Version-0.1.5-0f6cbd.svg" alt="Version">
+  <img src="https://img.shields.io/badge/Maturity-established-2EA44F.svg" alt="Maturity">
+</p>
 
 ---
 
-**Controllo di onestà - cosa funziona davvero oggi:** il nucleo di logica pura - parsing/esportazione URDF (`urdf/parser.py`, `urdf/writer.py`), validazione di fattibilità DOF (`urdf/dof.py`), cinematica diretta (`render/kinematics.py`), stima dell'inerzia (`inertia_calc.py`), risoluzione dei riferimenti alle mesh e download dello zipball GitHub (`source/scan.py`, `source/github_fetcher.py`, `source/local_folder.py`), il modello in memoria (`models.py`), l'elenco della galleria (`gallery.py`) e il caricatore i18n (`i18n.py`) - è reale ed è coperto da 355 test superati (`tests/`), nessuno dei quali importa PySide6/PyOpenGL. `test_github_fetcher.py` simula ogni chiamata di rete - un vero download di uno zipball GitHub è stato eseguito manualmente, mai come parte della suite automatizzata. Il livello Qt/OpenGL (`render/viewport.py` con il suo `UrdfGLRenderer`, `render/mesh.py`, ogni pannello `ui/*`, e l'`OffscreenUrdfRenderer` del deck `--qtquick`) è codice reale e funzionante ma privo di qualsiasi copertura di test automatizzata - richiede un vero display/plugin di piattaforma Qt, che la CI non ha, quindi viene verificato a mano, non da una suite di test. Il `StudioClient` di `server/client.py` (login/push/pull contro il `server.ts` di HYDRA-UMC-SERVER) è codice HTTP reale, provato contro un piccolo server locale che rispetta il contratto di `server.ts` (il token a ogni chiamata, una collisione di nome, il download di un modello, una risposta ostile). L'espansione xacro e il caricamento di mesh COLLADA (`.dae`) sono non-funzionalità esplicite e dichiarate (un errore chiaro, non un parsing errato silenzioso) - vedi la nota di onestà nella Panoramica più sotto e le sezioni Parsing URDF/Caricamento Mesh per il perché. Vedi `CHANGELOG.md` per ciò che è stato consegnato esattamente finora.
+---
+
+**Controllo di onestà - cosa funziona davvero oggi:** il nucleo di logica pura - parsing/esportazione URDF (`urdf/parser.py`, `urdf/writer.py`), validazione di fattibilità DOF (`urdf/dof.py`), cinematica diretta (`render/kinematics.py`), stima dell'inerzia (`inertia_calc.py`), risoluzione dei riferimenti alle mesh e download dello zipball GitHub (`source/scan.py`, `source/github_fetcher.py`, `source/local_folder.py`), il modello in memoria (`models.py`), l'elenco della galleria (`gallery.py`) e il caricatore i18n (`i18n.py`) - è reale ed è coperto da 366 test superati (`tests/`), nessuno dei quali importa PySide6/PyOpenGL. `test_github_fetcher.py` simula ogni chiamata di rete - un vero download di uno zipball GitHub è stato eseguito manualmente, mai come parte della suite automatizzata. Il livello Qt/OpenGL (`render/viewport.py` con il suo `UrdfGLRenderer`, `render/mesh.py`, ogni pannello `ui/*`, e l'`OffscreenUrdfRenderer` del deck `--qtquick`) è codice reale e funzionante ma privo di qualsiasi copertura di test automatizzata - richiede un vero display/plugin di piattaforma Qt, che la CI non ha, quindi viene verificato a mano, non da una suite di test. Il `StudioClient` di `server/client.py` (login/push/pull contro il `server.ts` di HYDRA-UMC-SERVER) è codice HTTP reale, provato contro un piccolo server locale che rispetta il contratto di `server.ts` (il token a ogni chiamata, una collisione di nome, il download di un modello, una risposta ostile). L'espansione xacro e il caricamento di mesh COLLADA (`.dae`) sono non-funzionalità esplicite e dichiarate (un errore chiaro, non un parsing errato silenzioso) - vedi la nota di onestà nella Panoramica più sotto e le sezioni Parsing URDF/Caricamento Mesh per il perché. Vedi `CHANGELOG.md` per ciò che è stato consegnato esattamente finora.
 
 > **Stato di sicurezza (safety e security):** questo ecosistema non è un sistema di sicurezza certificato. Non esiste ancora un percorso E-STOP hardware, né limiti o interblocchi imposti dal firmware, né un comando di movimento verificato; le immagini firmware sono controllate con CRC32 e un HMAC-SHA256 a chiave condivisa, non con una firma asimmetrica; TLS e TLS reciproco sono opzionali e disattivati per impostazione predefinita; nessuna scheda propria è stata ancora assemblata o provata. Leggi la [base di sicurezza](https://github.com/JuanenRac/HYDRA-UMC-DOCS/blob/main/docs/SECURITY_BASELINE.md) e il [modello delle minacce](https://github.com/JuanenRac/HYDRA-UMC-DOCS/blob/main/docs/THREAT_MODEL.md) prima di fidarti di qualsiasi affermazione qui per la sicurezza di una persona.
+
+---
 
 ## 📋 In breve
 
@@ -38,10 +40,12 @@
 |---|---|
 | Versione | `0.1.5` |
 | Maturità | Consolidato |
-| Test | 355 |
+| Test | 366 (`python -m pytest tests -q`) |
 | Tecnologia | Python / PySide6 / Qt6 / OpenGL |
 | Destinazione | Il PC di chi lo usa |
 | Su hardware reale | Non applicabile: nulla qui gira su hardware |
+
+**Vai a:** [Panoramica](#-panoramica) · [Architettura](#-architettura) · [Funzionalità](#-funzionalità) · [Sicurezza e protezione](#-sicurezza-e-protezione) · [Interfacce](#-interfacce) · [Configurazione](#-configurazione) · [Avvio rapido](#-avvio-rapido) · [Test](#-test) · [Risoluzione dei problemi](#-risoluzione-dei-problemi) · [Struttura del repository](#-struttura-del-repository) · [Progetti correlati](#-progetti-correlati)
 
 ## 🚦 Stato del progetto
 
@@ -52,7 +56,7 @@ Ogni riga è una parte di questo repository e il semaforo dice a che punto è og
 | Area | Stato | Cosa significa qui |
 |---|---|---|
 | Software | 🟢 | Completo per il suo scopo e stabile; la verifica di onestà qui sopra elenca i limiti noti |
-| Test | 🟢 | 355 test automatici, eseguiti a ogni modifica |
+| Test | 🟢 | 366 test automatici, eseguiti a ogni modifica |
 | Hardware reale | 🟢 | Non applicabile: nulla qui gira su hardware |
 | Documentazione | 🟢 | README in otto lingue, verificato rispetto al manifesto a ogni modifica |
 
@@ -64,9 +68,19 @@ Costruito con **Python** e **PySide6/Qt6**, usando gli stessi pattern architettu
 
 **Nota di onestà, in linea con la convenzione documentale già seguita nel resto di questo ecosistema:** questa app non espande le macro [xacro](http://wiki.ros.org/xacro) e non carica mesh COLLADA (`.dae`). Entrambe sono limitazioni nominate ed esplicite (un messaggio di errore chiaro, non un'analisi silenziosamente errata o un link mancante nel viewport) piuttosto che un tentativo implementato a metà - vedi le sezioni **URDF Parsing** e **Mesh Loading** più sotto per il motivo, e per cosa servirebbe un lavoro aggiuntivo consistente per un supporto reale di entrambe.
 
----
+## 🧩 Ruolo in HYDRA-UMC
 
-## 📥 Caricamento delle Sorgenti - GitHub o Cartella Locale
+**HYDRA-UMC-EDITOR-URDF** è lo strumento desktop che trasforma il porting di un nuovo robot nel catalogo dei modelli di HYDRA-UMC-STUDIO da un'indagine manuale a un flusso ripetibile. Carica un URDF da un repository GitHub o da una cartella locale, dice se il robot rientra nei 3-6 gradi di libertà supportati da STUDIO, lo mostra in una vista 3D dal vivo dove i link si possono ricolorare, scalare e dotare di nuovi limiti di giunto, ed esporta l'URDF o lo invia a un HYDRA-UMC-SERVER.
+
+## 🏛️ Architettura
+
+<p align="center">
+  <img src="images/architecture.svg" alt="HYDRA-UMC-EDITOR-URDF architecture" width="100%">
+</p>
+
+## ✨ Funzionalità
+
+### Caricamento delle Sorgenti - GitHub o Cartella Locale
 
 Due modi per indirizzare l'app verso i file sorgente di un robot, entrambi confluiscono nello stesso percorso di importazione:
 
@@ -78,9 +92,7 @@ In entrambi i casi, l'app trova poi ricorsivamente ogni file `*.urdf`/`*.xacro` 
 
 La **risoluzione dei riferimenti alle mesh** è il vero lavoro poco brillante che ogni sessione manuale passata di porting di un robot in questo ecosistema ha fatto a mano: un `<mesh filename="package://some_pkg/meshes/link1.stl"/>` di un URDF non è praticamente mai un percorso apribile direttamente una volta che il file si trova in una semplice cartella scaricata invece che in un workspace ROS attivo, dove `package://` si risolve tramite l'indice dei pacchetti ROS. Il resolver prova, in ordine: (1) il riferimento come percorso relativo alla cartella dello stesso URDF, (2) lo stesso riferimento con un segmento iniziale in stile `package://` col nome del pacchetto rimosso, (3) come percorso assoluto se già lo è, e (4) per solo basename ovunque sotto la cartella sorgente - che è ciò che effettivamente gestisce una vera URI `package://`, dato che lo schema e il nome del pacchetto sono privi di significato fuori da un workspace ROS attivo, ma il nome del file della mesh resta comunque individuabile.
 
----
-
-## ✅ Validazione di Fattibilità DOF
+### Validazione di Fattibilità DOF
 
 La versione automatizzata dello stesso giudizio che le sessioni passate proprie di questo ecosistema facevano a mano per ogni robot aggiunto al catalogo di STUDIO: **la cinematica propria di STUDIO supporta oggi catene seriali a 3, 4, 5 e 6 DOF** (il suo `RobotState.joints` è una mappa fissa `j1..j6`) - una manciata di bracci candidati reali, con licenza chiara, ricercati in passato si sono rivelati a 7, 8 o 9 DOF e sono stati scartati esattamente per questo motivo, non ipoteticamente. A ogni importazione (e dopo ogni modifica dal vivo che potrebbe cambiare il conteggio - ridefinire il tipo di un giunto, per esempio), l'app percorre il grafo reale dei giunti genitore/figlio e riporta:
 
@@ -91,9 +103,7 @@ La versione automatizzata dello stesso giudizio che le sessioni passate proprie 
 
 Il verdetto e ogni motivazione dietro di esso vengono renderizzati dal vivo nel pannello DOF, e il pannello Upload rifiuta di inviare a un server un robot non fattibile.
 
----
-
-## 🎨 Modifica dal Vivo con una vera Anteprima 3D
+### Modifica dal Vivo con una vera Anteprima 3D
 
 Il pannello Properties modifica qualsiasi link sia selezionato nell'albero dei link del pannello Viewport, e ogni modifica altera il modello caricato sul posto e ri-valida/ri-renderizza tramite un unico segnale (`EditorController.notify_tree_changed`) - nessun pannello deve sapere come il viewport o il report DOF reagiscono alla propria modifica:
 
@@ -106,9 +116,7 @@ Il pannello **Viewport** ospita la vera vista 3D OpenGL più uno slider di jog p
 
 **Z-up, non Y-up** - l'unica divergenza deliberata dalla convenzione di viewport propria di HYDRA-UMC SUITE: URDF è di per sé un formato Z-up (la gravità è `-Z`, ogni `<origin>`/`<axis>` in un file sorgente è scritto assumendolo), e il compito di questa app è mostrare e modificare fedelmente un URDF nella sua stessa convenzione, non riorientarlo in qualunque cosa un visualizzatore a valle (la scena Three.js di STUDIO, la scena OpenGL propria di SUITE) preferisca.
 
----
-
-## 🗂️ Caricamento delle Mesh
+### Caricamento delle Mesh
 
 Sia `.stl` (tramite `numpy-stl`) che `.obj` (un piccolo loader Wavefront scritto a mano - solo `v`/`vn`/`f`, facce n-gon triangolate a ventaglio) sono di prima classe. **COLLADA (`.dae`) non è supportato** - è un formato di scene-graph XML molto più grande (animazione scheletrica, sistemi di coordinate multipli, materiali/texture incorporati) che richiederebbe un vero parser per essere gestito onestamente invece che un tentativo di indovinare quali tag usi un `.dae` "semplice"; un link che ne referenzia uno riceve un errore chiaro e nominato invece di scomparire silenziosamente dal viewport o far crashare l'intera importazione. Ogni mesh caricata riceve anche la stessa protezione difensiva millimetri-contro-metri applicata dal proprio `useRealScaleSTL()` di HYDRA-UMC STUDIO e dal proprio loader di mesh di HYDRA-UMC SUITE: un link più grande di 5 metri reali su qualsiasi asse è molto più probabilmente un'esportazione in scala millimetrica priva di metadati sull'unità di misura che una vera parte gigante di robot, e viene riscalato automaticamente per 0.001.
 
@@ -116,7 +124,7 @@ Sia `.stl` (tramite `numpy-stl`) che `.obj` (un piccolo loader Wavefront scritto
 
 I percorsi delle mesh sono confinati: un `<mesh filename>` viene risolto solo in un file `.stl`, `.obj` o `.dae` nella cartella aperta, nella cartella dell'URDF o in una cartella aggiunta con «Locate Missing Meshes»; i segmenti `..`, i percorsi assoluti e gli URI `file://` che portano altrove vengono ignorati e solo quei file vengono caricati. Le mesh vuote, troncate o malformate sono segnalate come non caricate invece di fermare il visualizzatore. La protezione millimetri-metri riscala qualsiasi mesh più grande di 5 unità prima di applicare la `scale` dell'URDF, quindi una mesh già scalata dall'URDF può essere ridotta due volte. I tag che l'editor non modella (`<dynamics>`, `<safety_controller>`, `<mimic>`, `<transmission>`, `<gazebo>`, texture dei materiali) non vengono conservati quando si riesporta un URDF.
 
-## 📜 Parsing ed Esportazione URDF
+### Parsing ed Esportazione URDF
 
 XML semplice tramite `xml.etree.ElementTree` della libreria standard - nessuna dipendenza da `lxml` necessaria per un formato così semplice. Il modello in memoria (`hydra_editor_urdf/models.py`) è deliberatamente un albero di dataclass semplice, mutabile e sviluppato in casa, piuttosto che un wrapper attorno a una libreria Python URDF già esistente come `urdfpy` o `yourdfpy`: questa app ha bisogno di *modificare* l'albero interattivamente e ri-renderizzare ogni modifica dal vivo, cosa per cui una libreria di parsing pensata prevalentemente per la sola lettura non è adatta, e possedere il modello per intero lo mantiene piccolo, ispezionabile e libero dal ritmo di rilascio di una dipendenza di terze parti. Nomi dei campi e default seguono da vicino il vero [schema XML di URDF](http://wiki.ros.org/urdf/XML), così la coppia parser/writer resta una mappatura XML↔oggetto sottile e ovvia.
 
@@ -124,9 +132,7 @@ XML semplice tramite `xml.etree.ElementTree` della libreria standard - nessuna d
 
 L'esportazione (`urdf/writer.py`) riserializza da zero l'albero corrente in memoria invece di applicare patch al testo XML sorgente originale, così ogni modifica dal vivo - indipendentemente da quale pannello l'abbia fatta - si riflette esattamente una volta, attraverso un unico percorso di codice, sia nell'azione di menu "Export URDF" sia nel payload inviato a un server STUDIO.
 
----
-
-## 🖥️ Spazio di Lavoro Agganciabile
+### Spazio di Lavoro Agganciabile
 
 Veri pannelli `QDockWidget` - trascina per rendere flottante, trascina indietro per agganciare, unisci in schede, dividi lo spazio di lavoro - lo stesso meccanismo e la stessa logica già applicati dalla finestra principale propria di HYDRA-UMC SUITE: il sistema di docking proprio di Qt fa già esattamente ciò di cui ha bisogno uno spazio di lavoro in stile Photoshop/Fusion-360, e uno scritto a mano lo reinventerebbe soltanto con più bug. Cinque pannelli, disposti con un layout predefinito sensato completamente riorganizzabile in seguito:
 
@@ -136,9 +142,7 @@ Veri pannelli `QDockWidget` - trascina per rendere flottante, trascina indietro 
 - **Properties** - ricolorazione / riscalatura / ricambio-tipo-e-nuovi-limiti per il link selezionato.
 - **Upload** - connessione a un server STUDIO, push o pull.
 
----
-
-## ☁️ Andata e Ritorno con il Server
+### Andata e Ritorno con il Server
 
 Comunica con il contratto di invio modelli proprio di HYDRA-UMC-SERVER (`POST /api/models/submit`, `GET /api/models`, `GET /api/models/:category/:slug/download` nel `server.ts` proprio di quel progetto, protetto dietro il proprio interruttore **Config > Models > "Accept model submissions"**) usando `urllib.request` della libreria standard - un'altra chiamata HTTP in più non giustificava l'aggiunta di `httpx`/`requests` per un progetto che ha bisogno solo di 4 endpoint, non di una connessione persistente. Ogni chiamata viene eseguita su un `QThread` in background, così un server lento o irraggiungibile non blocca mai l'interfaccia. Questo contratto viveva un tempo all'interno del processo stesso di HYDRA-UMC-STUDIO, prima che quel progetto si dividesse in un frontend puro (STUDIO) più un backend headless separato (HYDRA-UMC-SERVER, vedi **Progetti Correlati** più sotto) - questa app non fissa nessuno dei due nomi nel codice, l'operatore imposta semplicemente i campi host/porta del pannello **Upload** su dove sta girando davvero il backend.
 
@@ -146,15 +150,11 @@ Comunica con il contratto di invio modelli proprio di HYDRA-UMC-SERVER (`POST /a
 - **Push** - riserializza il robot corrente in XML URDF ed encoda in base64 ogni file mesh referenziato dai suoi visual (risolto tramite lo stesso resolver di mesh costruito al momento dell'importazione) in linea nel corpo della richiesta, etichettato con la categoria scelta dall'operatore (rispecchiando le categorie proprie di Config > UI > Module Visibility di STUDIO: Robot 3-6DOF, CNC, Pick & Place, Laser, Vacuum Table, XY Table, Heated Bed, ATC Tools - un URDF non ha un proprio campo che dica a quale di queste appartenga). Una collisione di nome torna indietro come la risposta 409 propria del server; l'operatore decide se reinviare con **Overwrite** spuntato o rinominare, questa app non indovina mai.
 - **Pull** - scarica l'URDF + le mesh di un modello già inviato di nuovo in una cartella di lavoro locale e le carica direttamente nell'editor - la metà del ciclo "estrai, modifica, reinvia" proprio dello scopo di questa app, che permette di ritoccare una voce del catalogo esistente senza ripartire dal suo repository sorgente originale.
 
----
-
-## 🌐 Interfaccia Multilingua
+### Interfaccia Multilingua
 
 Traduzione completa dell'interfaccia in **inglese, spagnolo, italiano, francese, tedesco, cinese semplificato, giapponese e portoghese** (`language/*.lng`), usando esattamente lo stesso meccanismo a file semplice `CHIAVE=Valore` di ogni altro strumento Python di questo ecosistema (URTC Flasher, URTC Tester, HYDRA-UMC SUITE) - non reinventato qui, poiché il meccanismo stesso non porta alcuna logica specifica del progetto. Un cambio di lingua ha effetto dopo un riavvio dell'app invece di ritradurre dal vivo ogni widget già costruito, in linea con la stessa convenzione. `language/` si trova **accanto** all'eseguibile invece di essere incorporata al suo interno tramite `--add-data` di PyInstaller, così un traduttore può modificare o aggiungere un file `.lng` senza una ricompilazione.
 
----
-
-## 🎛️ Tema
+### Tema
 
 La barra degli strumenti superiore dello spazio di lavoro agganciabile è un
 vero pannello comandi `QToolBar`/`QLabel`/`QToolButton`, non una UI Qt
@@ -183,109 +183,47 @@ python main.py --qtquick
 
 Una `ApplicationWindow` QML del tutto autonoma (`qt_editor_urdf.py` + `assets/qml/EditorDeck.qml`), mai incorporata dentro il `QMainWindow` classico - lo stesso schema già collaudato usato da HYDRA-UMC-OS-REBUILDER, HYDRA-UMC-UPDATER, URTC-TESTER, URTC-FLASHER e HYDRA-UMC-SUITE, avviata accanto al punto di ingresso classico senza sostituirlo. Riproduce fedelmente la reale disposizione dello spazio di lavoro agganciabile classico (Source e DOF a schede a sinistra, Viewport e Properties affiancati, Upload in basso su tutta la larghezza) e tutte le funzioni reali dei suoi 5 pannelli - caricamento da GitHub/galleria/cartella locale, validazione DOF dal vivo, un'anteprima 3D con orbit/pan/zoom con albero dei link cliccabile e slider di jog per ogni giunto, modifica di colore/scala/limiti dei giunti/massa e inerzia, e il ciclo reale di connessione/invio/prelievo con il server STUDIO - tramite lo stesso `EditorController`, senza una seconda implementazione di nulla di tutto ciò. L'anteprima 3D riutilizza il vero codice di rendering del viewport classico (`UrdfGLRenderer` di `render/viewport.py`) tramite un `OffscreenUrdfRenderer` dedicato, lo stesso reale approccio `QOpenGLContext`/`QOffscreenSurface`/framebuffer già usato dal pannello Viewport Qt Quick di HYDRA-UMC-SUITE, inviato a QML tramite un `QQuickImageProvider`.
 
----
+## 🔒 Sicurezza e protezione
 
-## 📂 Repository Structure
+| Minaccia | Difesa | Dove |
+|---|---|---|
+| Un percorso di mesh che esce dalla cartella | Un `<mesh filename>` viene risolto solo in un file `.stl`, `.obj` o `.dae` dentro la cartella aperta, quella dell'URDF o una aggiunta con «Individua mesh mancanti»; `..`, i percorsi assoluti e gli URI `file://` che portano altrove vengono ignorati, e solo quei file vengono mai caricati | `source/scan.py`, `render/mesh.py` |
+| Una mesh o un file URDF rotto, vuoto o ostile | Le mesh vuote, troncate o malformate vengono segnalate come non caricate invece di fermare il visualizzatore; i file che non sono UTF-8 o sono binari, il testo malformato e un ciclo nell'albero dei link vengono rifiutati con un messaggio; una mesh più grande di 5 unità viene riscalata una volta come millimetri | `render/mesh.py`, `urdf/parser.py`, `tests/test_edge_cases.py` |
+| Un download da GitHub che si blocca o che non è GitHub | Si scaricano solo indirizzi riconosciuti dal modello di URL GitHub, come zipball con un limite di 20 s per richiesta e senza chiamare `git`; vale il limite di GitHub di 60 richieste all'ora per indirizzo | `source/github_fetcher.py` |
+| Un robot che STUDIO non può eseguire, o un modello salvato con valori impossibili | Il controllo di fattibilità accetta da 3 a 6 gradi di libertà e rifiuta giunti flottanti e planari, orfani e alberi disconnessi o con più genitori; prima del salvataggio si esegue un controllo (limiti dei giunti, masse) e l'esportazione conserva un backup | `urdf/dof.py`, `urdf/save_check.py` |
+| Inviare un modello a un server che non lo ha chiesto | Decide il server: deve avere «Accetta invii di modelli» attivo (Config > Modelli) e l'account deve essere amministratore; ogni chiamata ha un limite di 15 s e gira in un thread in background; un nome già esistente viene rifiutato finché non si spunta Sovrascrivi | `server/client.py` |
 
-```text
-HYDRA-UMC-EDITOR-URDF/
-├── main.py                        # Punto di ingresso - QApplication, tema, avvio massimizzato, toggle fullscreen F11; --qtquick passa al pannello sotto
-├── qt_editor_urdf.py               # Front end Qt Quick - pannello comandi `--qtquick` autonomo, collega l'EditorController invariato a QML
-├── run.bat / run.sh                # Script di comodo - attiva .venv se presente, esegue main.py, non si chiude da solo
-├── requirements.txt                # PySide6, PyOpenGL, numpy-stl, numpy (con versioni fissate)
-├── requirements-dev.txt            # Solo numpy + pytest - cio di cui tests/ ha davvero bisogno, senza PySide6
-├── build_exe.bat / build_exe.sh    # Script di build per eseguibile standalone Windows/Linux (PyInstaller) - esegue prima il bump della versione
-├── build-test.bat / build-test.sh  # Controllo build/compilazione senza incremento di versione
-├── HYDRA-UMC_EDITOR-URDF.spec      # Spec PyInstaller usata da build_exe.bat/.sh
-├── bump_version.py                 # Incremento di versione stile contachilometri (eseguito solo dal comando `bump` esplicito)
-├── bump_manifest_version.py        # Sincronizza la versione di hydra-umc.project.json con quella nativa (--sync)
-├── CHANGELOG.md                    # Cronologia delle versioni
-├── README.md                       # Questo file
-├── README_spa.md / README_ita.md / README_fra.md / README_deu.md / README_zho.md / README_jpn.md / README_por.md  # <- traduzioni
-├── LICENSE                         # GPL-3.0-or-later
-├── assets/
-│   ├── HYDRA_UMC_ICON.svg          # Marchio HYDRA-UMC animato del pannello della barra strumenti
-│   ├── qss/industrial_dark.qss     # Riutilizzato alla lettera da HYDRA-UMC-SUITE
-│   └── qml/EditorDeck.qml          # UI Qt Quick del pannello comandi `--qtquick`
-├── images/
-│   └── HYDRA_UMC_BANNER.svg        # Media e diagrammi
-├── language/                       # english/spanish/italian/french/german/japanese/chinese/portuguese.lng - si trova accanto all'exe, non incorporato
-├── hydra_editor_urdf/
-│   ├── __init__.py                 # __version__ - unica fonte di verità, letta dalla finestra Informazioni e riscritta da bump_version.py
-│   ├── app.py                      # EditorController - unico proprietario di "cosa è caricato", segnali Qt ascoltati da ogni pannello
-│   ├── models.py                   # Albero oggetti URDF sviluppato in casa (Robot/Link/Joint/Visual/Geometry/Material/...)
-│   ├── gallery.py                  # Elenco iniziale di repository pubblici reali e verificati di descrizioni robot
-│   ├── inertia_calc.py             # Formule chiuse del momento d'inerzia per le geometrie primitive
-│   ├── i18n.py                     # Loader di language/*.lng, persistenza configurazione - portato dal proprio i18n.py di HYDRA-UMC-SUITE
-│   ├── urdf/
-│   │   ├── parser.py               # XML URDF -> albero di models.py (ElementTree, xacro rilevato e rifiutato con un errore chiaro)
-│   │   ├── writer.py                # Albero di models.py -> stringa XML URDF (esportazione + payload di upload al server)
-│   │   ├── save_check.py            # Controlla un robot prima di scriverlo, per rifiutare con l'elenco di ciò che va corretto un modello con una parte impossibile o inutilizzabile
-│   │   └── dof.py                  # Conteggio DOF, validazione di fattibilità contro il tetto di 3-6 DOF di STUDIO
-│   ├── render/
-│   │   ├── mesh.py                 # Caricamento STL/OBJ, generazione primitive box/cylinder/sphere, protezione mm-contro-m
-│   │   ├── kinematics.py           # Cinematica diretta generica su un albero importato arbitrario (Z-up, convenzione propria di URDF)
-│   │   └── viewport.py             # UrdfGLRenderer (shader core GLSL 3.3, camera orbitale, buffer GPU per link) + il wrapper QOpenGLWidget classico + OffscreenUrdfRenderer per il pannello `--qtquick`
-│   ├── source/
-│   │   ├── scan.py                 # Trova i file .urdf/.xacro, costruisce il resolver di nomi file mesh consapevole di package://
-│   │   ├── github_fetcher.py       # Download + estrazione zipball GitHub (urllib + zipfile, nessuna dipendenza da git)
-│   │   └── local_folder.py         # Validazione cartella locale - la controparte snella di github_fetcher.py
-│   ├── server/
-│   │   └── client.py               # StudioClient - login/list_models/push_model/pull_model contro il server.ts di HYDRA-UMC-SERVER (il backend di STUDIO prima che i due repository si separassero)
-│   └── ui/
-│       ├── main_window.py          # QMainWindow - spazio di lavoro agganciabile, barra dei menu, cambio lingua, barra di stato
-│       ├── about_dialog.py         # Finestra Informazioni reale, come About.tsx di STUDIO e about_dialog.py di SUITE
-│       ├── theme.py                 # Applica assets/qss/industrial_dark.qss
-│       └── panels/
-│           ├── source_panel.py     # Inserimento URL GitHub / cartella locale, elenco URDF trovati
-│           ├── dof_panel.py        # Visualizzazione del verdetto di fattibilità
-│           ├── viewport_panel.py   # Host del viewport 3D, albero dei link, slider di jog
-│           ├── properties_panel.py # Editor di ricolorazione / riscalatura / ricambio-tipo-e-nuovi-limiti
-│           └── upload_panel.py     # Connessione/push/pull al server
-├── docs/
-│   ├── ARCHITECTURE.md
-│   ├── BUILD_AND_RUN.md
-│   └── INTEGRATION_CONTRACT.md
-├── tests/                          # Vera suite pytest (355 test) - solo logica pura, nessun import di PySide6 qui
-│   ├── test_urdf_parser.py / test_urdf_writer.py  # URDF XML <-> models.py, inclusi i round-trip parse -> write -> parse
-│   ├── test_dof.py                 # Validazione di fattibilita, limiti DOF, rilevamento radice/orfano/disconnesso/multi-genitore
-│   ├── test_kinematics.py          # Cinematica diretta, inclusa la regressione gia corretta del ciclo reale che si bloccava per sempre
-│   ├── test_inertia_calc.py        # Tensori in forma chiusa box/cilindro/sfera confrontati con valori da manuale calcolati indipendentemente
-│   ├── test_models.py              # Robot.root_link_name()/joints_by_parent()/movable_joints()
-│   ├── test_scan.py                # find_urdf_files()/build_mesh_resolver(), inclusa la regressione gia corretta di had_scheme
-│   ├── test_local_folder.py / test_github_fetcher.py  # Validazione della sorgente; chiamate di rete a GitHub simulate, mai reali
-│   ├── test_i18n.py                # I/O config/lingua su veri file temporanei, mai la config reale dell'operatore
-│   ├── test_gallery.py             # Controlli strutturali sulla lista GALLERY curata a mano
-│   ├── test_client_server.py       # Il client contro un server locale: un invio con le sue mesh, i rifiuti e ciò che il client ne fa
-│   ├── test_dropped_elements.py    # Ciò che il file contiene e il modello non sa dove mettere viene contato e segnalato
-│   ├── test_edge_cases.py          # File che non sono UTF-8 o sono binari, testo malformato, cicli e mesh STL rotte
-│   ├── test_input_safety.py        # Un percorso di mesh che esce dal repository non viene risolto; gli STL vuoti o rotti sono errori, non crash
-│   └── test_save_check.py          # Il controllo prima del salvataggio (limiti dei giunti, masse e il resto di ciò che rifiuta)
-├── tools/
-│   ├── build_test.py               # Controllo build/compilazione senza incremento di versione
-│   ├── ci_validate.py              # Validazione manifest/CHANGELOG/docs usata dalla CI
-│   ├── _doc_policy.py              # Regole di documentazione condivise dalla famiglia (copia di quella di HYDRA-UMC-SDK, mantenuta sincronizzata)
-│   ├── _readme_parity.py           # Verifica che gli otto README abbiano la stessa struttura (copia di quella di HYDRA-UMC-SDK, mantenuta sincronizzata)
-│   └── hydra_project_tool.py       # Gli stessi comandi in ogni repository: validate, test, ci, version, status, bump
-├── build/                           # Directory intermedia propria di PyInstaller (in gitignore)
-├── dist/                            # Eseguibile standalone compilato (output di build_exe.bat/.sh, in gitignore)
-└── work/                            # Spazio di lavoro temporaneo runtime per repository GitHub scaricati e modelli server prelevati (in gitignore)
+**Cosa non fa mai:** connettersi a un robot, muoverne uno, né dare a chi usa un URDF esportato alcuna garanzia su di esso. Chi usa il file deve verificarlo da sé.
+
+## 🔌 Interfacce
+
+| Topic o rotta | Cosa porta |
+|---|---|
+| URDF file or folder / GitHub address | ciò che si apre: una cartella su disco, o un repository GitHub pubblico scaricato come zip; i file `.xacro` vengono rifiutati con una spiegazione e le mesh `.dae` sono indicate come non supportate |
+| URDF export | l'intero albero viene riscritto dal modello da `urdf/writer.py`, così ogni modifica compare esattamente una volta nel file; il file sovrascritto viene prima salvato in backup |
+| `POST /api/login` | accede; solo un token `admin` raggiunge la rotta di invio, e il client si adatta a un server che chiede l'accesso anche per elencare i modelli |
+| `POST /api/models/submit`, `GET /api/models`, `GET /api/models/:category/:slug/download` | invia l'URDF con le mesh incluse, elenca il catalogo e riporta un modello inviato in una cartella di lavoro locale |
+
+## ⚙️ Configurazione
+
+C'è un piccolo file di configurazione e le dipendenze fissate; dall'ambiente non si legge altro.
+
+| Variabile | Predefinito | Cosa imposta |
+|---|---|---|
+| `hydra_editor_urdf_config.json` | `{"language": ...}` | la lingua della finestra, uno degli otto file `.lng` in `language/`; il file sta accanto al programma |
+| `requirements.txt` | fissato | numpy 2.5.2, numpy-stl 4.0.0, PyOpenGL 3.1.10 e PySide6 6.11.1 |
+| `MIN_SUPPORTED_DOF`, `MAX_SUPPORTED_DOF` | 3, 6 | i gradi di libertà che STUDIO può eseguire, in `urdf/dof.py`; cambiali lì se STUDIO cambia |
+
+## 🚀 Avvio rapido
+
+Richiede Python 3.11 o successivo e un driver grafico con OpenGL 3.3. I pacchetti sono fissati in `requirements.txt` e non serve `git`: le sorgenti GitHub si scaricano come zip.
+
+```bash
+pip install -r requirements.txt  # installs PySide6, PyOpenGL, numpy and numpy-stl at the pinned versions
+python main.py                   # starts the editor (run.bat or run.sh do the same inside a .venv when there is one)
+python main.py --qtquick         # the separate Qt Quick command deck
+python -m pytest tests -q        # runs the tests (pip install -r requirements-dev.txt first)
 ```
-
-Nota: un tentativo precedente incorporava un pannello comandi Qt
-Quick/QML (`assets/qml/CommandDeck.qml`, `ui/qtquick_deck.py`)
-direttamente dentro il vero layout `QDockWidget` di questo `QMainWindow`
-tramite `QQuickWidget` - non veniva mai composto correttamente (nero
-pieno, nessun errore in console) e fu revertito; il pannello della barra
-strumenti sopra è composto da semplici widget
-`QToolBar`/`QLabel`/`QToolButton`. Il vero pannello Qt Quick che questa
-app ha oggi (`qt_editor_urdf.py` / `assets/qml/EditorDeck.qml`, elencato
-sopra) è una finestra `--qtquick` autonoma diversa e successiva - vedi
-**🎛️ Tema** sopra e `CHANGELOG.md` per la storia completa.
-
----
-
-## 🛠️ Ambiente di Sviluppo
 
 ### Requisiti
 - [Python](https://www.python.org/) 3.11 o superiore
@@ -309,6 +247,12 @@ Oppure usa lo script di comodo - `run.bat` (Windows) / `run.sh` (Linux/Mac), che
 
 Si avvia massimizzata (non un vero fullscreen a livello di sistema operativo, quindi la barra del titolo e i controlli nativi della finestra restano visibili) - premi **F11** per attivare/disattivare il vero fullscreen senza bordi.
 
+## 🧪 Test
+
+366 test automatici si eseguono con `python -m pytest tests -q`. Non richiedono hardware né nulla al di fuori di questa macchina.
+
+La CI esegue `HYDRA_UMC_CI=1 python tools/ci_validate.py`, che controlla il manifesto, i documenti, gli otto README e le immagini.
+
 ### Test Automatizzati
 
 ```bash
@@ -316,7 +260,9 @@ pip install -r requirements-dev.txt
 python -m pytest tests/ -q
 ```
 
-Nota: la logica pura di questa app (parsing/esportazione URDF, validazione di fattibilità DOF, cinematica diretta, stima dell'inerzia, risoluzione dei riferimenti alle mesh, recupero da GitHub, i18n) non aveva alcuna copertura di test automatizzati. Corretto: 355 test reali distribuiti su 15 moduli di test, nessuno dei quali importa PySide6/PyOpenGL - `requirements-dev.txt` installa solo ciò di cui `tests/` ha davvero bisogno (`numpy` + `pytest`), quindi la suite viene eseguita senza display né plugin di piattaforma Qt. Diversi test sono regressioni esplicite per bug già trovati e corretti in precedenza e documentati direttamente nel codice sorgente (la protezione contro il ciclo infinito su un vero ciclo di `render/kinematics.py`, il gating `had_scheme` di `source/scan.py`, il controllo della massa negativa di `urdf/dof.py`) - una modifica futura non può reintrodurre silenziosamente nessuno di essi senza far fallire un test. La CI (`.github/workflows/ci.yml`) esegue lo stesso comando ad ogni push.
+Nota: la logica pura di questa app (parsing/esportazione URDF, validazione di fattibilità DOF, cinematica diretta, stima dell'inerzia, risoluzione dei riferimenti alle mesh, recupero da GitHub, i18n) non aveva alcuna copertura di test automatizzati. Corretto: 366 test reali distribuiti su 15 moduli di test, nessuno dei quali importa PySide6/PyOpenGL - `requirements-dev.txt` installa solo ciò di cui `tests/` ha davvero bisogno (`numpy` + `pytest`), quindi la suite viene eseguita senza display né plugin di piattaforma Qt. Diversi test sono regressioni esplicite per bug già trovati e corretti in precedenza e documentati direttamente nel codice sorgente (la protezione contro il ciclo infinito su un vero ciclo di `render/kinematics.py`, il gating `had_scheme` di `source/scan.py`, il controllo della massa negativa di `urdf/dof.py`) - una modifica futura non può reintrodurre silenziosamente nessuno di essi senza far fallire un test. La CI (`.github/workflows/ci.yml`) esegue lo stesso comando ad ogni push.
+
+## 🏗️ Compilazione e rilascio
 
 ### Build di Produzione
 
@@ -381,9 +327,72 @@ cp -r language dist/language
 
 Su Linux, eseguire il binario compilato richiede la presenza del runtime OpenGL proprio del sistema (`libGL.so.1` - es. `libgl1` su Debian/Ubuntu, `mesa-libGL` su Fedora, `libglvnd` su Arch) più `libxkbcommon-x11-0`/`xcb-util-cursor` per il plugin di piattaforma XCB proprio di Qt; `build_exe.sh` controlla la presenza di `libGL.so.1` in anticipo e stampa il comando di installazione corretto per ogni distro se manca, invece di fallire nel profondo di un'esecuzione di PyInstaller.
 
----
+## 🩺 Risoluzione dei problemi
 
-## 🔗 Progetti Correlati
+| Vedi | Perché | Fai |
+|---|---|---|
+| Un errore che nomina xacro, o un link che manca nel visualizzatore | Il file usa macro `<xacro:...>`, che non vengono espanse, o il link punta a una mesh `.dae`, che non viene caricata | Espandi prima lo xacro con lo strumento ROS `xacro` ed esporta le mesh come `.stl` o `.obj` |
+| Link senza mesh dopo aver aperto un repository | I percorsi delle mesh non si risolvono nella cartella aperta, oppure le mesh sono vuote o malformate | Usa «Individua mesh mancanti» per aggiungere la cartella che le contiene |
+| Il pannello DOF dice che il robot non è fattibile | Il robot ha meno di 3 o più di 6 gradi di libertà, un giunto flottante o planare, un link orfano, o un albero disconnesso o con più genitori | Leggi i motivi elencati sotto il verdetto e modifica tipi e limiti dei giunti nel pannello Proprietà |
+| L'invio viene rifiutato: un 409, un 401 o «gli invii non sono accettati» | Il nome esiste già (409), l'account non è amministratore o la sessione è sparita (401), o il server ha disattivato Accetta invii di modelli | Spunta Sovrascrivi per sostituire, accedi come amministratore o attiva gli invii in Config > Modelli del server |
+
+## 📂 Struttura del repository
+
+<p align="center">
+  <img src="images/repository-structure.svg" alt="Repository structure of HYDRA-UMC-EDITOR-URDF" width="100%">
+</p>
+
+<details>
+<summary>Versione testuale dell'albero</summary>
+
+```text
+HYDRA-UMC-EDITOR-URDF/
+├── hydra_editor_urdf/
+│   ├── __init__.py                  __version__ - unica fonte di verità, letta dalla finestra Informazioni e riscritta da bump_version.py
+│   ├── app.py                       EditorController - unico proprietario di "cosa è caricato", segnali Qt ascoltati da ogni pannello
+│   ├── models.py                    Albero oggetti URDF sviluppato in casa (Robot/Link/Joint/Visual/Geometry/Material/...)
+│   ├── gallery.py                   Elenco iniziale di repository pubblici reali e verificati di descrizioni robot
+│   ├── inertia_calc.py              Formule chiuse del momento d'inerzia per le geometrie primitive
+│   ├── i18n.py                      Loader di language/*.lng, persistenza configurazione - portato dal proprio i18n.py di HYDRA-UMC-SUITE
+│   ├── urdf/                        parser, writer, DOF e controllo al salvataggio
+│   ├── render/                      mesh, cinematica diretta, vista OpenGL
+│   ├── source/                      download da GitHub e cartelle locali
+│   ├── server/                      il client di HYDRA-UMC-SERVER
+│   └── ui/                          finestra, pannelli, dialoghi e tema
+├── assets/                          icona, tema scuro e il pannello Qt Quick
+├── images/                          banner e immagini del README
+├── language/                        english/spanish/italian/french/german/japanese/chinese/portuguese.lng - si trova accanto all'exe, non incorporato
+├── docs/                            documenti del progetto
+├── tests/                           Vera suite pytest (355 test) - solo logica pura, nessun import di PySide6 qui
+├── tools/                           strumenti del progetto e controlli della CI
+├── .github/                         workflow di CI e modelli di segnalazione
+├── main.py                          Punto di ingresso - QApplication, tema, avvio massimizzato, toggle fullscreen F11; --qtquick passa al pannello sotto
+├── qt_editor_urdf.py                Front end Qt Quick - pannello comandi `--qtquick` autonomo, collega l'EditorController invariato a QML
+├── run.bat / run.sh                 Script di comodo - attiva .venv se presente, esegue main.py, non si chiude da solo
+├── requirements.txt                 PySide6, PyOpenGL, numpy-stl, numpy (con versioni fissate)
+├── requirements-dev.txt             Solo numpy + pytest - cio di cui tests/ ha davvero bisogno, senza PySide6
+├── build_exe.bat / build_exe.sh     Script di build per eseguibile standalone Windows/Linux (PyInstaller) - esegue prima il bump della versione
+├── build-test.bat / build-test.sh   Controllo build/compilazione senza incremento di versione
+├── HYDRA-UMC_EDITOR-URDF.spec       Spec PyInstaller usata da build_exe.bat/.sh
+├── bump_version.py                  Incremento di versione stile contachilometri (eseguito solo dal comando `bump` esplicito)
+├── bump_manifest_version.py         Sincronizza la versione di hydra-umc.project.json con quella nativa (--sync)
+├── CHANGELOG.md                     Cronologia delle versioni
+├── LICENSE                          GPL-3.0-or-later
+├── hydra-umc.project.json           manifesto: versione, maturità, famiglia
+└── test.sh                          controllo di build senza modifiche
+```
+
+</details>
+
+## 🗺️ Roadmap e limiti noti
+
+Le macro xacro non vengono espanse e le mesh COLLADA (`.dae`) non vengono caricate; entrambe danno un errore chiaro. Un robot deve rientrare in 3-6 gradi di libertà per essere accettato da STUDIO. Il viaggio di andata e ritorno con il server è stato provato solo su un server di prova locale, non su un vero HYDRA-UMC-SERVER. Il pannello comandi Qt Quick è una finestra `--qtquick` separata e non fa parte dello spazio di lavoro ancorabile.
+
+## 🌍 Lingue
+
+Questo README e i documenti del repository esistono in otto lingue: inglese, spagnolo, tedesco, francese, italiano, giapponese, cinese e portoghese (Portogallo). Sono scritti insieme e la CI verifica che gli otto file abbiano le stesse sezioni e gli stessi link.
+
+## 🔗 Progetti correlati
 
 Questo progetto fa parte dell'ecosistema robotico HYDRA-UMC dello stesso autore (JuanenRac / Electro Hobby 3D). Utile da conoscere, poiché una richiesta potrebbe in realtà riguardare uno di questi invece di questo repository.
 
@@ -474,36 +483,31 @@ Questo progetto fa parte dell'ecosistema robotico HYDRA-UMC dello stesso autore 
 - **[HYDRA-UMC-OPS-AGENT](https://github.com/JuanenRac/HYDRA-UMC-OPS-AGENT)** — coordinatore di incidenti di manutenzione: un ruolo edge a basso privilegio raccoglie uno snapshot di inventario/salute sanificato, un ruolo control-plane lo rende in sola lettura e chiede a un provider di IA di suggerire una diagnosi - non applica mai una patch né distribuisce nulla.
 - **[HYDRA-UMC-DEV-SERVER](https://github.com/JuanenRac/HYDRA-UMC-DEV-SERVER)** — host di sviluppo riproducibile (Raspberry Pi 5 / CM5) che conserva il codice sorgente dell'ecosistema ed esegue attività delimitate di build/test tramite una coda durevole; un ruolo di sviluppo dedicato, esplicitamente distinto da un CM5 operativo.
 
----
+## 📚 Documentazione
 
-## 📚 Documentazione e Comunità
+Dove leggere di più:
 
-- **[docs/ARCHITECTURE.md](docs/ARCHITECTURE.md)** — la forma interna dell'editor: perché parsing, validazione di fattibilità, risoluzione delle mesh e anteprima 3D sono percorsi separati, e cosa questa app deliberatamente **non** fa (connettersi a un robot, caricare un URDF o comandare un movimento di propria iniziativa).
-- **[docs/BUILD_AND_RUN.md](docs/BUILD_AND_RUN.md)** — il percorso di validazione non distruttivo `build-test.bat`/`.sh` rispetto a un vero pacchetto `build_exe.bat`/`.sh`, e cosa è realmente oggi il pannello comandi (`QToolBar`, non Qt Quick/QML - vedi la sezione **Tema** sopra).
-- **[docs/INTEGRATION_CONTRACT.md](docs/INTEGRATION_CONTRACT.md)** — ciò che un consumatore a valle di un file URDF esportato deve validare da solo; questo progetto non fornisce alcun endpoint di rete o autorità di controllo hardware propria.
-- **[CONTRIBUTING.md](CONTRIBUTING.md)** — stack tecnologico e linee guida di codifica per una pull request.
-- **[CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md)** — gli standard di comportamento attesi in questa comunità.
-- **[SECURITY.md](SECURITY.md)** — come segnalare una vulnerabilità, e le reali aree di attenzione sulla sicurezza di questo progetto.
-- **[SUPPORT.md](SUPPORT.md)** — dove porre domande e segnalare bug.
-- **[LICENSE.md](LICENSE.md)** — la licenza propria di questo progetto.
+* [docs/SOURCE_MAP.md](docs/SOURCE_MAP.md) - ogni file sorgente dell'editor con una riga su ciò che fa
+* [docs/LICENSING.md](docs/LICENSING.md) - come sono concessi in licenza il codice, i documenti e le mesh
+* **[docs/ARCHITECTURE.md](docs/ARCHITECTURE.md)** — la forma interna dell'editor: perché parsing, validazione di fattibilità, risoluzione delle mesh e anteprima 3D sono percorsi separati, e cosa questa app deliberatamente **non** fa (connettersi a un robot, caricare un URDF o comandare un movimento di propria iniziativa).
+* **[docs/BUILD_AND_RUN.md](docs/BUILD_AND_RUN.md)** — il percorso di validazione non distruttivo `build-test.bat`/`.sh` rispetto a un vero pacchetto `build_exe.bat`/`.sh`, e cosa è realmente oggi il pannello comandi (`QToolBar`, non Qt Quick/QML - vedi la sezione **Tema** sopra).
+* **[docs/INTEGRATION_CONTRACT.md](docs/INTEGRATION_CONTRACT.md)** — ciò che un consumatore a valle di un file URDF esportato deve validare da solo; questo progetto non fornisce alcun endpoint di rete o autorità di controllo hardware propria.
+* [Base di sicurezza dell'ecosistema](https://github.com/JuanenRac/HYDRA-UMC-DOCS/blob/main/docs/SECURITY_BASELINE.md)
+* [Modello delle minacce dell'ecosistema](https://github.com/JuanenRac/HYDRA-UMC-DOCS/blob/main/docs/THREAT_MODEL.md)
+* [Registro delle modifiche di questo repository](CHANGELOG.md)
+* [Licenza di questo repository](LICENSE.md)
+
+## 🤝 Contribuire e comunità
+
+* Prima di una pull request esegui `HYDRA_UMC_CI=1 py -3 tools/ci_validate.py` (oppure `HYDRA_UMC_CI=1 python3 tools/ci_validate.py`): deve stampare `CI_VALIDATION=PASS`. Non eseguire `build.sh` né `build.bat` per questa verifica; compilare non è verificare.
+* I otto README sono scritti da un'unica fonte in HYDRA-UMC-DOCS; non modificarli a mano. Cambia la fonte e riscrivili con `tools/make_readmes.py`.
+* Non affermare in un README ciò che non è stato eseguito: scrivi «simulato» o «non provato su hardware» quando è la verità.
+* Vedi [CONTRIBUTING.md](CONTRIBUTING.md), il [codice di condotta](CODE_OF_CONDUCT.md), [SECURITY.md](SECURITY.md) e [SUPPORT.md](SUPPORT.md).
 
 ## 👤 AUTORE
-**JuanenRac** (Electro Hobby 3D)
-📧 electrohobby3d@gmail.com
-📺 [youtube.com/@electrohobby3d](https://youtube.com/@electrohobby3d)
+
+**JuanenRac (Electro Hobby 3D)** · electrohobby3d@gmail.com
 
 ## 📜 LICENZA
 
-HYDRA-UMC EDITOR-URDF è (c) 2026 JuanenRac (Electro Hobby 3D). Questo avviso deve essere incluso in qualsiasi distribuzione di questo progetto o lavoro derivato.
-
-Questo progetto consiste di codice sorgente e propria documentazione, resi disponibili sotto licenze diverse - ciascuna adatta a ciò che effettivamente copre:
-
-1. Il codice sorgente (`hydra_editor_urdf/`, `main.py`, e qualsiasi binario compilato a partire da esso tramite `build_exe.bat`/`build_exe.sh`) è disponibile sotto la **GNU General Public License v3.0 or later (GPL-3.0-or-later)**. Testo completo su https://www.gnu.org/licenses/gpl-3.0.html.
-
-2. La documentazione (questo README e le proprie traduzioni - `README_spa.md`, `README_ita.md`, `README_fra.md`, `README_deu.md`, `README_zho.md`, `README_jpn.md`, `README_por.md`) è disponibile sotto **Creative Commons Attribution-ShareAlike 4.0 International (CC BY-SA 4.0)**. Testo completo su https://creativecommons.org/licenses/by-sa/4.0/.
-
-Questa app non distribuisce alcun asset mesh di robot di terze parti proprio - a differenza di `public/models/` di HYDRA-UMC STUDIO, ogni mesh che questo editor carica proviene da qualunque repository sorgente o cartella locale verso cui l'operatore lo punta, sotto la licenza originale propria di quella sorgente. Rivedere e preservare quella licenza/attribuzione a monte prima di inviare un modello a un server STUDIO in esecuzione (nella cui convenzione propria `public/models/<slug>/ATTRIBUTION.txt` confluisce l'esportazione di questo editor) resta responsabilità propria dell'operatore - questa app non ha modo di rilevare o far rispettare automaticamente i termini di licenza di un repository sorgente.
-
-Questo editor è lo strumento di creazione modelli per il catalogo di [HYDRA-UMC STUDIO](https://github.com/JuanenRac/HYDRA-UMC-STUDIO) - consulta quel repository per la propria licenza lato server, a cui la licenza propria di questo repository non si estende, e viceversa.
-
-Se costruisci su questo progetto, tieni presente la separazione delle licenze: le modifiche al codice qui dovrebbero rimanere GPL-3.0-or-later, i derivati della documentazione (questo README e le sue traduzioni) dovrebbero rimanere CC BY-SA 4.0, e qualsiasi asset mesh che passa attraverso questo editor (importato, modificato o esportato) dovrebbe rimanere sotto qualunque licenza porti il suo repository sorgente originale, con attribuzione a quella sorgente.
+GPL-3.0-or-later - [LICENSE](LICENSE).

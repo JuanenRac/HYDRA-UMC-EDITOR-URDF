@@ -1,0 +1,189 @@
+{
+  "repo": "HYDRA-UMC-EDITOR-URDF",
+  "ecosystem": "hydra",
+  "tagline": "Parsing, feasibility, mesh loading and 3D preview are separate lanes around one model tree.",
+  "description": "HYDRA-UMC-EDITOR-URDF loads a URDF from GitHub or a folder into an in-house model tree, checks it against the 3 to 6 degrees of freedom of STUDIO, previews it with forward kinematics in OpenGL, and writes the tree back out or sends it to a HYDRA-UMC-SERVER.",
+  "columns": [
+    "WHO USES IT",
+    "THIS REPOSITORY",
+    "WHAT IT TALKS TO"
+  ],
+  "nodes": [
+    {
+      "id": "ope",
+      "column": 0,
+      "level": "tested",
+      "title": "The operator",
+      "lines": [
+        "docks: source, DOF, viewport,",
+        "properties, upload"
+      ],
+      "code": [
+        "hydra_editor_urdf/ui/main_window.py"
+      ]
+    },
+    {
+      "id": "dek",
+      "column": 0,
+      "level": "tested",
+      "title": "Command deck",
+      "lines": [
+        "--qtquick: a separate Qt",
+        "Quick window over the editor"
+      ],
+      "code": [
+        "qt_editor_urdf.py",
+        "assets/qml/EditorDeck.qml"
+      ]
+    },
+    {
+      "id": "git",
+      "column": 2,
+      "level": "contract",
+      "title": "GitHub and folders",
+      "lines": [
+        "a zipball of a public repo,",
+        "or a local folder"
+      ]
+    },
+    {
+      "id": "hy",
+      "column": 2,
+      "level": "untested",
+      "title": "HYDRA-UMC-SERVER",
+      "lines": [
+        "POST /api/models/submit;",
+        "tried against a local test server"
+      ]
+    },
+    {
+      "id": "src",
+      "column": 1,
+      "level": "tested",
+      "title": "source",
+      "lines": [
+        "finds the URDF and builds",
+        "the mesh path resolver"
+      ],
+      "code": [
+        "hydra_editor_urdf/source/scan.py",
+        "hydra_editor_urdf/source/github_fetcher.py",
+        "hydra_editor_urdf/source/local_folder.py"
+      ]
+    },
+    {
+      "id": "app",
+      "column": 1,
+      "level": "tested",
+      "title": "EditorController",
+      "lines": [
+        "the single owner of what",
+        "is loaded; Qt signals"
+      ],
+      "code": [
+        "hydra_editor_urdf/app.py"
+      ]
+    },
+    {
+      "id": "dof",
+      "column": 1,
+      "level": "tested",
+      "title": "dof",
+      "lines": [
+        "3 to 6 degrees of freedom;",
+        "floating and planar refused"
+      ],
+      "code": [
+        "hydra_editor_urdf/urdf/dof.py"
+      ]
+    },
+    {
+      "id": "urd",
+      "column": 1,
+      "level": "tested",
+      "title": "urdf",
+      "lines": [
+        "parser, writer, check",
+        "before saving"
+      ],
+      "code": [
+        "hydra_editor_urdf/urdf/parser.py",
+        "hydra_editor_urdf/urdf/writer.py",
+        "hydra_editor_urdf/urdf/save_check.py"
+      ]
+    },
+    {
+      "id": "srv",
+      "column": 1,
+      "level": "tested",
+      "title": "server client",
+      "lines": [
+        "login, list, push and pull",
+        "over urllib, in a thread"
+      ],
+      "code": [
+        "hydra_editor_urdf/server/client.py"
+      ]
+    },
+    {
+      "id": "ren",
+      "column": 1,
+      "level": "tested",
+      "title": "render",
+      "lines": [
+        "STL and OBJ loading, forward",
+        "kinematics, OpenGL view"
+      ],
+      "code": [
+        "hydra_editor_urdf/render/mesh.py",
+        "hydra_editor_urdf/render/kinematics.py",
+        "hydra_editor_urdf/render/viewport.py"
+      ]
+    }
+  ],
+  "edges": [
+    {
+      "from": "ope",
+      "to": "app",
+      "level": "tested"
+    },
+    {
+      "from": "dek",
+      "to": "app",
+      "level": "tested"
+    },
+    {
+      "from": "src",
+      "to": "app",
+      "level": "tested"
+    },
+    {
+      "from": "app",
+      "to": "urd",
+      "level": "tested"
+    },
+    {
+      "from": "urd",
+      "to": "dof",
+      "level": "tested"
+    },
+    {
+      "from": "urd",
+      "to": "ren",
+      "level": "tested"
+    },
+    {
+      "from": "src",
+      "to": "git",
+      "level": "contract",
+      "label": "zip"
+    },
+    {
+      "from": "srv",
+      "to": "hy",
+      "level": "untested",
+      "label": "HTTP"
+    }
+  ],
+  "footer": "Pure logic tested headlessly; the server client was tried against a local test server, not a real HYDRA-UMC-SERVER."
+}

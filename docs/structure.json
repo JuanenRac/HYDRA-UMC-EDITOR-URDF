@@ -1,0 +1,776 @@
+{
+  "repo": "HYDRA-UMC-EDITOR-URDF",
+  "ecosystem": "hydra",
+  "svg": "en",
+  "exempt": [
+    "CODE_OF_CONDUCT.md",
+    "CONTRIBUTING.md",
+    "SECURITY.md",
+    "SUPPORT.md",
+    "LICENSE",
+    "LICENSE.md",
+    "test.bat"
+  ],
+  "cards": [
+    {
+      "name": "hydra_editor_urdf/",
+      "span": 3,
+      "accent": "a",
+      "rows": [
+        {
+          "name": "__init__.py",
+          "desc": {
+            "en": "__version__ - single source of truth",
+            "es": "__version__ - única fuente de verdad",
+            "de": "__version__ - einzige Quelle der Wahrheit",
+            "fr": "__version__ - source unique de verite",
+            "it": "__version__ - unica fonte di verità",
+            "ja": "__version__ —— 唯一の権威ある",
+            "zh": "__version__ —— 唯一权威来源",
+            "pt": "__version__ - fonte única de verdade"
+          },
+          "tree_desc": {
+            "en": "__version__ - single source of truth, read by the About dialog and rewritten by bump_version.py",
+            "es": "__version__ - única fuente de verdad, leída por el diálogo Acerca de y reescrita por bump_version.py",
+            "de": "__version__ - einzige Quelle der Wahrheit, gelesen vom Über-Dialog und neu geschrieben von bump_version.py",
+            "fr": "__version__ - source unique de verite, lue par la boite de dialogue A propos et reecrite par bump_version.py",
+            "it": "__version__ - unica fonte di verità, letta dalla finestra Informazioni e riscritta da bump_version.py",
+            "ja": "__version__ —— 唯一の権威ある情報源、About ダイアログが読み取り、bump_version.py が書き換える",
+            "zh": "__version__ —— 唯一权威来源，由 About 对话框读取，由 bump_version.py 重写",
+            "pt": "__version__ - fonte única de verdade, lida pela caixa Acerca de e reescrita pelo bump_version.py"
+          }
+        },
+        {
+          "name": "app.py",
+          "desc": {
+            "en": "EditorController",
+            "es": "EditorController",
+            "de": "EditorController",
+            "fr": "EditorController",
+            "it": "EditorController",
+            "ja": "EditorController —— 「何",
+            "zh": "EditorController —— “当",
+            "pt": "EditorController"
+          },
+          "tree_desc": {
+            "en": "EditorController - single owner of \"what's loaded\", Qt signals every panel listens to",
+            "es": "EditorController - único dueño de \"qué está cargado\", señales Qt que escucha cada panel",
+            "de": "EditorController - alleiniger Besitzer von „was geladen ist\", Qt-Signale, denen jedes Panel zuhört",
+            "fr": "EditorController - proprietaire unique de \"ce qui est charge\", signaux Qt que chaque panneau ecoute",
+            "it": "EditorController - unico proprietario di \"cosa è caricato\", segnali Qt ascoltati da ogni pannello",
+            "ja": "EditorController —— 「何が読み込まれているか」の唯一の保持者、各パネルがリッスンする Qt シグナル",
+            "zh": "EditorController —— “当前加载了什么”的唯一持有者，每个面板监听的 Qt 信号",
+            "pt": "EditorController - único dono de «o que está carregado», sinais Qt a que todos os painéis escutam"
+          }
+        },
+        {
+          "name": "models.py",
+          "desc": {
+            "en": "In-house URDF object tree",
+            "es": "Árbol de objetos URDF propio",
+            "de": "Hausgemachter URDF-Objektbaum",
+            "fr": "Arbre d'objets URDF interne",
+            "it": "Albero oggetti URDF sviluppato in casa",
+            "ja": "自社製の URDF オブジェクトツリー",
+            "zh": "自研的 URDF 对象树（Robot/Lin",
+            "pt": "Árvore própria de objetos URDF"
+          },
+          "tree_desc": {
+            "en": "In-house URDF object tree (Robot/Link/Joint/Visual/Geometry/Material/...)",
+            "es": "Árbol de objetos URDF propio (Robot/Link/Joint/Visual/Geometry/Material/...)",
+            "de": "Hausgemachter URDF-Objektbaum (Robot/Link/Joint/Visual/Geometry/Material/...)",
+            "fr": "Arbre d'objets URDF interne (Robot/Link/Joint/Visual/Geometry/Material/...)",
+            "it": "Albero oggetti URDF sviluppato in casa (Robot/Link/Joint/Visual/Geometry/Material/...)",
+            "ja": "自社製の URDF オブジェクトツリー（Robot/Link/Joint/Visual/Geometry/Material/…）",
+            "zh": "自研的 URDF 对象树（Robot/Link/Joint/Visual/Geometry/Material/…）",
+            "pt": "Árvore própria de objetos URDF (Robot/Link/Joint/Visual/Geometry/Material/...)"
+          }
+        },
+        {
+          "name": "gallery.py",
+          "desc": {
+            "en": "Starter list of real",
+            "es": "Lista inicial de repositorios públicos",
+            "de": "Startliste echter",
+            "fr": "Liste de depart de depots publics reels et",
+            "it": "Elenco iniziale di repository pubblici",
+            "ja": "実在が検証済みの公開ロボット記述リポジトリの",
+            "zh": "经过验证的真实公开机器人描述仓库的初始列表",
+            "pt": "Lista inicial de repositórios públicos"
+          },
+          "tree_desc": {
+            "en": "Starter list of real, verified public robot-description repositories",
+            "es": "Lista inicial de repositorios públicos reales y verificados de descripciones de robots",
+            "de": "Startliste echter, verifizierter öffentlicher Robotermodell-Repositories",
+            "fr": "Liste de depart de depots publics reels et verifies de descriptions de robots",
+            "it": "Elenco iniziale di repository pubblici reali e verificati di descrizioni robot",
+            "ja": "実在が検証済みの公開ロボット記述リポジトリのスターターリスト",
+            "zh": "经过验证的真实公开机器人描述仓库的初始列表",
+            "pt": "Lista inicial de repositórios públicos reais e verificados de descrição de robôs"
+          }
+        },
+        {
+          "name": "inertia_calc.py",
+          "desc": {
+            "en": "Closed-form moment-of-inertia formulas",
+            "es": "Fórmulas cerradas de momento de inercia",
+            "de": "Geschlossene Trägheitsmoment-Formeln für",
+            "fr": "Formules fermees de moment d'inertie pour",
+            "it": "Formule chiuse del momento d'inerzia per le",
+            "ja": "プリミティブ形状に対する慣性モーメントの閉形",
+            "zh": "基本几何体的闭式转动惯量公式",
+            "pt": "Fórmulas de momento de inércia de forma"
+          },
+          "tree_desc": {
+            "en": "Closed-form moment-of-inertia formulas for the primitive geometries",
+            "es": "Fórmulas cerradas de momento de inercia para las geometrías primitivas",
+            "de": "Geschlossene Trägheitsmoment-Formeln für die primitiven Geometrien",
+            "fr": "Formules fermees de moment d'inertie pour les geometries primitives",
+            "it": "Formule chiuse del momento d'inerzia per le geometrie primitive",
+            "ja": "プリミティブ形状に対する慣性モーメントの閉形式公式",
+            "zh": "基本几何体的闭式转动惯量公式",
+            "pt": "Fórmulas de momento de inércia de forma fechada para as geometrias primitivas"
+          }
+        },
+        {
+          "name": "i18n.py",
+          "desc": {
+            "en": "language/*.lng loader, config persistence",
+            "es": "Cargador de language/*.lng",
+            "de": "Loader für language/*.lng",
+            "fr": "Chargeur de language/*.lng",
+            "it": "Loader di language/*.lng",
+            "ja": "language/*.lng ローダー",
+            "zh": "language/*.lng 加载器",
+            "pt": "Carregador de language/*.lng"
+          },
+          "tree_desc": {
+            "en": "language/*.lng loader, config persistence - ported from HYDRA-UMC-SUITE's own i18n.py",
+            "es": "Cargador de language/*.lng, persistencia de configuración - portado desde el propio i18n.py de HYDRA-UMC-SUITE",
+            "de": "Loader für language/*.lng, Persistenz der Konfiguration - portiert aus der eigenen i18n.py von HYDRA-UMC-SUITE",
+            "fr": "Chargeur de language/*.lng, persistance de la configuration - porte depuis le propre i18n.py de HYDRA-UMC-SUITE",
+            "it": "Loader di language/*.lng, persistenza configurazione - portato dal proprio i18n.py di HYDRA-UMC-SUITE",
+            "ja": "language/*.lng ローダー、設定の永続化——HYDRA-UMC-SUITE 自身の i18n.py から移植",
+            "zh": "language/*.lng 加载器、配置持久化——从 HYDRA-UMC-SUITE 自身的 i18n.py 移植",
+            "pt": "Carregador de language/*.lng, persistência da configuração - portado do i18n.py do próprio HYDRA-UMC-SUITE"
+          }
+        },
+        {
+          "name": "urdf/",
+          "desc": {
+            "en": "parser, writer, DOF and save check",
+            "es": "analizador, escritor, GDL y comprobación al",
+            "de": "Parser, Writer, DOF und Speicherprüfung",
+            "fr": "analyseur, écrivain, DDL et vérification à",
+            "it": "parser, writer, DOF e controllo al",
+            "ja": "パーサー、ライター、DOF、保存時の検査",
+            "zh": "解析器、写出器、DOF 和保存检查",
+            "pt": "analisador, escritor, GDL e verificação ao"
+          },
+          "tree_desc": {
+            "en": "parser, writer, DOF and save check",
+            "es": "analizador, escritor, GDL y comprobación al guardar",
+            "de": "Parser, Writer, DOF und Speicherprüfung",
+            "fr": "analyseur, écrivain, DDL et vérification à l'enregistrement",
+            "it": "parser, writer, DOF e controllo al salvataggio",
+            "ja": "パーサー、ライター、DOF、保存時の検査",
+            "zh": "解析器、写出器、DOF 和保存检查",
+            "pt": "analisador, escritor, GDL e verificação ao guardar"
+          }
+        },
+        {
+          "name": "render/",
+          "desc": {
+            "en": "meshes, forward kinematics, OpenGL view",
+            "es": "mallas, cinemática directa, vista OpenGL",
+            "de": "Meshes, Vorwärtskinematik, OpenGL-Ansicht",
+            "fr": "maillages, cinématique directe, vue OpenGL",
+            "it": "mesh, cinematica diretta, vista OpenGL",
+            "ja": "メッシュ、順運動学、OpenGL ビュー",
+            "zh": "网格、正向运动学、OpenGL 视图",
+            "pt": "malhas, cinemática direta, vista OpenGL"
+          },
+          "tree_desc": {
+            "en": "meshes, forward kinematics, OpenGL view",
+            "es": "mallas, cinemática directa, vista OpenGL",
+            "de": "Meshes, Vorwärtskinematik, OpenGL-Ansicht",
+            "fr": "maillages, cinématique directe, vue OpenGL",
+            "it": "mesh, cinematica diretta, vista OpenGL",
+            "ja": "メッシュ、順運動学、OpenGL ビュー",
+            "zh": "网格、正向运动学、OpenGL 视图",
+            "pt": "malhas, cinemática direta, vista OpenGL"
+          }
+        },
+        {
+          "name": "source/",
+          "desc": {
+            "en": "GitHub download and local folders",
+            "es": "descarga de GitHub y carpetas locales",
+            "de": "GitHub-Download und lokale Ordner",
+            "fr": "téléchargement GitHub et dossiers locaux",
+            "it": "download da GitHub e cartelle locali",
+            "ja": "GitHub のダウンロードとローカルフォル",
+            "zh": "GitHub 下载和本地文件夹",
+            "pt": "transferência do GitHub e pastas locais"
+          },
+          "tree_desc": {
+            "en": "GitHub download and local folders",
+            "es": "descarga de GitHub y carpetas locales",
+            "de": "GitHub-Download und lokale Ordner",
+            "fr": "téléchargement GitHub et dossiers locaux",
+            "it": "download da GitHub e cartelle locali",
+            "ja": "GitHub のダウンロードとローカルフォルダー",
+            "zh": "GitHub 下载和本地文件夹",
+            "pt": "transferência do GitHub e pastas locais"
+          }
+        },
+        {
+          "name": "server/",
+          "desc": {
+            "en": "the client of HYDRA-UMC-SERVER",
+            "es": "el cliente de HYDRA-UMC-SERVER",
+            "de": "der Client von HYDRA-UMC-SERVER",
+            "fr": "le client de HYDRA-UMC-SERVER",
+            "it": "il client di HYDRA-UMC-SERVER",
+            "ja": "HYDRA-UMC-SERVER のクライア",
+            "zh": "HYDRA-UMC-SERVER 的客户端",
+            "pt": "o cliente do HYDRA-UMC-SERVER"
+          },
+          "tree_desc": {
+            "en": "the client of HYDRA-UMC-SERVER",
+            "es": "el cliente de HYDRA-UMC-SERVER",
+            "de": "der Client von HYDRA-UMC-SERVER",
+            "fr": "le client de HYDRA-UMC-SERVER",
+            "it": "il client di HYDRA-UMC-SERVER",
+            "ja": "HYDRA-UMC-SERVER のクライアント",
+            "zh": "HYDRA-UMC-SERVER 的客户端",
+            "pt": "o cliente do HYDRA-UMC-SERVER"
+          }
+        },
+        {
+          "name": "ui/",
+          "desc": {
+            "en": "window, docks, dialogs and theme",
+            "es": "ventana, paneles, diálogos y tema",
+            "de": "Fenster, Docks, Dialoge und Thema",
+            "fr": "fenêtre, panneaux, dialogues et thème",
+            "it": "finestra, pannelli, dialoghi e tema",
+            "ja": "ウィンドウ、ドック、ダイアログ、テーマ",
+            "zh": "窗口、停靠面板、对话框和主题",
+            "pt": "janela, painéis, diálogos e tema"
+          },
+          "tree_desc": {
+            "en": "window, docks, dialogs and theme",
+            "es": "ventana, paneles, diálogos y tema",
+            "de": "Fenster, Docks, Dialoge und Thema",
+            "fr": "fenêtre, panneaux, dialogues et thème",
+            "it": "finestra, pannelli, dialoghi e tema",
+            "ja": "ウィンドウ、ドック、ダイアログ、テーマ",
+            "zh": "窗口、停靠面板、对话框和主题",
+            "pt": "janela, painéis, diálogos e tema"
+          }
+        }
+      ],
+      "sub": {
+        "en": "the Python package",
+        "es": "el paquete Python",
+        "de": "das Python-Paket",
+        "fr": "le paquet Python",
+        "it": "il pacchetto Python",
+        "ja": "Python パッケージ",
+        "zh": "Python 包",
+        "pt": "o pacote Python"
+      },
+      "columns": 2
+    },
+    {
+      "name": {
+        "en": "folders",
+        "es": "carpetas",
+        "de": "Ordner",
+        "fr": "dossiers",
+        "it": "cartelle",
+        "ja": "フォルダ",
+        "zh": "文件夹",
+        "pt": "pastas"
+      },
+      "kind": "group",
+      "span": 3,
+      "accent": "b",
+      "columns": 2,
+      "rows": [
+        {
+          "name": "assets/",
+          "desc": {
+            "en": "icon, dark theme and the Qt Quick deck",
+            "es": "icono, tema oscuro y la cubierta Qt Quick",
+            "de": "Symbol, dunkles Thema und das",
+            "fr": "icône, thème sombre et le pupitre Qt Quick",
+            "it": "icona, tema scuro e il pannello Qt Quick",
+            "ja": "アイコン、ダークテーマ、Qt Quick デ",
+            "zh": "图标、深色主题和 Qt Quick 面板",
+            "pt": "ícone, tema escuro e o painel Qt Quick"
+          },
+          "tree_desc": {
+            "en": "icon, dark theme and the Qt Quick deck",
+            "es": "icono, tema oscuro y la cubierta Qt Quick",
+            "de": "Symbol, dunkles Thema und das Qt-Quick-Bedienfeld",
+            "fr": "icône, thème sombre et le pupitre Qt Quick",
+            "it": "icona, tema scuro e il pannello Qt Quick",
+            "ja": "アイコン、ダークテーマ、Qt Quick デッキ",
+            "zh": "图标、深色主题和 Qt Quick 面板",
+            "pt": "ícone, tema escuro e o painel Qt Quick"
+          }
+        },
+        {
+          "name": "images/",
+          "desc": {
+            "en": "banner and the pictures of the README",
+            "es": "banner e imágenes del README",
+            "de": "Banner und Bilder der README",
+            "fr": "bannière et images du README",
+            "it": "banner e immagini del README",
+            "ja": "バナーと README の図",
+            "zh": "横幅和 README 的图片",
+            "pt": "faixa e imagens do README"
+          },
+          "tree_desc": {
+            "en": "banner and the pictures of the README",
+            "es": "banner e imágenes del README",
+            "de": "Banner und Bilder der README",
+            "fr": "bannière et images du README",
+            "it": "banner e immagini del README",
+            "ja": "バナーと README の図",
+            "zh": "横幅和 README 的图片",
+            "pt": "faixa e imagens do README"
+          }
+        },
+        {
+          "name": "language/",
+          "desc": {
+            "en": "english/spanish/italian/french/german/japane",
+            "es": "english/spanish/italian/french/german/japane",
+            "de": "english/spanish/italian/french/german/japane",
+            "fr": "english/spanish/italian/french/german/japane",
+            "it": "english/spanish/italian/french/german/japane",
+            "ja": "english/spanish/italia",
+            "zh": "english/spanish/italia",
+            "pt": "english/spanish/italian/french/german/japane"
+          },
+          "tree_desc": {
+            "en": "english/spanish/italian/french/german/japanese/chinese/portuguese.lng - sits beside the exe, not bundled",
+            "es": "english/spanish/italian/french/german/japanese/chinese/portuguese.lng - junto al exe, no empaquetado dentro",
+            "de": "english/spanish/italian/french/german/japanese/chinese/portuguese.lng - liegt neben der exe, nicht gebündelt",
+            "fr": "english/spanish/italian/french/german/japanese/chinese/portuguese.lng - se trouve a cote de l'exe, pas integre",
+            "it": "english/spanish/italian/french/german/japanese/chinese/portuguese.lng - si trova accanto all'exe, non incorporato",
+            "ja": "english/spanish/italian/french/german/chinese/japanese/portuguese.lng —— exe の隣に置かれ、バンドルされない",
+            "zh": "english/spanish/italian/french/german/chinese/japanese/portuguese.lng —— 位于 exe 旁边，未打包",
+            "pt": "english/spanish/italian/french/german/japanese/chinese/portuguese.lng - ficam ao lado do exe, não empacotados"
+          }
+        },
+        {
+          "name": "docs/",
+          "desc": {
+            "en": "documents of the project",
+            "es": "documentos del proyecto",
+            "de": "Dokumente des Projekts",
+            "fr": "documents du projet",
+            "it": "documenti del progetto",
+            "ja": "プロジェクトの文書",
+            "zh": "项目文档",
+            "pt": "documentos do projeto"
+          },
+          "tree_desc": {
+            "en": "documents of the project",
+            "es": "documentos del proyecto",
+            "de": "Dokumente des Projekts",
+            "fr": "documents du projet",
+            "it": "documenti del progetto",
+            "ja": "プロジェクトの文書",
+            "zh": "项目文档",
+            "pt": "documentos do projeto"
+          }
+        },
+        {
+          "name": "tests/",
+          "desc": {
+            "en": "Real pytest suite",
+            "es": "Suite real de pytest",
+            "de": "Echte pytest-Suite",
+            "fr": "Vraie suite pytest",
+            "it": "Vera suite pytest",
+            "ja": "実際の pytest スイート(355 件の",
+            "zh": "真实的 pytest 套件(355 个测试)",
+            "pt": "Suíte pytest real"
+          },
+          "tree_desc": {
+            "en": "Real pytest suite (355 tests) - pure logic only, no PySide6 import anywhere here",
+            "es": "Suite real de pytest (355 pruebas) - solo logica pura, sin ningun import de PySide6 aqui",
+            "de": "Echte pytest-Suite (355 Tests) - nur reine Logik, hier wird nirgends PySide6 importiert",
+            "fr": "Vraie suite pytest (355 tests) - logique pure uniquement, aucun import de PySide6 ici",
+            "it": "Vera suite pytest (355 test) - solo logica pura, nessun import di PySide6 qui",
+            "ja": "実際の pytest スイート(355 件のテスト)—— 純粋なロジックのみ、ここでは PySide6 のインポートは一切なし",
+            "zh": "真实的 pytest 套件(355 个测试)——只测纯逻辑,这里完全没有导入 PySide6",
+            "pt": "Suíte pytest real (355 testes) - só lógica pura, sem importar PySide6 em lado nenhum"
+          }
+        },
+        {
+          "name": "tools/",
+          "desc": {
+            "en": "project tools and CI checks",
+            "es": "herramientas del proyecto y comprobaciones",
+            "de": "Projektwerkzeuge und CI-Prüfungen",
+            "fr": "outils du projet et vérifications de la CI",
+            "it": "strumenti del progetto e controlli della CI",
+            "ja": "プロジェクトのツールと CI の検査",
+            "zh": "项目工具和 CI 检查",
+            "pt": "ferramentas do projeto e verificações da CI"
+          },
+          "tree_desc": {
+            "en": "project tools and CI checks",
+            "es": "herramientas del proyecto y comprobaciones del CI",
+            "de": "Projektwerkzeuge und CI-Prüfungen",
+            "fr": "outils du projet et vérifications de la CI",
+            "it": "strumenti del progetto e controlli della CI",
+            "ja": "プロジェクトのツールと CI の検査",
+            "zh": "项目工具和 CI 检查",
+            "pt": "ferramentas do projeto e verificações da CI"
+          }
+        },
+        {
+          "name": ".github/",
+          "desc": {
+            "en": "CI workflow and issue templates",
+            "es": "flujo de CI y plantillas de incidencias",
+            "de": "CI-Workflow und Issue-Vorlagen",
+            "fr": "workflow de CI et modèles de tickets",
+            "it": "workflow di CI e modelli di segnalazione",
+            "ja": "CI ワークフローと Issue テンプレート",
+            "zh": "CI 工作流和 Issue 模板",
+            "pt": "fluxo de CI e modelos de problemas"
+          }
+        }
+      ]
+    },
+    {
+      "name": {
+        "en": "project files",
+        "es": "ficheros del proyecto",
+        "de": "Projektdateien",
+        "fr": "fichiers du projet",
+        "it": "file del progetto",
+        "ja": "プロジェクトのファイル",
+        "zh": "项目文件",
+        "pt": "ficheiros do projeto"
+      },
+      "kind": "group",
+      "span": 3,
+      "accent": "c",
+      "columns": 2,
+      "rows": [
+        {
+          "name": "main.py",
+          "desc": {
+            "en": "Entry point - QApplication",
+            "es": "Punto de entrada",
+            "de": "Einstiegspunkt",
+            "fr": "Point d'entree",
+            "it": "Punto di ingresso",
+            "ja": "エントリポイント——QApplication",
+            "zh": "入口点——QApplication",
+            "pt": "Ponto de entrada"
+          },
+          "tree_desc": {
+            "en": "Entry point - QApplication, theme, maximized start, F11 fullscreen toggle; --qtquick switches to the deck below",
+            "es": "Punto de entrada - QApplication, tema, arranque maximizado, alternancia F11 de pantalla completa; --qtquick cambia al panel de abajo",
+            "de": "Einstiegspunkt - QApplication, Theme, maximierter Start, F11-Vollbild-Umschalter; --qtquick wechselt zum Panel unten",
+            "fr": "Point d'entree - QApplication, theme, demarrage maximise, bascule plein ecran F11 ; --qtquick bascule vers le panneau ci-dessous",
+            "it": "Punto di ingresso - QApplication, tema, avvio massimizzato, toggle fullscreen F11; --qtquick passa al pannello sotto",
+            "ja": "エントリポイント——QApplication、テーマ、最大化起動、F11 フルスクリーン切替。--qtquick で下記のデッキに切り替え",
+            "zh": "入口点——QApplication、主题、最大化启动、F11 全屏切换；--qtquick 切换到下方面板",
+            "pt": "Ponto de entrada - QApplication, tema, arranque maximizado, F11 alterna ecrã inteiro; --qtquick muda para o painel abaixo"
+          }
+        },
+        {
+          "name": "qt_editor_urdf.py",
+          "desc": {
+            "en": "Qt Quick front end",
+            "es": "Interfaz Qt Quick",
+            "de": "Qt-Quick-Frontend",
+            "fr": "Interface Qt Quick",
+            "it": "Front end Qt Quick",
+            "ja": "Qt Quick フロントエンド —— 独立",
+            "zh": "Qt Quick 前端 —— 独立的 `",
+            "pt": "Front end Qt Quick"
+          },
+          "tree_desc": {
+            "en": "Qt Quick front end - standalone `--qtquick` command deck, bridges the unchanged EditorController to QML",
+            "es": "Interfaz Qt Quick - panel de comandos `--qtquick` independiente, conecta el EditorController sin tocar con QML",
+            "de": "Qt-Quick-Frontend - eigenständiges `--qtquick`-Kommandopult, verbindet den unveränderten EditorController mit QML",
+            "fr": "Interface Qt Quick - panneau de commandes `--qtquick` autonome, relie l'EditorController inchange a QML",
+            "it": "Front end Qt Quick - pannello comandi `--qtquick` autonomo, collega l'EditorController invariato a QML",
+            "ja": "Qt Quick フロントエンド —— 独立した `--qtquick` コマンドデッキ、変更を加えていない EditorController を QML に接続",
+            "zh": "Qt Quick 前端 —— 独立的 `--qtquick` 命令面板，将未改动的 EditorController 接入 QML",
+            "pt": "Front end Qt Quick - painel de comandos `--qtquick` autónomo, liga o EditorController inalterado ao QML"
+          }
+        },
+        {
+          "name": "run.bat / run.sh",
+          "desc": {
+            "en": "Convenience wrapper",
+            "es": "Script de conveniencia",
+            "de": "Komfort-Skript",
+            "fr": "Script pratique",
+            "it": "Script di comodo",
+            "ja": "簡易起動スクリプト——.venv があれば有",
+            "zh": "便捷启动脚本——若存在 .venv 则激活",
+            "pt": "Invólucro de conveniência"
+          },
+          "tree_desc": {
+            "en": "Convenience wrapper - activates .venv if present, runs main.py, no auto-close",
+            "es": "Script de conveniencia - activa .venv si existe, ejecuta main.py, no se autocierra",
+            "de": "Komfort-Skript - aktiviert .venv falls vorhanden, startet main.py, schliesst sich nicht selbst",
+            "fr": "Script pratique - active .venv si present, lance main.py, ne se ferme pas seul",
+            "it": "Script di comodo - attiva .venv se presente, esegue main.py, non si chiude da solo",
+            "ja": "簡易起動スクリプト——.venv があれば有効化し main.py を実行、自動では閉じない",
+            "zh": "便捷启动脚本——若存在 .venv 则激活，运行 main.py，不会自行关闭窗口",
+            "pt": "Invólucro de conveniência - ativa o .venv se existir, executa o main.py, sem fecho automático"
+          }
+        },
+        {
+          "name": "requirements.txt",
+          "desc": {
+            "en": "PySide6, PyOpenGL, numpy-stl, numpy (pinned)",
+            "es": "PySide6, PyOpenGL, numpy-stl, numpy",
+            "de": "PySide6, PyOpenGL, numpy-stl, numpy",
+            "fr": "PySide6, PyOpenGL, numpy-stl, numpy",
+            "it": "PySide6, PyOpenGL, numpy-stl, numpy",
+            "ja": "PySide6、PyOpenGL、numpy",
+            "zh": "PySide6、PyOpenGL、numpy",
+            "pt": "PySide6, PyOpenGL, numpy-stl, numpy"
+          },
+          "tree_desc": {
+            "en": "PySide6, PyOpenGL, numpy-stl, numpy (pinned)",
+            "es": "PySide6, PyOpenGL, numpy-stl, numpy (con versiones fijadas)",
+            "de": "PySide6, PyOpenGL, numpy-stl, numpy (fest gepinnt)",
+            "fr": "PySide6, PyOpenGL, numpy-stl, numpy (versions figees)",
+            "it": "PySide6, PyOpenGL, numpy-stl, numpy (con versioni fissate)",
+            "ja": "PySide6、PyOpenGL、numpy-stl、numpy（バージョン固定）",
+            "zh": "PySide6、PyOpenGL、numpy-stl、numpy（已锁定版本）",
+            "pt": "PySide6, PyOpenGL, numpy-stl, numpy (fixados)"
+          }
+        },
+        {
+          "name": "requirements-dev.txt",
+          "desc": {
+            "en": "numpy + pytest only",
+            "es": "Solo numpy + pytest",
+            "de": "Nur numpy + pytest",
+            "fr": "numpy + pytest seulement",
+            "it": "Solo numpy + pytest",
+            "ja": "numpy と pytest のみ —— t",
+            "zh": "仅 numpy + pytest——test",
+            "pt": "só numpy + pytest"
+          },
+          "tree_desc": {
+            "en": "numpy + pytest only - what tests/ actually needs, no PySide6",
+            "es": "Solo numpy + pytest - lo que tests/ necesita de verdad, sin PySide6",
+            "de": "Nur numpy + pytest - was tests/ tatsaechlich braucht, ohne PySide6",
+            "fr": "numpy + pytest seulement - ce dont tests/ a reellement besoin, sans PySide6",
+            "it": "Solo numpy + pytest - cio di cui tests/ ha davvero bisogno, senza PySide6",
+            "ja": "numpy と pytest のみ —— tests/ が実際に必要とするもの、PySide6 は含まない",
+            "zh": "仅 numpy + pytest——tests/ 真正需要的东西,不含 PySide6",
+            "pt": "só numpy + pytest - o que os tests/ realmente precisam, sem PySide6"
+          }
+        },
+        {
+          "name": "build_exe.bat / build_exe.sh",
+          "desc": {
+            "en": "Windows/Linux standalone-executable build",
+            "es": "Scripts de compilación de ejecutable",
+            "de": "Build-Skripte für eigenständige",
+            "fr": "Scripts de build d'executable autonome",
+            "it": "Script di build per eseguibile standalone",
+            "ja": "Windows/Linux 独立実行ファイル",
+            "zh": "Windows/Linux 独立可执行文件构",
+            "pt": "Scripts de compilação de executável"
+          },
+          "tree_desc": {
+            "en": "Windows/Linux standalone-executable build scripts (PyInstaller) - bumps the version first",
+            "es": "Scripts de compilación de ejecutable independiente para Windows/Linux (PyInstaller) - primero sube la versión",
+            "de": "Build-Skripte für eigenständige Windows-/Linux-Executables (PyInstaller) - erhöht zuerst die Versionsnummer",
+            "fr": "Scripts de build d'executable autonome Windows/Linux (PyInstaller) - fait d'abord monter le numero de version",
+            "it": "Script di build per eseguibile standalone Windows/Linux (PyInstaller) - esegue prima il bump della versione",
+            "ja": "Windows/Linux 独立実行ファイルビルドスクリプト（PyInstaller）——最初にバージョンを加算",
+            "zh": "Windows/Linux 独立可执行文件构建脚本（PyInstaller）——先递增版本号",
+            "pt": "Scripts de compilação de executável autónomo para Windows/Linux (PyInstaller) - sobem primeiro a versão"
+          }
+        },
+        {
+          "name": "build-test.bat / build-test.sh",
+          "desc": {
+            "en": "Non-versioning build/compile check",
+            "es": "Comprobación de build/compilación sin subir",
+            "de": "Build-/Kompilierprüfung ohne",
+            "fr": "Controle build/compilation sans gestion de",
+            "it": "Controllo build/compilazione senza",
+            "ja": "バージョンを更新しないビルド/コンパイル確認",
+            "zh": "不递增版本号的构建/编译检查",
+            "pt": "Verificação de compilação sem alterar"
+          },
+          "tree_desc": {
+            "en": "Non-versioning build/compile check",
+            "es": "Comprobación de build/compilación sin subir versión",
+            "de": "Build-/Kompilierprüfung ohne Versionserhöhung",
+            "fr": "Controle build/compilation sans gestion de version",
+            "it": "Controllo build/compilazione senza incremento di versione",
+            "ja": "バージョンを更新しないビルド/コンパイル確認",
+            "zh": "不递增版本号的构建/编译检查",
+            "pt": "Verificação de compilação sem alterar versões"
+          }
+        },
+        {
+          "name": "HYDRA-UMC_EDITOR-URDF.spec",
+          "desc": {
+            "en": "PyInstaller build spec used",
+            "es": "Spec de PyInstaller usado por",
+            "de": "PyInstaller-Build-Spec",
+            "fr": "Spec PyInstaller utilisee par",
+            "it": "Spec PyInstaller usata da build_exe.bat/.sh",
+            "ja": "build_exe.bat/.sh が使用す",
+            "zh": "build_exe.bat/.sh 使用的",
+            "pt": "Especificação de compilação do PyInstaller"
+          },
+          "tree_desc": {
+            "en": "PyInstaller build spec used by build_exe.bat/.sh",
+            "es": "Spec de PyInstaller usado por build_exe.bat/.sh",
+            "de": "PyInstaller-Build-Spec, verwendet von build_exe.bat/.sh",
+            "fr": "Spec PyInstaller utilisee par build_exe.bat/.sh",
+            "it": "Spec PyInstaller usata da build_exe.bat/.sh",
+            "ja": "build_exe.bat/.sh が使用する PyInstaller ビルド仕様",
+            "zh": "build_exe.bat/.sh 使用的 PyInstaller 构建规格",
+            "pt": "Especificação de compilação do PyInstaller usada pelo build_exe.bat/.sh"
+          }
+        },
+        {
+          "name": "bump_version.py",
+          "desc": {
+            "en": "explicit version bump",
+            "es": "Incremento de versión tipo cuentakilómetros",
+            "de": "ausdrückliche Versionserhöhung",
+            "fr": "Incrément de version type compteur",
+            "it": "Incremento di versione stile contachilometri",
+            "ja": "明示的なバージョン更新",
+            "zh": "显式提升版本",
+            "pt": "Subida de versão ao estilo conta-quilómetros"
+          },
+          "tree_desc": {
+            "en": "explicit version bump",
+            "es": "Incremento de versión tipo cuentakilómetros (solo lo ejecuta el comando `bump` explícito)",
+            "de": "ausdrückliche Versionserhöhung",
+            "fr": "Incrément de version type compteur kilométrique (exécuté seulement par la commande `bump` explicite)",
+            "it": "Incremento di versione stile contachilometri (eseguito solo dal comando `bump` esplicito)",
+            "ja": "明示的なバージョン更新",
+            "zh": "显式提升版本",
+            "pt": "Subida de versão ao estilo conta-quilómetros (executada só pelo comando `bump` explícito)"
+          }
+        },
+        {
+          "name": "bump_manifest_version.py",
+          "desc": {
+            "en": "Syncs hydra-umc.project.json's version",
+            "es": "Sincroniza la versión de",
+            "de": "Synchronisiert die Version von",
+            "fr": "Synchronise la version de",
+            "it": "Sincronizza la versione di",
+            "ja": "hydra-umc.project.json",
+            "zh": "将 hydra-umc.project.js",
+            "pt": "Sincroniza a versão do"
+          },
+          "tree_desc": {
+            "en": "Syncs hydra-umc.project.json's version to the native one (--sync)",
+            "es": "Sincroniza la versión de hydra-umc.project.json con la nativa (--sync)",
+            "de": "Synchronisiert die Version von hydra-umc.project.json mit der nativen (--sync)",
+            "fr": "Synchronise la version de hydra-umc.project.json avec la version native (--sync)",
+            "it": "Sincronizza la versione di hydra-umc.project.json con quella nativa (--sync)",
+            "ja": "hydra-umc.project.json のバージョンをネイティブ側と同期（--sync）",
+            "zh": "将 hydra-umc.project.json 的版本与原生版本同步（--sync）",
+            "pt": "Sincroniza a versão do hydra-umc.project.json com a nativa (--sync)"
+          }
+        },
+        {
+          "name": "CHANGELOG.md",
+          "desc": {
+            "en": "Version history",
+            "es": "Historial de versiones",
+            "de": "Versionshistorie",
+            "fr": "Historique des versions",
+            "it": "Cronologia delle versioni",
+            "ja": "バージョン履歴",
+            "zh": "版本历史",
+            "pt": "Histórico de versões"
+          },
+          "tree_desc": {
+            "en": "Version history",
+            "es": "Historial de versiones",
+            "de": "Versionshistorie",
+            "fr": "Historique des versions",
+            "it": "Cronologia delle versioni",
+            "ja": "バージョン履歴",
+            "zh": "版本历史",
+            "pt": "Histórico de versões"
+          }
+        },
+        {
+          "name": "LICENSE",
+          "desc": {
+            "en": "GPL-3.0-or-later",
+            "es": "GPL-3.0-or-later",
+            "de": "GPL-3.0-or-later",
+            "fr": "GPL-3.0-or-later",
+            "it": "GPL-3.0-or-later",
+            "ja": "GPL-3.0-or-later",
+            "zh": "GPL-3.0-or-later",
+            "pt": "GPL-3.0-or-later"
+          },
+          "tree_desc": {
+            "en": "GPL-3.0-or-later",
+            "es": "GPL-3.0-or-later",
+            "de": "GPL-3.0-or-later",
+            "fr": "GPL-3.0-or-later",
+            "it": "GPL-3.0-or-later",
+            "ja": "GPL-3.0-or-later",
+            "zh": "GPL-3.0-or-later",
+            "pt": "GPL-3.0-or-later"
+          }
+        },
+        {
+          "name": "hydra-umc.project.json",
+          "desc": {
+            "en": "manifest: version, maturity, family",
+            "es": "manifiesto: versión, madurez, familia",
+            "de": "Manifest: Version, Reifegrad, Familie",
+            "fr": "manifeste : version, maturité, famille",
+            "it": "manifesto: versione, maturità, famiglia",
+            "ja": "マニフェスト：バージョン、成熟度、ファミリー",
+            "zh": "清单：版本、成熟度、系列",
+            "pt": "manifesto: versão, maturidade, família"
+          }
+        },
+        {
+          "name": "test.sh",
+          "desc": {
+            "en": "non-mutating build check",
+            "es": "comprobación de compilación sin cambios",
+            "de": "Build-Prüfung ohne Änderungen",
+            "fr": "vérification de build sans modification",
+            "it": "controllo di build senza modifiche",
+            "ja": "変更を伴わないビルド確認",
+            "zh": "不修改内容的构建检查",
+            "pt": "verificação de compilação sem alterações"
+          }
+        }
+      ]
+    }
+  ]
+}
