@@ -92,3 +92,35 @@ def test_saving_leaves_the_dropped_elements_out_as_the_warning_says():
     robot = parse_urdf_string(arm("".join(joint(i) for i in range(1, 7)), "<transmission name='t'/>"))
     written = robot_to_urdf_string(robot)
     assert "transmission" not in written
+
+
+# ---- keeping the elements the model has no field for
+
+def test_the_unsupported_elements_are_left_out_by_default_and_written_back_on_request():
+    inside = '<dynamics damping="0.5" friction="0.1"/><safety_controller k_velocity="3"/>'
+    extra = '<transmission name="t1"><joint name="j1"/></transmission><gazebo reference="l1"><material>Gazebo/Red</material></gazebo>'
+    robot = parse_urdf_string(arm("".join(joint(i, inside if i == 1 else "") for i in range(1, 7)), extra))
+    assert len(robot.joints["j1"].extra_xml) == 2 and len(robot.extra_xml) == 2
+
+    plain = robot_to_urdf_string(robot)
+    assert "dynamics" not in plain and "transmission" not in plain and "gazebo" not in plain
+
+    kept = robot_to_urdf_string(robot, keep_unsupported=True)
+    again = parse_urdf_string(kept)
+    assert again.dropped_elements == robot.dropped_elements
+    assert 'damping="0.5"' in kept and "<safety_controller" in kept and "Gazebo/Red" in kept
+    # and a second round trip changes nothing
+    assert robot_to_urdf_string(again, keep_unsupported=True) == kept
+
+
+def test_a_mimic_keeps_its_multiplier_and_offset_when_kept():
+    robot = parse_urdf_string(arm("".join(joint(i, '<mimic joint="j1" multiplier="2" offset="0.1"/>' if i == 2 else "") for i in range(1, 7))))
+    kept = robot_to_urdf_string(robot, keep_unsupported=True)
+    assert 'multiplier="2"' in kept and 'offset="0.1"' in kept
+    assert "multiplier" not in robot_to_urdf_string(robot)
+
+
+def test_an_element_that_names_a_joint_that_was_deleted_is_not_written_back():
+    robot = parse_urdf_string(arm("".join(joint(i) for i in range(1, 7)), '<transmission name="t6"><joint name="j6"/></transmission>'))
+    del robot.joints["j6"]
+    assert "transmission" not in robot_to_urdf_string(robot, keep_unsupported=True)

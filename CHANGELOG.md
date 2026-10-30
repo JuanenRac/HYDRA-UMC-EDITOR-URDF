@@ -4,6 +4,7 @@ All notable changes to this project are documented here.
 
 ## [Unreleased]
 
+- **The elements the model has no field for can be written back:** the reader now keeps, as text, the `<transmission>`, `<gazebo>` and other children of `<robot>` and the `<dynamics>`, `<safety_controller>`, `<calibration>` and `<mimic>` (with its multiplier and offset) of each joint, and `robot_to_urdf_string(robot, keep_unsupported=True)` writes them back, leaving out those that name a joint or link that was deleted. The default is unchanged (they are left out, and the screen that lists them still says so); there is no switch in the windows yet.
 - **README in the universal layout:** the README and its seven translations follow the layout that the four families share (22 sections in a fixed order), with an architecture picture and a repository-structure picture drawn from `docs/architecture.json` and `docs/structure.json`; the CI validator checks both pictures and the file tree.
 
 - **The layout of the README is checked in the CI:** the validator runs `tools/universal_readme_check.py` and lists, as a warning, what differs from the universal layout of the README.

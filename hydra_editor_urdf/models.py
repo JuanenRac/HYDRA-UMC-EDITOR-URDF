@@ -190,6 +190,10 @@ class Joint:
     # `<mimic joint="...">`: the name of the joint this one follows. The editor does not keep the rest of the element (multiplier,
     # offset) and does not write it back, but a follower is not a degree of freedom of its own, so it must not be counted as one.
     mimic_of: str | None = field(default=None, compare=False)
+    # The children of this <joint> the model has no field for (<dynamics>, <safety_controller>, <calibration>, <mimic> with its
+    # multiplier and offset, ...), as the XML text they had in the file. The writer puts them back only when asked to
+    # (robot_to_urdf_string(keep_unsupported=True)).
+    extra_xml: tuple[str, ...] = field(default=(), compare=False)
 
     @property
     def is_movable(self) -> bool:
@@ -214,6 +218,9 @@ class Robot:
     # What the source file had that this model does not keep (and the writer therefore does not write): the element, e.g.
     # "<transmission>" or "<joint><dynamics>", and how many times. Filled by urdf/parser.py; empty for a robot built by hand.
     dropped_elements: dict[str, int] = field(default_factory=dict, compare=False)
+    # The children of <robot> the model has no place for (<transmission>, <gazebo>, ...) as their XML text, kept for
+    # robot_to_urdf_string(keep_unsupported=True).
+    extra_xml: tuple[str, ...] = field(default=(), compare=False)
 
     def joints_by_parent(self) -> dict[str, list[Joint]]:
         result: dict[str, list[Joint]] = {}

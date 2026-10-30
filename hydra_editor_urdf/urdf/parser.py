@@ -283,7 +283,12 @@ def _parse_joint(el: ET.Element) -> Joint:
 
     mimic_el = el.find("mimic")
     mimic_of = mimic_el.get("joint") if mimic_el is not None and mimic_el.get("joint") else None
-    return Joint(name=name, type=jtype, parent=parent, child=child, origin=_parse_origin(el.find("origin")), axis=axis, limit=limit, mimic_of=mimic_of)  # type: ignore[arg-type]
+    extra = tuple(
+        ET.tostring(sub, encoding="unicode").strip()
+        for sub in el
+        if isinstance(sub.tag, str) and sub.tag not in _KEPT_CHILDREN["joint"]
+    )
+    return Joint(name=name, type=jtype, parent=parent, child=child, origin=_parse_origin(el.find("origin")), axis=axis, limit=limit, mimic_of=mimic_of, extra_xml=extra)  # type: ignore[arg-type]
 
 
 def parse_urdf_string(xml_text: str) -> Robot:
@@ -313,6 +318,11 @@ def parse_urdf_string(xml_text: str) -> Robot:
     robot = Robot(name=root.get("name", "robot"))
     robot.materials = _parse_top_level_materials(root)
     robot.dropped_elements = find_dropped_elements(root)
+    robot.extra_xml = tuple(
+        ET.tostring(child, encoding="unicode").strip()
+        for child in root
+        if isinstance(child.tag, str) and child.tag not in _KEPT_CHILDREN["robot"]
+    )
 
     for link_el in root.findall("link"):
         link = _parse_link(link_el, robot.materials)

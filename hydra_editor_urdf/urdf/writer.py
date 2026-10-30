@@ -117,7 +117,15 @@ def _set_link(root: ET.Element, link: Link) -> None:
     _set_inertial(link_el, link.inertial)
 
 
-def _set_joint(root: ET.Element, joint: Joint) -> None:
+def _append_raw(parent: ET.Element, fragments: tuple[str, ...]) -> None:
+    for fragment in fragments:
+        try:
+            parent.append(ET.fromstring(fragment))
+        except ET.ParseError:
+            continue  # a fragment that no longer parses is left out rather than breaking the export
+
+
+def _set_joint(root: ET.Element, joint: Joint, keep_unsupported: bool = False) -> None:
     joint_el = ET.SubElement(root, "joint")
     joint_el.set("name", joint.name)
     joint_el.set("type", joint.type.value)
@@ -135,9 +143,14 @@ def _set_joint(root: ET.Element, joint: Joint) -> None:
         limit_el.set("upper", _fmt_one(joint.limit.upper))
         limit_el.set("effort", _fmt_one(joint.limit.effort))
         limit_el.set("velocity", _fmt_one(joint.limit.velocity))
+    if keep_unsupported:
+        _append_raw(joint_el, joint.extra_xml)
 
 
-def robot_to_urdf_string(robot: Robot, pretty: bool = True) -> str:
+def robot_to_urdf_string(robot: Robot, pretty: bool = True, keep_unsupported: bool = False) -> str:
+    """The URDF text of `robot`. With `keep_unsupported=True` the elements the model has no field for (<transmission>,
+    <gazebo>, <dynamics>, <safety_controller>, <mimic> with its multiplier and offset, ...) are written back as the file
+    had them, except those that name a joint or link the robot no longer has; by default they are left out, as before."""
     root = ET.Element("robot")
     root.set("name", robot.name)
 
@@ -149,7 +162,22 @@ def robot_to_urdf_string(robot: Robot, pretty: bool = True) -> str:
     for link in robot.links.values():
         _set_link(root, link)
     for joint in robot.joints.values():
-        _set_joint(root, joint)
+        _set_joint(root, joint, keep_unsupported)
+    if keep_unsupported:
+        known = set(robot.joints) | set(robot.links)
+        for fragment in robot.extra_xml:
+            try:
+                element = ET.fromstring(fragment)
+            except ET.ParseError:
+                continue
+            named = set()
+            for e in element.iter():
+                named.update(v for v in (e.get("joint"), e.get("link"), e.get("reference")) if v)
+                if e.tag in ("joint", "link") and e.get("name"):
+                    named.add(e.get("name"))
+            if named - known:
+                continue  # it points at something that was deleted or renamed
+            root.append(element)
 
     raw = ET.tostring(root, encoding="unicode")
     if not pretty:
