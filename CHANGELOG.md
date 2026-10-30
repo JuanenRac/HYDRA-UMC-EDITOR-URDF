@@ -4,6 +4,8 @@ All notable changes to this project are documented here.
 
 ## [Unreleased]
 
+- **The unit of a mesh is declared by its model:** a `metadata.json` in the folder of the meshes (or up to three folders above) with `"unit": "mm"` or `"m"` decides the scale. Only when no unit is declared is the size of the mesh used to guess it, as before, and the span above which a mesh is taken for millimeters is `mesh_millimeter_span` in `hydra_editor_urdf_config.json` (5 by default; 0 turns the guess off). A mesh that its URDF already scales (`<mesh scale=...>` other than 1 1 1) is no longer guessed a second time, so a model with `scale="0.001 0.001 0.001"` is not made 1000 times smaller again.
+
 - **The elements the model has no field for can be written back:** the reader now keeps, as text, the `<transmission>`, `<gazebo>` and other children of `<robot>` and the `<dynamics>`, `<safety_controller>`, `<calibration>` and `<mimic>` (with its multiplier and offset) of each joint, and `robot_to_urdf_string(robot, keep_unsupported=True)` writes them back, leaving out those that name a joint or link that was deleted. The default is unchanged (they are left out, and the screen that lists them still says so). The Export button now opens a window that says how many such elements the source file has and has a switch, off by default and off again for every robot that is loaded, to write them back; it is in the eight languages.
 - **README in the universal layout:** the README and its seven translations follow the layout that the four families share (22 sections in a fixed order), with an architecture picture and a repository-structure picture drawn from `docs/architecture.json` and `docs/structure.json`; the CI validator checks both pictures and the file tree.
 

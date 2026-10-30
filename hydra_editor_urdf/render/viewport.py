@@ -310,7 +310,9 @@ class UrdfGLRenderer:
                     missing.append(f"{link_name}: {geometry.filename}" if link_name else geometry.filename)
                 return None
             try:
-                mesh = load_mesh_file(resolved)
+                # A URDF that scales the mesh itself (a scale other than 1 1 1) already says what the unit is:
+                # the size guess would shrink it a second time.
+                mesh = load_mesh_file(resolved, fallback=geometry.scale == (1.0, 1.0, 1.0))
             except (UnsupportedMeshFormat, MalformedMeshFile, OSError, ValueError):
                 if missing is not None:
                     missing.append(f"{link_name}: {geometry.filename}" if link_name else geometry.filename)

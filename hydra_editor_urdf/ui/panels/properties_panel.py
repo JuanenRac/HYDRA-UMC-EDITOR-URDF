@@ -292,7 +292,7 @@ class PropertiesPanel(QWidget):
                 return
             try:
                 from hydra_editor_urdf.render.mesh import load_mesh_file
-                mesh = load_mesh_file(resolved).scaled(geometry.scale)
+                mesh = load_mesh_file(resolved, fallback=geometry.scale == (1.0, 1.0, 1.0)).scaled(geometry.scale)
                 mins = mesh.vertices.min(axis=0)
                 maxs = mesh.vertices.max(axis=0)
                 extents = maxs - mins

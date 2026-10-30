@@ -22,6 +22,7 @@
 # =============================================================================
 from __future__ import annotations
 
+import json
 import struct
 from collections import OrderedDict
 from dataclasses import dataclass
@@ -86,19 +87,70 @@ class Mesh:
         return Mesh(vertices=new_vertices, normals=new_normals)
 
 
-def _guard_mm_vs_m_scale(vertices: np.ndarray) -> np.ndarray:
-    """Same defensive mm-vs-m check HYDRA-UMC-STUDIO's own useRealScaleSTL()
-    and HYDRA-UMC-SUITE's own render/mesh.py apply - a surprising number of
-    real-world exported meshes are authored in millimeters without saying
-    so anywhere the file format can record. A single robot link bigger
-    than 5 real-world meters in any axis is far more likely to be a
-    millimeter-scale mesh than an actual giant robot part."""
+# The unit of the meshes of a model is declared in the `metadata.json` of its folder (`"unit": "mm"` or `"m"`).
+# Only when it is not declared is the size of the mesh used to guess it, and the span above which a mesh is taken
+# for millimeters is `mesh_millimeter_span` in hydra_editor_urdf_config.json (0 turns the guess off).
+DEFAULT_MILLIMETER_SPAN = 5.0
+_UNIT_NAMES = {
+    "mm": "mm", "millimeter": "mm", "millimeters": "mm", "millimetre": "mm", "millimetres": "mm",
+    "m": "m", "meter": "m", "meters": "m", "metre": "m", "metres": "m",
+}
+_METADATA_LEVELS = 4
+
+
+def normalize_unit(value: object) -> str | None:
+    """"mm" or "m" for a declared unit, None for anything else (not declared, or not understood)."""
+    if not isinstance(value, str):
+        return None
+    return _UNIT_NAMES.get(value.strip().lower())
+
+
+def declared_unit(path: str | Path) -> str | None:
+    """The unit the `metadata.json` next to a mesh, or in the folders above it, declares for the model."""
+    folder = Path(path).resolve().parent
+    for _ in range(_METADATA_LEVELS):
+        metadata = folder / "metadata.json"
+        if metadata.is_file():
+            try:
+                data = json.loads(metadata.read_text(encoding="utf-8"))
+            except (OSError, ValueError):
+                return None
+            if isinstance(data, dict):
+                return normalize_unit(data.get("unit", data.get("units")))
+            return None
+        if folder.parent == folder:
+            break
+        folder = folder.parent
+    return None
+
+
+def millimeter_span() -> float:
+    """The span (in the unit of the file) above which an undeclared mesh is taken for millimeters."""
+    from hydra_editor_urdf.i18n import load_config
+
+    value = load_config().get("mesh_millimeter_span", DEFAULT_MILLIMETER_SPAN)
+    if isinstance(value, bool) or not isinstance(value, (int, float)) or value < 0:
+        return DEFAULT_MILLIMETER_SPAN
+    return float(value)
+
+
+def _guard_mm_vs_m_scale(vertices: np.ndarray, unit: str | None = None, fallback: bool = True) -> np.ndarray:
+    """Brings the vertices to meters. A unit declared for the model decides ("mm" scales by 0.001, "m" leaves the
+    mesh alone). Without one, the defensive check HYDRA-UMC-STUDIO's own useRealScaleSTL() and HYDRA-UMC-SUITE's
+    own render/mesh.py apply is the fallback: a single robot link bigger than 5 real-world meters in any axis is far
+    more likely to be a millimeter-scale mesh than an actual giant robot part. The fallback is not applied when
+    `fallback` is False (a URDF that scales the mesh itself)."""
     if len(vertices) == 0:
         raise MalformedMeshFile("the mesh has no triangles")
     if not np.isfinite(vertices).all():
         raise MalformedMeshFile("the mesh has vertices that are not finite numbers")
+    if unit == "mm":
+        return vertices * 0.001
+    if unit == "m" or not fallback:
+        return vertices
+    limit = millimeter_span()
     span = vertices.max(axis=0) - vertices.min(axis=0)
-    if float(np.max(span)) > 5.0:
+    if limit > 0 and float(np.max(span)) > limit:
         return vertices * 0.001
     return vertices
 
@@ -120,11 +172,11 @@ def _is_truncated_binary_stl(path: Path) -> bool:
     return 84 + 50 * declared > size
 
 
-def load_stl(path: str | Path) -> Mesh:
+def load_stl(path: str | Path, unit: str | None = None, fallback: bool = True) -> Mesh:
     if _is_truncated_binary_stl(Path(path)):
         raise MalformedMeshFile(f"{Path(path).name}: the file is cut short - its header promises more triangles than it holds.")
     raw = stl_mesh.Mesh.from_file(str(path))
-    vertices = _guard_mm_vs_m_scale(raw.vectors.reshape(-1, 3).astype(np.float32))
+    vertices = _guard_mm_vs_m_scale(raw.vectors.reshape(-1, 3).astype(np.float32), unit, fallback)
 
     normals = np.repeat(raw.normals.astype(np.float32), 3, axis=0)
     lengths = np.linalg.norm(normals, axis=1, keepdims=True)
@@ -134,7 +186,7 @@ def load_stl(path: str | Path) -> Mesh:
     return Mesh(vertices=vertices, normals=normals)
 
 
-def load_obj(path: str | Path) -> Mesh:
+def load_obj(path: str | Path, unit: str | None = None, fallback: bool = True) -> Mesh:
     """Minimal Wavefront OBJ loader - `v`/`vn`/`f` only (no material
     library, no texture coordinates, no quad-to-triangle-fan for anything
     beyond a plain triangle/quad face). Good enough for a robot
@@ -209,7 +261,7 @@ def load_obj(path: str | Path) -> Mesh:
                 for i in range(1, len(face) - 1):
                     emit_triangle(face[0], face[i], face[i + 1])
 
-    vertices = _guard_mm_vs_m_scale(np.array(out_vertices, dtype=np.float32))
+    vertices = _guard_mm_vs_m_scale(np.array(out_vertices, dtype=np.float32), unit, fallback)
     normals = np.array(out_normals, dtype=np.float32)
     return Mesh(vertices=vertices, normals=normals)
 
@@ -317,7 +369,7 @@ def make_sphere_mesh(radius: float, segments: int = 16, rings: int = 12) -> Mesh
 # size and is read again; a mesh that could not be read is never kept. The arrays are read-only: whoever scales a
 # mesh gets a new one (`Mesh.scaled`), and the shared original can never be changed by mistake.
 MESH_CACHE_BYTES = 256 * 1024 * 1024
-_mesh_cache: "OrderedDict[tuple[str, int, int], Mesh]" = OrderedDict()
+_mesh_cache: "OrderedDict[tuple[str, int, int, str, bool, float], Mesh]" = OrderedDict()
 _mesh_cache_bytes = 0
 
 
@@ -332,21 +384,23 @@ def clear_mesh_cache() -> None:
     _mesh_cache_bytes = 0
 
 
-def load_mesh_file(path: str | Path) -> Mesh:
-    """The mesh in a file, from the cache when the file has not changed since it was read (see above); the one entry
-    point render/kinematics.py's mesh cache and source/scan.py both use."""
+def load_mesh_file(path: str | Path, fallback: bool = True) -> Mesh:
+    """The mesh in a file, in meters, from the cache when the file has not changed since it was read (see above);
+    the one entry point render/kinematics.py's mesh cache and source/scan.py both use. The unit comes from the
+    metadata of the model; `fallback=False` keeps the size guess off for a mesh that the URDF scales itself."""
     global _mesh_cache_bytes
     path = Path(path)
+    unit = declared_unit(path)
     try:
         stat = path.stat()
-        key = (str(path.resolve()), stat.st_mtime_ns, stat.st_size)
+        key = (str(path.resolve()), stat.st_mtime_ns, stat.st_size, unit or "", fallback, millimeter_span())
     except OSError:
-        return _read_mesh_file(path)  # the error of the read says what is wrong with the path
+        return _read_mesh_file(path, unit, fallback)  # the error of the read says what is wrong with the path
     cached = _mesh_cache.get(key)
     if cached is not None:
         _mesh_cache.move_to_end(key)
         return cached
-    mesh = _read_mesh_file(path)
+    mesh = _read_mesh_file(path, unit, fallback)
     mesh.vertices.flags.writeable = False
     mesh.normals.flags.writeable = False
     size = _mesh_bytes(mesh)
@@ -359,12 +413,12 @@ def load_mesh_file(path: str | Path) -> Mesh:
     return mesh
 
 
-def _read_mesh_file(path: Path) -> Mesh:
+def _read_mesh_file(path: Path, unit: str | None = None, fallback: bool = True) -> Mesh:
     """Dispatches on file extension - adding a new format later means touching this function alone."""
     suffix = path.suffix.lower()
     if suffix in (".stl", ".obj"):
         try:
-            return load_stl(path) if suffix == ".stl" else load_obj(path)
+            return load_stl(path, unit, fallback) if suffix == ".stl" else load_obj(path, unit, fallback)
         except (ValueError, IndexError, AssertionError, struct.error) as error:
             # an empty, truncated or hand-edited file must be reported as a
             # mesh that could not be loaded, never abort the whole render

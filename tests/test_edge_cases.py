@@ -637,7 +637,7 @@ def test_a_mesh_is_read_from_disk_once_until_the_file_changes(tmp_path: Path, mo
     _write_ascii_stl(path, 2)
     reads: list[str] = []
     real = mesh_module._read_mesh_file
-    monkeypatch.setattr(mesh_module, "_read_mesh_file", lambda p: reads.append(str(p)) or real(p))
+    monkeypatch.setattr(mesh_module, "_read_mesh_file", lambda p, *args: reads.append(str(p)) or real(p, *args))
     first = mesh_module.load_mesh_file(path)
     second = mesh_module.load_mesh_file(path)
     assert first is second and first.triangle_count == 2
