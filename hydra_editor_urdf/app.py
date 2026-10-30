@@ -188,13 +188,19 @@ class EditorController(QObject):
 
     # --- export ------------------------------------------------------------
 
-    def export_urdf_string(self) -> str | None:
+    def export_urdf_string(self, keep_unsupported: bool = False) -> str | None:
+        """The URDF text of the robot. With `keep_unsupported` the elements the model has no field for (transmissions,
+        gazebo, joint dynamics, ...) are written back as the source file had them; off by default."""
         if self.robot is None:
             return None
-        return robot_to_urdf_string(self.robot)
+        return robot_to_urdf_string(self.robot, keep_unsupported=keep_unsupported)
 
-    def export_urdf_file(self, path: str | Path, mesh_root: str | Path | None = None) -> None:
-        text = self.export_urdf_string()
+    def unsupported_count(self) -> int:
+        """How many elements of the source file the model has no field for (they are lost on export unless kept)."""
+        return sum(self.robot.dropped_elements.values()) if self.robot is not None else 0
+
+    def export_urdf_file(self, path: str | Path, mesh_root: str | Path | None = None, keep_unsupported: bool = False) -> None:
+        text = self.export_urdf_string(keep_unsupported=True) if keep_unsupported else self.export_urdf_string()
         if text is None:
             raise ValueError("No robot loaded to export.")
         path = Path(path)

@@ -178,6 +178,7 @@ class EditorQtBridge(QObject):
         self._viewport_frame_version = 0
 
         # -- Upload panel
+        self._export_keep_unsupported = False
         self._upload_client: StudioClient | None = None
         self._upload_connecting = False
         self._upload_status_text = _("UPLOAD_STATUS_NOT_CONNECTED")
@@ -379,6 +380,7 @@ class EditorQtBridge(QObject):
         self._rebuild_link_tree(robot)
         self._rebuild_joint_sliders(robot)
         self._selected_link = None
+        self._export_keep_unsupported = False
         self._reset_properties_selection()
         self._refresh_upload_gate()
         renderer = self._ensure_viewport_renderer()
@@ -919,13 +921,30 @@ class EditorQtBridge(QObject):
     def exportDefaultFileName(self) -> str:
         return f"{self._controller.robot.name}.urdf" if self._controller.robot is not None else "robot.urdf"
 
+    @Property(bool, notify=changed)
+    def exportKeepUnsupported(self) -> bool:
+        return self._export_keep_unsupported
+
+    @Slot(bool)
+    def setExportKeepUnsupported(self, keep: bool) -> None:
+        """The switch of the export window: write back the elements this editor has no field for. Off by default and
+        off again for every robot that is loaded, so a choice made for one file never carries over to another."""
+        if keep != self._export_keep_unsupported:
+            self._export_keep_unsupported = keep
+            self.changed.emit()
+
+    @Property(str, notify=changed)
+    def exportUnsupportedText(self) -> str:
+        count = self._controller.unsupported_count()
+        return _("EXPORT_UNSUPPORTED_COUNT", count=count) if count else _("EXPORT_UNSUPPORTED_NONE")
+
     @Slot(str, result=str)
     def exportUrdf(self, path: str) -> str:
         """Returns an empty string on success, or a human-readable error -
         QML has no try/except of its own to report a real OSError with."""
         path = _url_to_local_path(path)
         try:
-            self._controller.export_urdf_file(path)
+            self._controller.export_urdf_file(path, keep_unsupported=self._export_keep_unsupported)
             self._status_message = _("EXPORT_SUCCESS", path=path)
             self.changed.emit()
             return ""

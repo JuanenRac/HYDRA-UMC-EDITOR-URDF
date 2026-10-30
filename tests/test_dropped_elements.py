@@ -124,3 +124,44 @@ def test_an_element_that_names_a_joint_that_was_deleted_is_not_written_back():
     robot = parse_urdf_string(arm("".join(joint(i) for i in range(1, 7)), '<transmission name="t6"><joint name="j6"/></transmission>'))
     del robot.joints["j6"]
     assert "transmission" not in robot_to_urdf_string(robot, keep_unsupported=True)
+
+
+# ---- the switch of the export window reaches the file
+
+def _controller_with(extra: str):
+    from hydra_editor_urdf.app import EditorController
+
+    controller = EditorController()
+    controller.robot = parse_urdf_string(arm("".join(joint(i) for i in range(1, 7)), extra))
+    return controller
+
+
+def test_the_export_leaves_the_unsupported_elements_out_unless_the_switch_is_on(tmp_path):
+    controller = _controller_with('<transmission name="t1"><joint name="j1"/></transmission><gazebo reference="l1"/>')
+    assert controller.unsupported_count() == 2
+    off = tmp_path / "off.urdf"
+    controller.export_urdf_file(off)
+    assert "transmission" not in off.read_text(encoding="utf-8")
+    on = tmp_path / "on.urdf"
+    controller.export_urdf_file(on, keep_unsupported=True)
+    text = on.read_text(encoding="utf-8")
+    assert "<transmission" in text and "<gazebo" in text
+
+
+def test_a_robot_with_nothing_left_out_counts_zero():
+    assert _controller_with("").unsupported_count() == 0
+
+
+def test_the_export_texts_exist_in_the_eight_languages():
+    import pathlib
+    import re
+
+    keys = ["EXPORT_OPTIONS_TITLE", "EXPORT_KEEP_UNSUPPORTED", "EXPORT_KEEP_UNSUPPORTED_HINT", "EXPORT_UNSUPPORTED_COUNT", "EXPORT_UNSUPPORTED_NONE"]
+    folder = pathlib.Path(__file__).resolve().parents[1] / "language"
+    files = sorted(folder.glob("*.lng"))
+    assert len(files) == 8
+    for path in files:
+        values = dict(line.split("=", 1) for line in path.read_text(encoding="utf-8").splitlines() if "=" in line and not line.startswith("#"))
+        for key in keys:
+            assert values.get(key, "").strip(), f"{path.name}: {key}"
+        assert re.findall(r"\{\w+\}", values["EXPORT_UNSUPPORTED_COUNT"]) == ["{count}"], path.name

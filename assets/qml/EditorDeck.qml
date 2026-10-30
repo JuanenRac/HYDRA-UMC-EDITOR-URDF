@@ -130,7 +130,7 @@ ApplicationWindow {
                     Text { text: editorBackend.deckSummaryText; color: editorBackend.dofHasRobot ? (editorBackend.dofFeasible ? emerald : rose) : muted; font.family: "Bahnschrift"; font.bold: true; font.pixelSize: 13 }
                     Text { text: editorBackend.statusMessage; color: muted; font.pixelSize: 10; elide: Text.ElideRight; Layout.fillWidth: true }
                 }
-                GameButton { text: editorBackend.uiText("QT_EXPORT"); accent: "#b86a35"; enabled: editorBackend.canExport; onClicked: exportDialog.open() }
+                GameButton { text: editorBackend.uiText("QT_EXPORT"); accent: "#b86a35"; enabled: editorBackend.canExport; onClicked: exportOptionsDialog.open() }
                 GameButton { text: editorBackend.uiText("MENU_ABOUT"); accent: "#24465e"; onClicked: aboutDialog.open() }
                 ColumnLayout {
                     spacing: 0
@@ -144,6 +144,31 @@ ApplicationWindow {
         id: folderDialog
         title: editorBackend.uiText("SOURCE_BROWSE_DIALOG_TITLE")
         onAccepted: localPathField.text = editorBackend.toLocalPath(selectedFolder.toString())
+    }
+
+    Dialog {
+        id: exportOptionsDialog
+        objectName: "exportOptionsDialog"
+        anchors.centerIn: parent
+        modal: true
+        width: 440
+        title: editorBackend.uiText("EXPORT_OPTIONS_TITLE")
+        standardButtons: Dialog.Ok | Dialog.Cancel
+        background: Rectangle { color: window.panel; radius: 16; border.width: 1; border.color: window.panelBorder }
+        contentItem: ColumnLayout {
+            spacing: 10
+            Text { text: editorBackend.exportUnsupportedText; color: window.textPrimary; wrapMode: Text.WordWrap; Layout.preferredWidth: 400 }
+            CheckBox {
+                id: exportKeepBox
+                objectName: "exportKeepUnsupported"
+                text: editorBackend.uiText("EXPORT_KEEP_UNSUPPORTED")
+                checked: editorBackend.exportKeepUnsupported
+                onToggled: editorBackend.setExportKeepUnsupported(checked)
+                palette.windowText: window.textPrimary
+            }
+            Text { text: editorBackend.uiText("EXPORT_KEEP_UNSUPPORTED_HINT"); color: window.muted; font.pixelSize: 10; wrapMode: Text.WordWrap; Layout.preferredWidth: 400 }
+        }
+        onAccepted: exportDialog.open()
     }
 
     FileDialog {
