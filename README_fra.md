@@ -19,7 +19,7 @@ GPL-3.0-or-later - see LICENSE
   <img src="https://img.shields.io/badge/Language-Python%203.11-3776AB.svg" alt="Language">
   <img src="https://img.shields.io/badge/Framework-PySide6-41CD52.svg" alt="Framework">
   <img src="https://img.shields.io/badge/Format-URDF-red.svg" alt="Format">
-  <img src="https://img.shields.io/badge/Tests-366%20passing-2ea44f.svg" alt="Tests">
+  <img src="https://img.shields.io/badge/Tests-372%20passing-2ea44f.svg" alt="Tests">
   <img src="https://img.shields.io/badge/Version-0.1.5-0f6cbd.svg" alt="Version">
   <img src="https://img.shields.io/badge/Maturity-established-2EA44F.svg" alt="Maturity">
 </p>
@@ -28,7 +28,7 @@ GPL-3.0-or-later - see LICENSE
 
 ---
 
-**Vérification d'honnêteté - ce qui fonctionne réellement aujourd'hui :** le noyau de logique pure - analyse/export URDF (`urdf/parser.py`, `urdf/writer.py`), validation de faisabilité DOF (`urdf/dof.py`), cinématique directe (`render/kinematics.py`), estimation d'inertie (`inertia_calc.py`), résolution des références de maillage et téléchargement de zipball GitHub (`source/scan.py`, `source/github_fetcher.py`, `source/local_folder.py`), le modèle en mémoire (`models.py`), la liste de la galerie (`gallery.py`) et le chargeur i18n (`i18n.py`) - est réel et couvert par 366 tests passants (`tests/`), dont aucun n'importe PySide6/PyOpenGL. `test_github_fetcher.py` simule chaque appel réseau - un vrai téléchargement de zipball GitHub a été exécuté manuellement, jamais dans le cadre de la suite automatisée. La couche Qt/OpenGL (`render/viewport.py` et son `UrdfGLRenderer`, `render/mesh.py`, chaque panneau `ui/*`, et l'`OffscreenUrdfRenderer` du deck `--qtquick`) est du code réel et fonctionnel mais sans aucune couverture de test automatisée - elle a besoin d'un vrai affichage/plugin de plateforme Qt, que la CI n'a pas, donc elle est vérifiée à la main, pas par une suite de tests. Le `StudioClient` de `server/client.py` (login/push/pull contre le `server.ts` de HYDRA-UMC-SERVER) est du code HTTP réel, testé contre un petit serveur local qui respecte le contrat de `server.ts` (le jeton à chaque appel, une collision de nom, le téléchargement d'un modèle, une réponse hostile). L'expansion xacro et le chargement de maillages COLLADA (`.dae`) sont des non-fonctionnalités explicites et nommées (une erreur claire, pas une mauvaise analyse silencieuse) - voir la note d'honnêteté dans l'Aperçu ci-dessous et les sections Analyse URDF/Chargement des maillages pour le pourquoi. Voir `CHANGELOG.md` pour ce qui a été livré exactement jusqu'à présent.
+**Vérification d'honnêteté - ce qui fonctionne réellement aujourd'hui :** le noyau de logique pure - analyse/export URDF (`urdf/parser.py`, `urdf/writer.py`), validation de faisabilité DOF (`urdf/dof.py`), cinématique directe (`render/kinematics.py`), estimation d'inertie (`inertia_calc.py`), résolution des références de maillage et téléchargement de zipball GitHub (`source/scan.py`, `source/github_fetcher.py`, `source/local_folder.py`), le modèle en mémoire (`models.py`), la liste de la galerie (`gallery.py`) et le chargeur i18n (`i18n.py`) - est réel et couvert par 372 tests passants (`tests/`), dont aucun n'importe PySide6/PyOpenGL. `test_github_fetcher.py` simule chaque appel réseau - un vrai téléchargement de zipball GitHub a été exécuté manuellement, jamais dans le cadre de la suite automatisée. La couche Qt/OpenGL (`render/viewport.py` et son `UrdfGLRenderer`, `render/mesh.py`, chaque panneau `ui/*`, et l'`OffscreenUrdfRenderer` du deck `--qtquick`) est du code réel et fonctionnel mais sans aucune couverture de test automatisée - elle a besoin d'un vrai affichage/plugin de plateforme Qt, que la CI n'a pas, donc elle est vérifiée à la main, pas par une suite de tests. Le `StudioClient` de `server/client.py` (login/push/pull contre le `server.ts` de HYDRA-UMC-SERVER) est du code HTTP réel, testé contre un petit serveur local qui respecte le contrat de `server.ts` (le jeton à chaque appel, une collision de nom, le téléchargement d'un modèle, une réponse hostile). L'expansion xacro et le chargement de maillages COLLADA (`.dae`) sont des non-fonctionnalités explicites et nommées (une erreur claire, pas une mauvaise analyse silencieuse) - voir la note d'honnêteté dans l'Aperçu ci-dessous et les sections Analyse URDF/Chargement des maillages pour le pourquoi. Voir `CHANGELOG.md` pour ce qui a été livré exactement jusqu'à présent.
 
 > **État de la sûreté et de la cybersécurité :** cet écosystème n'est pas un système de sécurité certifié. Il n'existe pas encore de chaîne d'E-STOP matérielle, ni de limites ou de verrouillages imposés par le firmware, ni de commande de mouvement vérifiée ; les images de firmware sont contrôlées par CRC-32 et une signature Ed25519, et une compilation de version refuse les clés de développement publiées (les têtes d'outil et les cartes d'extension derrière le relais utilisent encore les chargeurs d'URTC, qui prennent un HMAC-SHA256 à clé partagée au lieu d'une signature) ; TLS et TLS mutuel sont optionnels et désactivés par défaut ; aucune carte propre n'a encore été assemblée ni testée. Lisez la [base de sécurité](https://github.com/JuanenRac/HYDRA-UMC-DOCS/blob/main/docs/SECURITY_BASELINE.md) et le [modèle de menaces](https://github.com/JuanenRac/HYDRA-UMC-DOCS/blob/main/docs/THREAT_MODEL.md) avant de vous fier à une affirmation d'ici pour la sécurité d'une personne.
 
@@ -40,7 +40,7 @@ GPL-3.0-or-later - see LICENSE
 |---|---|
 | Version | `0.1.5` |
 | Maturité | Établi |
-| Tests | 366 (`python -m pytest tests -q`) |
+| Tests | 372 (`python -m pytest tests -q`) |
 | Technologie | Python / PySide6 / Qt6 / OpenGL |
 | Cible | Le PC de la personne qui l'utilise |
 | Sur matériel réel | Sans objet : rien ici ne s'exécute sur du matériel |
@@ -56,7 +56,7 @@ Chaque ligne est une partie de ce dépôt et le feu dit où elle en est aujourd'
 | Domaine | État | Ce que cela veut dire ici |
 |---|---|---|
 | Logiciel | 🟢 | Complet pour son usage et stable ; la vérification d'honnêteté ci-dessus liste les limites connues |
-| Tests | 🟢 | 366 tests automatiques, exécutés à chaque modification |
+| Tests | 🟢 | 372 tests automatiques, exécutés à chaque modification |
 | Matériel réel | 🟢 | Sans objet : rien ici ne s'exécute sur du matériel |
 | Documentation | 🟢 | README en huit langues, vérifié par rapport au manifeste à chaque modification |
 
@@ -131,6 +131,8 @@ XML pur via le propre `xml.etree.ElementTree` de la bibliothèque standard - auc
 **xacro n'est pas expansé.** [xacro](http://wiki.ros.org/xacro) est un préprocesseur de macros Python/XML doté de son propre paquet ROS et de sa propre chaîne de dépendances, et un véritable fichier xacro n'est fiablement résolvable qu'à l'intérieur du même environnement de paquet ROS contre lequel il a été rédigé (arguments de macro, inclusions de style `$(find pkg)`, etc.) - quelque chose que cette application n'a aucun moyen de reproduire honnêtement. Un fichier qui utilise des balises `<xacro:...>` ou déclare l'espace de noms xacro obtient une erreur claire expliquant la limitation et pointant vers l'outil en ligne de commande ROS `xacro` pour le prétraiter d'abord, plutôt qu'une analyse silencieusement erronée.
 
 L'export (`urdf/writer.py`) re-sérialise l'arbre en mémoire actuel entièrement depuis zéro plutôt que de rapiécer le texte XML source original, de sorte que chaque édition en direct - quel que soit le panneau qui l'a effectuée - se reflète exactement une fois, via un seul chemin de code, à la fois dans l'action de menu « Export URDF » et dans le payload envoyé à un serveur STUDIO.
+
+Les éléments pour lesquels le modèle n'a pas de champ (`<transmission>`, `<gazebo>`, le `<dynamics>`, le `<safety_controller>` et le `<calibration>` d'une articulation, et le multiplicateur et le décalage d'un `<mimic>`) sont conservés sous forme de texte à la lecture d'un fichier. Le bouton **Exporter** ouvre une fenêtre qui dit combien d'éléments de ce genre le fichier contient et qui a un interrupteur, désactivé par défaut et de nouveau désactivé à chaque robot chargé, pour les réécrire comme le fichier source les avait ; ceux qui nomment une articulation ou un lien supprimé ne sont jamais réécrits.
 
 ### Espace de travail ancrable
 
@@ -249,7 +251,7 @@ Démarre maximisé (pas un plein écran véritablement natif au niveau du systè
 
 ## 🧪 Tests
 
-366 tests automatiques s'exécutent avec `python -m pytest tests -q`. Ils n'ont besoin ni de matériel ni de rien en dehors de cette machine.
+372 tests automatiques s'exécutent avec `python -m pytest tests -q`. Ils n'ont besoin ni de matériel ni de rien en dehors de cette machine.
 
 La CI exécute `HYDRA_UMC_CI=1 python tools/ci_validate.py`, qui vérifie le manifeste, les documents, les huit README et les images.
 
@@ -260,7 +262,7 @@ pip install -r requirements-dev.txt
 python -m pytest tests/ -q
 ```
 
-Note : la logique pure de cette application (analyse/export URDF, validation de faisabilité DOF, cinématique directe, estimation d'inertie, résolution des références de maillage, récupération GitHub, i18n) n'avait aucune couverture de tests automatisés. Corrigé : 366 vrais tests répartis sur 15 modules de test, dont aucun n'importe PySide6/PyOpenGL - `requirements-dev.txt` installe uniquement ce dont `tests/` a réellement besoin (`numpy` + `pytest`), donc la suite s'exécute sans écran ni plugin de plateforme Qt. Plusieurs tests sont des régressions explicites pour des bugs déjà trouvés et corrigés auparavant et documentés directement dans le code source (la protection contre la boucle infinie sur un vrai cycle de `render/kinematics.py`, le conditionnement `had_scheme` de `source/scan.py`, la vérification de masse négative de `urdf/dof.py`) - une future modification ne peut plus réintroduire silencieusement l'un d'eux sans faire échouer un test. La CI (`.github/workflows/ci.yml`) exécute la même commande à chaque push.
+Note : la logique pure de cette application (analyse/export URDF, validation de faisabilité DOF, cinématique directe, estimation d'inertie, résolution des références de maillage, récupération GitHub, i18n) n'avait aucune couverture de tests automatisés. Corrigé : 372 vrais tests répartis sur 15 modules de test, dont aucun n'importe PySide6/PyOpenGL - `requirements-dev.txt` installe uniquement ce dont `tests/` a réellement besoin (`numpy` + `pytest`), donc la suite s'exécute sans écran ni plugin de plateforme Qt. Plusieurs tests sont des régressions explicites pour des bugs déjà trouvés et corrigés auparavant et documentés directement dans le code source (la protection contre la boucle infinie sur un vrai cycle de `render/kinematics.py`, le conditionnement `had_scheme` de `source/scan.py`, la vérification de masse négative de `urdf/dof.py`) - une future modification ne peut plus réintroduire silencieusement l'un d'eux sans faire échouer un test. La CI (`.github/workflows/ci.yml`) exécute la même commande à chaque push.
 
 ## 🏗️ Compilation et publication
 
