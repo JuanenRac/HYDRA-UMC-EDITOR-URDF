@@ -13,6 +13,8 @@
   ],
   "deployment_target": "user-pc",
   "maturity": "established",
+  "evidence": "none",
+  "hardware_bound": false,
   "family": "Core Backend & Clients",
   "parent": "HYDRA-UMC-STUDIO",
   "build": "Desktop PySide6/Qt6 app. run.bat/run.sh runs it from source; build-test.bat/build-test.sh validates sources without versioning; build_exe.bat/build_exe.sh produces a standalone PyInstaller executable.",
