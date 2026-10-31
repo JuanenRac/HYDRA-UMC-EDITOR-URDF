@@ -113,3 +113,5 @@ EXPORT_KEEP_UNSUPPORTED=このエディターに項目がない要素を残す(�
 EXPORT_KEEP_UNSUPPORTED_HINT=既定ではオフです。これまでどおりファイルには書き出されません。オンにすると、元のファイルにあったとおりに書き戻します。ただし、削除されたジョイントやリンクを指すものは除きます。
 EXPORT_UNSUPPORTED_COUNT=元のファイルには、このエディターが保持しない要素が {count} 件あります。
 EXPORT_UNSUPPORTED_NONE=元のファイルの内容で、エクスポートから外れるものはありません。
+EXPORT_Y_UP=Y軸が上のシーン(Three.js)向けにモデルを書き出す
+EXPORT_Y_UP_HINT=既定ではオフ：ファイルは URDF の Z 軸が上の規約のままです。オンにすると、ルートリンクが世界を回転させて、STUDIO のシーンと同じく Y が上を向きます。スケールは設定ファイルの y_up_scale です(既定は 1)。

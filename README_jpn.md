@@ -19,7 +19,7 @@ GPL-3.0-or-later - see LICENSE
   <img src="https://img.shields.io/badge/Language-Python%203.11-3776AB.svg" alt="Language">
   <img src="https://img.shields.io/badge/Framework-PySide6-41CD52.svg" alt="Framework">
   <img src="https://img.shields.io/badge/Format-URDF-red.svg" alt="Format">
-  <img src="https://img.shields.io/badge/Tests-372%20passing-2ea44f.svg" alt="Tests">
+  <img src="https://img.shields.io/badge/Tests-399%20passing-2ea44f.svg" alt="Tests">
   <img src="https://img.shields.io/badge/Version-0.1.6-0f6cbd.svg" alt="Version">
   <img src="https://img.shields.io/badge/Maturity-established-2EA44F.svg" alt="Maturity">
 </p>
@@ -28,7 +28,7 @@ GPL-3.0-or-later - see LICENSE
 
 ---
 
-**正直な現状確認 - 今日実際に動くもの:** 純粋なロジックのコア - URDF のパース/エクスポート(`urdf/parser.py`、`urdf/writer.py`)、DOF 実現可能性検証(`urdf/dof.py`)、順運動学(`render/kinematics.py`)、慣性推定(`inertia_calc.py`)、メッシュ参照解決と GitHub zipball 取得(`source/scan.py`、`source/github_fetcher.py`、`source/local_folder.py`)、インメモリモデル(`models.py`)、ギャラリー一覧(`gallery.py`)、そして i18n ローダー(`i18n.py`)は本物であり、`tests/` 内の 372 件のテストに合格しており、そのいずれも PySide6/PyOpenGL をインポートしていない。`test_github_fetcher.py` はすべてのネットワーク呼び出しをモック化している - 実際の GitHub zipball ダウンロードは手動で実行されたことはあるが、自動化されたテストスイートの一部として実行されたことは一度もない。Qt/OpenGL 層(`render/viewport.py` の `UrdfGLRenderer`、`render/mesh.py`、各 `ui/*` パネル、そして `--qtquick` デッキの `OffscreenUrdfRenderer`)は本物の動作するコードだが、自動テストのカバレッジは一切ない - 実際のディスプレイ/Qt プラットフォームプラグインが必要であり、CI にはそれがないため、テストスイートではなく手作業で検証されている。`server/client.py` の `StudioClient`(HYDRA-UMC-SERVER の `server.ts` に対するログイン/プッシュ/プル)は本物の HTTP コードであり、`server.ts` の契約を守る小さなローカルサーバーに対してテストされている(すべての呼び出しでのトークン、名前の衝突、モデルのダウンロード、悪意のある応答)。xacro の展開と COLLADA(`.dae`)メッシュの読み込みは、明示的に名前が付けられた未実装機能である(サイレントな誤解析ではなく明確なエラーを返す) - その理由については下記の概要にある正直さについての注記、および URDF パース/メッシュ読み込みの各セクションを参照。これまでに何が実際に出荷されたかは `CHANGELOG.md` を参照。
+**正直な現状確認 - 今日実際に動くもの:** 純粋なロジックのコア - URDF のパース/エクスポート(`urdf/parser.py`、`urdf/writer.py`)、DOF 実現可能性検証(`urdf/dof.py`)、順運動学(`render/kinematics.py`)、慣性推定(`inertia_calc.py`)、メッシュ参照解決と GitHub zipball 取得(`source/scan.py`、`source/github_fetcher.py`、`source/local_folder.py`)、インメモリモデル(`models.py`)、ギャラリー一覧(`gallery.py`)、そして i18n ローダー(`i18n.py`)は本物であり、`tests/` 内の 399 件のテストに合格しており、そのいずれも PySide6/PyOpenGL をインポートしていない。`test_github_fetcher.py` はすべてのネットワーク呼び出しをモック化している - 実際の GitHub zipball ダウンロードは手動で実行されたことはあるが、自動化されたテストスイートの一部として実行されたことは一度もない。Qt/OpenGL 層(`render/viewport.py` の `UrdfGLRenderer`、`render/mesh.py`、各 `ui/*` パネル、そして `--qtquick` デッキの `OffscreenUrdfRenderer`)は本物の動作するコードだが、自動テストのカバレッジは一切ない - 実際のディスプレイ/Qt プラットフォームプラグインが必要であり、CI にはそれがないため、テストスイートではなく手作業で検証されている。`server/client.py` の `StudioClient`(HYDRA-UMC-SERVER の `server.ts` に対するログイン/プッシュ/プル)は本物の HTTP コードであり、`server.ts` の契約を守る小さなローカルサーバーに対してテストされている(すべての呼び出しでのトークン、名前の衝突、モデルのダウンロード、悪意のある応答)。xacro の展開と COLLADA(`.dae`)メッシュの読み込みは、明示的に名前が付けられた未実装機能である(サイレントな誤解析ではなく明確なエラーを返す) - その理由については下記の概要にある正直さについての注記、および URDF パース/メッシュ読み込みの各セクションを参照。これまでに何が実際に出荷されたかは `CHANGELOG.md` を参照。 唯一の例外は任意設定です。`hydra_editor_urdf_config.json` で `xacro_expand` を true にし、`xacro` ツールがマシンにインストールされている場合に限り、xacro ファイルはそのツールで展開されます(何も同梱されません)。
 
 > **安全性とセキュリティの現状:** このエコシステムは認証された安全システムではありません。ハードウェアの E-STOP 経路、ファームウェアが強制する制限やインターロック、検証済みの動作コマンドはまだありません。ファームウェアイメージは CRC-32 と Ed25519 署名で検査し、リリースビルドは公開済みの開発用鍵を拒否します(リレーの先のツールヘッドと拡張ボードは引き続き URTC のブートローダーを使い、署名ではなく共有鍵の HMAC-SHA256 を使います)。TLS と相互 TLS は任意で、既定では無効です。独自基板はまだ実装も試験もされていません。ここに書かれた内容を人の安全のために頼る前に、[セキュリティベースライン](https://github.com/JuanenRac/HYDRA-UMC-DOCS/blob/main/docs/SECURITY_BASELINE.md)と[脅威モデル](https://github.com/JuanenRac/HYDRA-UMC-DOCS/blob/main/docs/THREAT_MODEL.md)をお読みください。
 
@@ -40,7 +40,7 @@ GPL-3.0-or-later - see LICENSE
 |---|---|
 | バージョン | `0.1.6` |
 | 成熟度 | 確立 |
-| テスト | 372 (`python -m pytest tests -q`) |
+| テスト | 399 (`python -m pytest tests -q`) |
 | 技術 | Python / PySide6 / Qt6 / OpenGL |
 | 対象 | 利用者の PC |
 | 実機での確認 | 対象外：ここにあるものはハードウェア上では動きません |
@@ -56,7 +56,7 @@ GPL-3.0-or-later - see LICENSE
 | 領域 | 状態 | ここでの意味 |
 |---|---|---|
 | ソフトウェア | 🟢 | 目的に対して完成していて安定しています。既知の制限は上の正直さの確認に書かれています |
-| テスト | 🟢 | 自動テスト 372 件。変更のたびに実行されます |
+| テスト | 🟢 | 自動テスト 399 件。変更のたびに実行されます |
 | 実機 | 🟢 | 対象外：ここにあるものはハードウェア上では動きません |
 | ドキュメント | 🟢 | 8 言語の README。変更のたびにマニフェストと照合されます |
 
@@ -66,7 +66,7 @@ GPL-3.0-or-later - see LICENSE
 
 **Python** と **PySide6/Qt6** で構築されており、本エコシステムの他のデスクトップツールである [HYDRA-UMC SUITE](https://github.com/JuanenRac/HYDRA-UMC-SUITE) ですでに検証済みの同じアーキテクチャパターンを使用しています：Photoshop/Fusion 360 風のドッキング可能なワークスペース（`QDockWidget`）、手書きの OpenGL 3D ビューポート（`QOpenGLWidget` + GLSL 3.3 コアプロファイルシェーダー、`glBegin`/`glEnd` のレガシーパスなし）、そして状態を保持し各 UI パネルが Qt シグナル経由でリッスンする 1 つの中心的なコントローラーオブジェクト。同一エコシステム内の姉妹ツール向けに新しい UI/レンダースタックを模索するのではなく、ここでこのパターンを再利用することは、見落としではなく意図的な選択です。
 
-**本エコシステムの他のドキュメントと同じ慣例に従った正直な注記：** 本アプリは [xacro](http://wiki.ros.org/xacro) マクロを展開せず、COLLADA（`.dae`）メッシュも読み込みません。どちらも明示的に名前を挙げた制限事項です（半端な試みではなく、明確なエラーメッセージであり、サイレントな解析ミスやビューポートでのリンク欠落ではありません）——具体的な理由は下記「URDF パース」および「メッシュ読み込み」セクションを参照してください。
+**本エコシステムの他のドキュメントと同じ慣例に従った正直な注記：** 本アプリは [xacro](http://wiki.ros.org/xacro) マクロを展開せず、COLLADA（`.dae`）メッシュも読み込みません。どちらも明示的に名前を挙げた制限事項です（半端な試みではなく、明確なエラーメッセージであり、サイレントな解析ミスやビューポートでのリンク欠落ではありません）——具体的な理由は下記「URDF パース」および「メッシュ読み込み」セクションを参照してください。 唯一の例外は任意設定です。`hydra_editor_urdf_config.json` で `xacro_expand` を true にし、`xacro` ツールがマシンにインストールされている場合に限り、xacro ファイルはそのツールで展開されます(何も同梱されません)。
 
 ## 🧩 HYDRA-UMC での役割
 
@@ -128,7 +128,9 @@ GPL-3.0-or-later - see LICENSE
 
 標準ライブラリ自身の `xml.etree.ElementTree` によるプレーンな XML 処理——これほどシンプルなフォーマットには `lxml` 依存は不要です。メモリ内モデル（`hydra_editor_urdf/models.py`）は、`urdfpy` や `yourdfpy` のような既存の Python URDF ライブラリのラッパーではなく、意図的にシンプルで可変な自社製のデータクラスツリーです：本アプリはそのツリーをインタラクティブに*編集*し、すべての変更をライブで再レンダリングする必要があり、読み取り中心のパースライブラリはそのような用途には向いていません。モデルを完全に自前で持つことで、それを小さく、検査可能で、サードパーティ依存関係自身のリリースサイクルから自由な状態に保てます。フィールド名とデフォルト値は実際の [URDF XML スキーマ](http://wiki.ros.org/urdf/XML) に忠実に従っているため、パーサー/ライターのペアは薄く自明な XML↔オブジェクトのマッピングであり続けます。
 
-**xacro は展開されません。** [xacro](http://wiki.ros.org/xacro) は、独自の ROS パッケージと依存関係チェーンを持つ Python/XML マクロプリプロセッサであり、実際の xacro ファイルは、それが作成された同じ ROS パッケージ環境の内部でしか確実に解決できません（マクロ引数、`$(find pkg)` 形式のインクルードなど）——これは本アプリが正直に再現する方法を持たないものです。`<xacro:...>` タグを使用しているか xacro 名前空間を宣言しているファイルは、サイレントな解析ミスではなく、その制限を説明し、まずそれを前処理するための ROS の `xacro` コマンドラインツールを指し示す明確なエラーを受け取ります。
+**xacro は展開されません。** [xacro](http://wiki.ros.org/xacro) は、独自の ROS パッケージと依存関係チェーンを持つ Python/XML マクロプリプロセッサであり、実際の xacro ファイルは、それが作成された同じ ROS パッケージ環境の内部でしか確実に解決できません（マクロ引数、`$(find pkg)` 形式のインクルードなど）——これは本アプリが正直に再現する方法を持たないものです。`<xacro:...>` タグを使用しているか xacro 名前空間を宣言しているファイルは、サイレントな解析ミスではなく、その制限を説明し、まずそれを前処理するための ROS の `xacro` コマンドラインツールを指し示す明確なエラーを受け取ります。 唯一の例外は任意設定です。`hydra_editor_urdf_config.json` で `xacro_expand` を true にし、`xacro` ツールがマシンにインストールされている場合に限り、xacro ファイルはそのツールで展開されます(何も同梱されません)。
+
+**任意のチェックとエクスポート(すべて既定ではオフ)**(`hydra_editor_urdf_config.json` のスイッチ):`self_collision_check` は、初期姿勢または関節を一つずつ動かしたときにボックスが重なるリンクの組を警告として一覧にします(`self_collision_steps`、`self_collision_tolerance_m`。ボックスは実際の形状を包むため、わずかな接近は報告されることがありますが、重なりを見逃すことはありません)。`license_check` は、フォルダに LICENSE、COPYING、NOTICE、ATTRIBUTION のいずれのファイルもないメッシュと、条件付きライセンスを警告し、見つかった内容から ATTRIBUTION テキストを作れます。エクスポート画面の Y 軸上チェックボックスは、Three.js シーン向けにモデルを書き出します(ルートリンクが世界を 4 分の 1 回転させ、`y_up_scale` が長さを拡大縮小します)。オンにしない限り、実現可能性も書き出される内容も変わりません。
 
 エクスポート（`urdf/writer.py`）は、元のソース XML テキストにパッチを当てるのではなく、現在のメモリ内ツリーをゼロから再シリアライズします。そのため、どのパネルによって行われたかにかかわらず、すべてのライブ編集は、「URDF をエクスポート」メニューアクションと STUDIO サーバーへ送信されるペイロードの両方に、1 つのコードパスを通じて正確に 1 回反映されます。
 
@@ -250,7 +252,7 @@ python main.py
 
 ## 🧪 テスト
 
-`python -m pytest tests -q` で自動テスト 372 件を実行します。 ハードウェアも、このマシンの外にあるものも必要ありません。
+`python -m pytest tests -q` で自動テスト 399 件を実行します。 ハードウェアも、このマシンの外にあるものも必要ありません。
 
 CI は `HYDRA_UMC_CI=1 python tools/ci_validate.py` を実行し、マニフェスト、文書、8 つの README、図を検査します。
 
@@ -261,7 +263,7 @@ pip install -r requirements-dev.txt
 python -m pytest tests/ -q
 ```
 
-注:このアプリ自身の純粋なロジック(URDF のパース/エクスポート、DOF 実現可能性検証、順運動学、慣性推定、メッシュ参照解決、GitHub 取得、i18n)には自動テストのカバレッジが一切ありませんでした。修正済み:15 のテストモジュールにまたがる 372 件の実際のテストを追加——どれも PySide6/PyOpenGL をインポートしないため、`requirements-dev.txt` は `tests/` が実際に必要とするもの(`numpy` と `pytest`)だけをインストールし、ディスプレイや Qt プラットフォームプラグインなしでスイート全体が実行できます。いくつかのテストは、以前に既に見つかって修正され、ソースコード自体にコメントとして記録済みのバグ(`render/kinematics.py` の実際のサイクルでの無限ループ防止、`source/scan.py` の `had_scheme` 条件分岐、`urdf/dof.py` の負の質量チェック)に対する明示的な回帰テストです——今後の変更がテストを失敗させることなくこれらのいずれかを静かに再発させることはできません。CI(`.github/workflows/ci.yml`)はプッシュのたびに同じコマンドを実行します。
+注:このアプリ自身の純粋なロジック(URDF のパース/エクスポート、DOF 実現可能性検証、順運動学、慣性推定、メッシュ参照解決、GitHub 取得、i18n)には自動テストのカバレッジが一切ありませんでした。修正済み:15 のテストモジュールにまたがる 399 件の実際のテストを追加——どれも PySide6/PyOpenGL をインポートしないため、`requirements-dev.txt` は `tests/` が実際に必要とするもの(`numpy` と `pytest`)だけをインストールし、ディスプレイや Qt プラットフォームプラグインなしでスイート全体が実行できます。いくつかのテストは、以前に既に見つかって修正され、ソースコード自体にコメントとして記録済みのバグ(`render/kinematics.py` の実際のサイクルでの無限ループ防止、`source/scan.py` の `had_scheme` 条件分岐、`urdf/dof.py` の負の質量チェック)に対する明示的な回帰テストです——今後の変更がテストを失敗させることなくこれらのいずれかを静かに再発させることはできません。CI(`.github/workflows/ci.yml`)はプッシュのたびに同じコマンドを実行します。
 
 ## 🏗️ ビルドとリリース
 

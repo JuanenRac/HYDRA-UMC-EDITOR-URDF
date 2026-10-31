@@ -113,3 +113,5 @@ EXPORT_KEEP_UNSUPPORTED=Elemente behalten, für die dieser Editor kein Feld hat 
 EXPORT_KEEP_UNSUPPORTED_HINT=Standardmäßig aus: Sie bleiben wie bisher aus der Datei draußen. Eingeschaltet werden sie so zurückgeschrieben, wie die Quelldatei sie hatte, außer solchen, die ein gelöschtes Gelenk oder Glied nennen.
 EXPORT_UNSUPPORTED_COUNT=Die Quelldatei enthält {count} Element(e), die dieser Editor nicht behält.
 EXPORT_UNSUPPORTED_NONE=Nichts aus der Quelldatei bleibt beim Export draußen.
+EXPORT_Y_UP=Das Modell für eine Szene mit Y nach oben schreiben (Three.js)
+EXPORT_Y_UP_HINT=Standardmäßig aus: Die Datei behält die Z-oben-Konvention von URDF. Eingeschaltet dreht ein Wurzel-Link die Welt so, dass Y nach oben zeigt, wie in der STUDIO-Szene; der Maßstab ist y_up_scale in der Konfigurationsdatei (standardmäßig 1).

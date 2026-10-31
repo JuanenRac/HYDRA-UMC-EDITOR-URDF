@@ -19,7 +19,7 @@ GPL-3.0-or-later - see LICENSE
   <img src="https://img.shields.io/badge/Language-Python%203.11-3776AB.svg" alt="Language">
   <img src="https://img.shields.io/badge/Framework-PySide6-41CD52.svg" alt="Framework">
   <img src="https://img.shields.io/badge/Format-URDF-red.svg" alt="Format">
-  <img src="https://img.shields.io/badge/Tests-372%20passing-2ea44f.svg" alt="Tests">
+  <img src="https://img.shields.io/badge/Tests-399%20passing-2ea44f.svg" alt="Tests">
   <img src="https://img.shields.io/badge/Version-0.1.6-0f6cbd.svg" alt="Version">
   <img src="https://img.shields.io/badge/Maturity-established-2EA44F.svg" alt="Maturity">
 </p>
@@ -28,7 +28,7 @@ GPL-3.0-or-later - see LICENSE
 
 ---
 
-**诚实核查 - 今天真正能运行的部分：** 纯逻辑核心 - URDF 解析/导出(`urdf/parser.py`、`urdf/writer.py`)、DOF 可行性验证(`urdf/dof.py`)、正向运动学(`render/kinematics.py`)、惯量估算(`inertia_calc.py`)、网格引用解析与 GitHub 压缩包下载(`source/scan.py`、`source/github_fetcher.py`、`source/local_folder.py`)、内存中的模型(`models.py`)、画廊列表(`gallery.py`)以及 i18n 加载器(`i18n.py`)——都是真实的，并由 372 个通过的测试(`tests/`)覆盖，其中没有一个测试导入 PySide6/PyOpenGL。`test_github_fetcher.py` 模拟了所有网络调用——真实的 GitHub 压缩包下载曾手动运行过，但从未纳入自动化测试套件。Qt/OpenGL 层(`render/viewport.py` 中的 `UrdfGLRenderer`、`render/mesh.py`、每一个 `ui/*` 面板，以及 `--qtquick` 面板的 `OffscreenUrdfRenderer`)是真实可运行的代码，但完全没有自动化测试覆盖——它需要真实的显示设备/Qt 平台插件，而 CI 环境没有，因此只能手动验证，而非通过测试套件验证。`server/client.py` 中的 `StudioClient`(针对 HYDRA-UMC-SERVER 的 `server.ts` 进行登录/推送/拉取)是真实的 HTTP 代码，已针对遵守 `server.ts` 契约的小型本地服务器进行测试(每次调用携带令牌、名称冲突、模型下载、恶意响应)。xacro 展开和 COLLADA(`.dae`)网格加载是明确声明、有名有姓的未实现功能(会给出清晰的错误，而不是静默解析错误)——原因见下方概述中的诚实说明，以及 URDF 解析/网格加载各节。具体已交付的内容请见 `CHANGELOG.md`。
+**诚实核查 - 今天真正能运行的部分：** 纯逻辑核心 - URDF 解析/导出(`urdf/parser.py`、`urdf/writer.py`)、DOF 可行性验证(`urdf/dof.py`)、正向运动学(`render/kinematics.py`)、惯量估算(`inertia_calc.py`)、网格引用解析与 GitHub 压缩包下载(`source/scan.py`、`source/github_fetcher.py`、`source/local_folder.py`)、内存中的模型(`models.py`)、画廊列表(`gallery.py`)以及 i18n 加载器(`i18n.py`)——都是真实的，并由 399 个通过的测试(`tests/`)覆盖，其中没有一个测试导入 PySide6/PyOpenGL。`test_github_fetcher.py` 模拟了所有网络调用——真实的 GitHub 压缩包下载曾手动运行过，但从未纳入自动化测试套件。Qt/OpenGL 层(`render/viewport.py` 中的 `UrdfGLRenderer`、`render/mesh.py`、每一个 `ui/*` 面板，以及 `--qtquick` 面板的 `OffscreenUrdfRenderer`)是真实可运行的代码，但完全没有自动化测试覆盖——它需要真实的显示设备/Qt 平台插件，而 CI 环境没有，因此只能手动验证，而非通过测试套件验证。`server/client.py` 中的 `StudioClient`(针对 HYDRA-UMC-SERVER 的 `server.ts` 进行登录/推送/拉取)是真实的 HTTP 代码，已针对遵守 `server.ts` 契约的小型本地服务器进行测试(每次调用携带令牌、名称冲突、模型下载、恶意响应)。xacro 展开和 COLLADA(`.dae`)网格加载是明确声明、有名有姓的未实现功能(会给出清晰的错误，而不是静默解析错误)——原因见下方概述中的诚实说明，以及 URDF 解析/网格加载各节。具体已交付的内容请见 `CHANGELOG.md`。 唯一的例外是可选项:在 `hydra_editor_urdf_config.json` 中将 `xacro_expand` 设为 true,且机器上已安装 `xacro` 工具时,xacro 文件由该工具展开(程序本身不附带任何内容)。
 
 > **安全与安防现状:**本生态系统不是经认证的安全系统。目前尚无硬件 E-STOP 通路,没有由固件强制执行的限位或联锁,也没有经过验证的运动指令;固件映像使用 CRC-32 和 Ed25519 签名校验,发布构建会拒绝已公开的开发密钥(中继之后的工具头和扩展板仍运行 URTC 的引导程序,它们使用共享密钥的 HMAC-SHA256 而不是签名);TLS 与双向 TLS 均为可选项,默认关闭;自制电路板尚未组装或测试。在依赖此处任何说法来保障人身安全之前,请先阅读[安全基线](https://github.com/JuanenRac/HYDRA-UMC-DOCS/blob/main/docs/SECURITY_BASELINE.md)和[威胁模型](https://github.com/JuanenRac/HYDRA-UMC-DOCS/blob/main/docs/THREAT_MODEL.md)。
 
@@ -40,7 +40,7 @@ GPL-3.0-or-later - see LICENSE
 |---|---|
 | 版本 | `0.1.6` |
 | 成熟度 | 成熟 |
-| 测试 | 372 (`python -m pytest tests -q`) |
+| 测试 | 399 (`python -m pytest tests -q`) |
 | 技术栈 | Python / PySide6 / Qt6 / OpenGL |
 | 目标 | 使用者的电脑 |
 | 真实硬件 | 不适用：这里的内容不在硬件上运行 |
@@ -56,7 +56,7 @@ GPL-3.0-or-later - see LICENSE
 | 领域 | 状态 | 在这里的含义 |
 |---|---|---|
 | 软件 | 🟢 | 就其用途而言已完整且稳定；上面的诚实性检查列出了已知限制 |
-| 测试 | 🟢 | 372 项自动测试，每次变更都会运行 |
+| 测试 | 🟢 | 399 项自动测试，每次变更都会运行 |
 | 真实硬件 | 🟢 | 不适用：这里的内容不在硬件上运行 |
 | 文档 | 🟢 | 八种语言的 README，每次变更都会与清单核对 |
 
@@ -66,7 +66,7 @@ GPL-3.0-or-later - see LICENSE
 
 使用 **Python** 和 **PySide6/Qt6** 构建，采用与本生态系统中另一款桌面工具 [HYDRA-UMC SUITE](https://github.com/JuanenRac/HYDRA-UMC-SUITE) 中已经验证过的相同架构模式：类 Photoshop/Fusion-360 的可停靠工作区（`QDockWidget`）、一个手写的 OpenGL 3D 视口（`QOpenGLWidget` + GLSL 3.3 核心配置着色器，不使用 `glBegin`/`glEnd` 遗留路径），以及一个持有状态的中央控制器对象，每个 UI 面板都通过 Qt 信号监听它。在本生态系统的同类工具上复用这一模式——而非为其探索一套新的 UI/渲染技术栈——是一个刻意的选择，而非疏忽。
 
-**诚实说明，与本生态系统其余文档所采用的惯例一致：** 本应用不展开 [xacro](http://wiki.ros.org/xacro) 宏，也不加载 COLLADA（`.dae`）网格。两者都是明确命名的限制（一条清晰的错误信息，而非静默的解析错误或视口中缺失的连杆），而非半成品式的尝试——具体原因见下方“URDF 解析”和“网格加载”两节。
+**诚实说明，与本生态系统其余文档所采用的惯例一致：** 本应用不展开 [xacro](http://wiki.ros.org/xacro) 宏，也不加载 COLLADA（`.dae`）网格。两者都是明确命名的限制（一条清晰的错误信息，而非静默的解析错误或视口中缺失的连杆），而非半成品式的尝试——具体原因见下方“URDF 解析”和“网格加载”两节。 唯一的例外是可选项:在 `hydra_editor_urdf_config.json` 中将 `xacro_expand` 设为 true,且机器上已安装 `xacro` 工具时,xacro 文件由该工具展开(程序本身不附带任何内容)。
 
 ## 🧩 在 HYDRA-UMC 中的角色
 
@@ -128,7 +128,9 @@ GPL-3.0-or-later - see LICENSE
 
 通过标准库自身的 `xml.etree.ElementTree` 进行纯 XML 处理——对于这样一种简单的格式，不需要 `lxml` 依赖。内存中的模型（`hydra_editor_urdf/models.py`）是一棵刻意保持简单、可变、自研的数据类树，而非对现有 Python URDF 库（如 `urdfpy` 或 `yourdfpy`）的包装：本应用需要以交互方式*编辑*这棵树并实时重新渲染每一次更改，这不是一个以只读解析为主的库所擅长的场景，完全拥有这个模型能让它保持小巧、可检查，且不受第三方依赖自身发布节奏的影响。字段名称和默认值紧密遵循真实的 [URDF XML 规范](http://wiki.ros.org/urdf/XML)，因此解析器/写入器这一对始终是一个薄而直观的 XML↔对象映射。
 
-**xacro 不会被展开。** [xacro](http://wiki.ros.org/xacro) 是一个拥有自己 ROS 包和依赖链的 Python/XML 宏预处理器，一个真实的 xacro 文件只有在它编写时所针对的那个 ROS 包环境内部才能被可靠地解析（宏参数、`$(find pkg)` 风格的引入等）——这是本应用无法诚实复现的。使用了 `<xacro:...>` 标签或声明了 xacro 命名空间的文件会得到一条清晰的错误信息，解释这一限制并指向 ROS 的 `xacro` 命令行工具进行预处理，而不是静默解析错误。
+**xacro 不会被展开。** [xacro](http://wiki.ros.org/xacro) 是一个拥有自己 ROS 包和依赖链的 Python/XML 宏预处理器，一个真实的 xacro 文件只有在它编写时所针对的那个 ROS 包环境内部才能被可靠地解析（宏参数、`$(find pkg)` 风格的引入等）——这是本应用无法诚实复现的。使用了 `<xacro:...>` 标签或声明了 xacro 命名空间的文件会得到一条清晰的错误信息，解释这一限制并指向 ROS 的 `xacro` 命令行工具进行预处理，而不是静默解析错误。 唯一的例外是可选项:在 `hydra_editor_urdf_config.json` 中将 `xacro_expand` 设为 true,且机器上已安装 `xacro` 工具时,xacro 文件由该工具展开(程序本身不附带任何内容)。
+
+**可选的检查与导出,默认全部关闭**(开关在 `hydra_editor_urdf_config.json` 中):`self_collision_check` 以警告形式列出在初始姿态或逐个关节活动时包围盒重叠的连杆对(`self_collision_steps`、`self_collision_tolerance_m`;包围盒包住真实形状,因此可能报告擦边情况,但不会漏掉重叠);`license_check` 对文件夹中没有 LICENSE、COPYING、NOTICE 或 ATTRIBUTION 文件的网格以及带条件的许可证发出警告,并可根据找到的内容生成 ATTRIBUTION 文本;导出窗口有一个 Y 轴向上复选框,可为 Three.js 场景写出模型(根连杆将世界旋转四分之一圈,`y_up_scale` 缩放长度)。未开启时,它们都不会改变可行性或写出的内容。
 
 导出（`urdf/writer.py`）会从头重新序列化当前的内存树，而非修补原始的源 XML 文本，因此每一次实时编辑——无论由哪个面板做出——都会通过同一条代码路径，恰好一次地反映在“导出 URDF”菜单操作和发送到 STUDIO 服务器的负载中。
 
@@ -246,7 +248,7 @@ python main.py
 
 ## 🧪 测试
 
-运行 `python -m pytest tests -q` 会执行 372 个自动测试。 不需要硬件，也不需要这台机器以外的任何东西。
+运行 `python -m pytest tests -q` 会执行 399 个自动测试。 不需要硬件，也不需要这台机器以外的任何东西。
 
 CI 运行 `HYDRA_UMC_CI=1 python tools/ci_validate.py`，检查清单、文档、八个 README 和图片。
 
@@ -257,7 +259,7 @@ pip install -r requirements-dev.txt
 python -m pytest tests/ -q
 ```
 
-说明:本应用自身的纯逻辑(URDF 解析/导出、DOF 可行性校验、正向运动学、惯性估算、网格引用解析、GitHub 拉取、i18n)此前完全没有自动化测试覆盖。已修复:新增 15 个测试模块共 372 个真实测试,其中没有一个会导入 PySide6/PyOpenGL——`requirements-dev.txt` 只安装 `tests/` 真正需要的东西(`numpy` 和 `pytest`),因此整个测试套件无需显示器或 Qt 平台插件即可运行。其中几个测试是针对此前已发现并修复、且已在源码本身留有注释记录的 bug 的明确回归测试(`render/kinematics.py` 中针对真实环路的无限循环防护、`source/scan.py` 的 `had_scheme` 条件、`urdf/dof.py` 的负质量检查)——今后的修改如果悄悄让其中任何一个问题重现,都会被测试直接拦下。CI(`.github/workflows/ci.yml`)在每次推送时都会运行同样的命令。
+说明:本应用自身的纯逻辑(URDF 解析/导出、DOF 可行性校验、正向运动学、惯性估算、网格引用解析、GitHub 拉取、i18n)此前完全没有自动化测试覆盖。已修复:新增 15 个测试模块共 399 个真实测试,其中没有一个会导入 PySide6/PyOpenGL——`requirements-dev.txt` 只安装 `tests/` 真正需要的东西(`numpy` 和 `pytest`),因此整个测试套件无需显示器或 Qt 平台插件即可运行。其中几个测试是针对此前已发现并修复、且已在源码本身留有注释记录的 bug 的明确回归测试(`render/kinematics.py` 中针对真实环路的无限循环防护、`source/scan.py` 的 `had_scheme` 条件、`urdf/dof.py` 的负质量检查)——今后的修改如果悄悄让其中任何一个问题重现,都会被测试直接拦下。CI(`.github/workflows/ci.yml`)在每次推送时都会运行同样的命令。
 
 ## 🏗️ 构建与发布
 

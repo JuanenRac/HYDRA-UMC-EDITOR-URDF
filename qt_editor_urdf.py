@@ -179,6 +179,7 @@ class EditorQtBridge(QObject):
 
         # -- Upload panel
         self._export_keep_unsupported = False
+        self._export_y_up = False
         self._upload_client: StudioClient | None = None
         self._upload_connecting = False
         self._upload_status_text = _("UPLOAD_STATUS_NOT_CONNECTED")
@@ -381,6 +382,7 @@ class EditorQtBridge(QObject):
         self._rebuild_joint_sliders(robot)
         self._selected_link = None
         self._export_keep_unsupported = False
+        self._export_y_up = False
         self._reset_properties_selection()
         self._refresh_upload_gate()
         renderer = self._ensure_viewport_renderer()
@@ -933,6 +935,18 @@ class EditorQtBridge(QObject):
             self._export_keep_unsupported = keep
             self.changed.emit()
 
+    @Property(bool, notify=changed)
+    def exportYUp(self) -> bool:
+        return self._export_y_up
+
+    @Slot(bool)
+    def setExportYUp(self, y_up: bool) -> None:
+        """The switch of the export window: write the model in the Y-up convention of a Three.js scene. Off by default
+        and off again for every robot that is loaded."""
+        if y_up != self._export_y_up:
+            self._export_y_up = y_up
+            self.changed.emit()
+
     @Property(str, notify=changed)
     def exportUnsupportedText(self) -> str:
         count = self._controller.unsupported_count()
@@ -944,7 +958,7 @@ class EditorQtBridge(QObject):
         QML has no try/except of its own to report a real OSError with."""
         path = _url_to_local_path(path)
         try:
-            self._controller.export_urdf_file(path, keep_unsupported=self._export_keep_unsupported)
+            self._controller.export_urdf_file(path, keep_unsupported=self._export_keep_unsupported, y_up=self._export_y_up)
             self._status_message = _("EXPORT_SUCCESS", path=path)
             self.changed.emit()
             return ""

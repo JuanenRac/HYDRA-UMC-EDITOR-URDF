@@ -113,3 +113,5 @@ EXPORT_KEEP_UNSUPPORTED=Manter os elementos para os quais este editor não tem c
 EXPORT_KEEP_UNSUPPORTED_HINT=Desativado por predefinição: ficam de fora do ficheiro, como antes. Ativado, são escritos de novo tal como estavam no ficheiro de origem, exceto os que nomeiam uma articulação ou uma ligação que foi apagada.
 EXPORT_UNSUPPORTED_COUNT=O ficheiro de origem tem {count} elemento(s) que este editor não mantém.
 EXPORT_UNSUPPORTED_NONE=Nada do ficheiro de origem fica de fora da exportação.
+EXPORT_Y_UP=Escrever o modelo para uma cena com Y para cima (Three.js)
+EXPORT_Y_UP_HINT=Desativado por predefinição: o ficheiro mantém a convenção Z para cima do URDF. Ativado, um elo raiz roda o mundo para que o Y aponte para cima, como na cena do STUDIO; a escala é y_up_scale no ficheiro de configuração (1 por predefinição).

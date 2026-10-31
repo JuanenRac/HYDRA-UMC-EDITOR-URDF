@@ -19,7 +19,7 @@ GPL-3.0-or-later - see LICENSE
   <img src="https://img.shields.io/badge/Language-Python%203.11-3776AB.svg" alt="Language">
   <img src="https://img.shields.io/badge/Framework-PySide6-41CD52.svg" alt="Framework">
   <img src="https://img.shields.io/badge/Format-URDF-red.svg" alt="Format">
-  <img src="https://img.shields.io/badge/Tests-372%20passing-2ea44f.svg" alt="Tests">
+  <img src="https://img.shields.io/badge/Tests-399%20passing-2ea44f.svg" alt="Tests">
   <img src="https://img.shields.io/badge/Version-0.1.6-0f6cbd.svg" alt="Version">
   <img src="https://img.shields.io/badge/Maturity-established-2EA44F.svg" alt="Maturity">
 </p>
@@ -28,7 +28,7 @@ GPL-3.0-or-later - see LICENSE
 
 ---
 
-**Honesty check - what actually runs today:** the pure-logic core - URDF parsing/export (`urdf/parser.py`, `urdf/writer.py`), DOF feasibility validation (`urdf/dof.py`), forward kinematics (`render/kinematics.py`), inertia estimation (`inertia_calc.py`), mesh-reference resolution and GitHub-zipball fetching (`source/scan.py`, `source/github_fetcher.py`, `source/local_folder.py`), the in-memory model (`models.py`), the gallery list (`gallery.py`) and the i18n loader (`i18n.py`) - is real and covered by 372 passing tests (`tests/`), none of which import PySide6/PyOpenGL. `test_github_fetcher.py` mocks every network call - a real GitHub zipball download has been run manually, never as part of the automated suite. The Qt/OpenGL layer (`render/viewport.py`'s `UrdfGLRenderer`, `render/mesh.py`, every `ui/*` panel, and the `--qtquick` deck's `OffscreenUrdfRenderer`) is real, working code but has no automated test coverage at all - it needs a real display/Qt platform plugin, which CI doesn't have, so it's verified by hand, not by a test suite. `server/client.py`'s `StudioClient` (login/push/pull against HYDRA-UMC-SERVER's `server.ts`) is real HTTP code, tested against a small local server that keeps the contract of `server.ts` (the token on every call, a name collision, the download of a model, a hostile answer). xacro expansion and COLLADA (`.dae`) mesh loading are explicit, named non-features (a clear error, not a silent misparse) - see the Honesty note in the Overview below and the URDF Parsing/Mesh Loading sections for why. See `CHANGELOG.md` for exactly what has shipped so far.
+**Honesty check - what actually runs today:** the pure-logic core - URDF parsing/export (`urdf/parser.py`, `urdf/writer.py`), DOF feasibility validation (`urdf/dof.py`), forward kinematics (`render/kinematics.py`), inertia estimation (`inertia_calc.py`), mesh-reference resolution and GitHub-zipball fetching (`source/scan.py`, `source/github_fetcher.py`, `source/local_folder.py`), the in-memory model (`models.py`), the gallery list (`gallery.py`) and the i18n loader (`i18n.py`) - is real and covered by 399 passing tests (`tests/`), none of which import PySide6/PyOpenGL. `test_github_fetcher.py` mocks every network call - a real GitHub zipball download has been run manually, never as part of the automated suite. The Qt/OpenGL layer (`render/viewport.py`'s `UrdfGLRenderer`, `render/mesh.py`, every `ui/*` panel, and the `--qtquick` deck's `OffscreenUrdfRenderer`) is real, working code but has no automated test coverage at all - it needs a real display/Qt platform plugin, which CI doesn't have, so it's verified by hand, not by a test suite. `server/client.py`'s `StudioClient` (login/push/pull against HYDRA-UMC-SERVER's `server.ts`) is real HTTP code, tested against a small local server that keeps the contract of `server.ts` (the token on every call, a name collision, the download of a model, a hostile answer). xacro expansion and COLLADA (`.dae`) mesh loading are explicit, named non-features (a clear error, not a silent misparse) - see the Honesty note in the Overview below and the URDF Parsing/Mesh Loading sections for why. See `CHANGELOG.md` for exactly what has shipped so far. The one exception is opt-in: with `xacro_expand` set to true in `hydra_editor_urdf_config.json` and the `xacro` tool installed on the machine, a xacro file is expanded by that tool (nothing is bundled).
 
 > **Safety and security status:** this ecosystem is not a certified safety system. There is no hardware E-STOP path, no firmware-enforced limits or interlocks and no verified motion command yet; firmware images are checked with CRC-32 and an Ed25519 signature, and a release build refuses the published development keys (the tool heads and expansion boards behind the relay still run URTC bootloaders, which take a shared-key HMAC-SHA256 instead of a signature); TLS and mutual TLS are optional and off by default; no custom board has been populated or tested yet. Read the [security baseline](https://github.com/JuanenRac/HYDRA-UMC-DOCS/blob/main/docs/SECURITY_BASELINE.md) and the [threat model](https://github.com/JuanenRac/HYDRA-UMC-DOCS/blob/main/docs/THREAT_MODEL.md) before relying on any statement here for the safety of a person.
 
@@ -40,7 +40,7 @@ GPL-3.0-or-later - see LICENSE
 |---|---|
 | Version | `0.1.6` |
 | Maturity | Established |
-| Tests | 372 (`python -m pytest tests -q`) |
+| Tests | 399 (`python -m pytest tests -q`) |
 | Stack | Python / PySide6 / Qt6 / OpenGL |
 | Target | The PC of the person using it |
 | On real hardware | Not applicable: nothing here runs on hardware |
@@ -56,7 +56,7 @@ Each line is one part of this repository and the light says how far it is today.
 | Area | State | What it means here |
 |---|---|---|
 | Software | 🟢 | Complete for its purpose and stable; the honesty check above lists the known limits |
-| Tests | 🟢 | 372 automated tests, run on every change |
+| Tests | 🟢 | 399 automated tests, run on every change |
 | Real hardware | 🟢 | Not applicable: nothing here runs on hardware |
 | Documentation | 🟢 | README in eight languages, checked against the manifest on every change |
 
@@ -66,7 +66,7 @@ Each line is one part of this repository and the light says how far it is today.
 
 Built with **Python** and **PySide6/Qt6**, using the same architectural patterns already validated in this ecosystem's other desktop tool, [HYDRA-UMC SUITE](https://github.com/JuanenRac/HYDRA-UMC-SUITE): a Photoshop/Fusion-360-style dockable workspace (`QDockWidget`), a hand-written OpenGL 3D viewport (`QOpenGLWidget` + GLSL 3.3 core-profile shaders, no `glBegin`/`glEnd` legacy path), and one central controller object that owns state and every UI panel listens to via Qt signals. Reusing that pattern here - rather than exploring a new UI/render stack for a sibling tool in the same ecosystem - is a deliberate choice, not an oversight.
 
-**Honesty note, matching the rest of this ecosystem's own documentation convention:** this app does not expand [xacro](http://wiki.ros.org/xacro) macros, and does not load COLLADA (`.dae`) meshes. Both are named, explicit limitations (a clear error message, not a silent misparse or a missing link in the viewport) rather than a half-implemented attempt - see the **URDF Parsing** and **Mesh Loading** sections below for why real support for either would take significant additional work.
+**Honesty note, matching the rest of this ecosystem's own documentation convention:** this app does not expand [xacro](http://wiki.ros.org/xacro) macros, and does not load COLLADA (`.dae`) meshes. Both are named, explicit limitations (a clear error message, not a silent misparse or a missing link in the viewport) rather than a half-implemented attempt - see the **URDF Parsing** and **Mesh Loading** sections below for why real support for either would take significant additional work. The one exception is opt-in: with `xacro_expand` set to true in `hydra_editor_urdf_config.json` and the `xacro` tool installed on the machine, a xacro file is expanded by that tool (nothing is bundled).
 
 ## 🧩 Role in HYDRA-UMC
 
@@ -128,7 +128,9 @@ Mesh paths are confined: a `<mesh filename>` is only resolved to a `.stl`, `.obj
 
 Plain XML via the standard library's own `xml.etree.ElementTree` - no `lxml` dependency needed for a format this simple. The in-memory model (`hydra_editor_urdf/models.py`) is a deliberately plain, mutable, in-house dataclass tree rather than a wrapper around an existing Python URDF library such as `urdfpy` or `yourdfpy`: this app needs to *edit* the tree interactively and re-render every change live, which a read-mostly parsing library isn't shaped for, and owning the model outright keeps it small, inspectable, and free of a third-party dependency's own release cadence. Field names and defaults follow the real [URDF XML schema](http://wiki.ros.org/urdf/XML) closely, so the parser/writer pair stays a thin, obvious XML↔object mapping.
 
-**xacro is not expanded.** [xacro](http://wiki.ros.org/xacro) is a Python/XML macro preprocessor with its own ROS package and dependency chain, and a real xacro file is only reliably resolvable inside the same ROS package environment it was authored against (macro arguments, `$(find pkg)`-style includes, etc.) - something this app has no way to reproduce honestly. A file that uses `<xacro:...>` tags or declares the xacro namespace gets a clear error explaining the limitation and pointing at the ROS `xacro` command-line tool to preprocess it first, rather than a silent misparse.
+**xacro is not expanded.** [xacro](http://wiki.ros.org/xacro) is a Python/XML macro preprocessor with its own ROS package and dependency chain, and a real xacro file is only reliably resolvable inside the same ROS package environment it was authored against (macro arguments, `$(find pkg)`-style includes, etc.) - something this app has no way to reproduce honestly. A file that uses `<xacro:...>` tags or declares the xacro namespace gets a clear error explaining the limitation and pointing at the ROS `xacro` command-line tool to preprocess it first, rather than a silent misparse. The one exception is opt-in: with `xacro_expand` set to true in `hydra_editor_urdf_config.json` and the `xacro` tool installed on the machine, a xacro file is expanded by that tool (nothing is bundled).
+
+**Optional checks and exports, all off by default** (switches in `hydra_editor_urdf_config.json`): `self_collision_check` lists, as warnings, pairs of links whose boxes overlap in the home pose or while one joint at a time is jogged (`self_collision_steps`, `self_collision_tolerance_m`; the boxes contain the real shapes, so a near miss can be reported but an overlap is not missed); `license_check` warns about meshes with no LICENSE, COPYING, NOTICE or ATTRIBUTION file in their folders and about licenses with conditions, and an ATTRIBUTION text can be built from what is found; the Export window has a Y-up box that writes the model for a Three.js scene (a root link turns the world a quarter turn, `y_up_scale` scales the lengths). None of them changes feasibility or what is written unless it is switched on.
 
 Export (`urdf/writer.py`) re-serializes the current in-memory tree from scratch rather than patching the original source XML text, so every live edit - regardless of which panel made it - is reflected exactly once, through one code path, in both the "Export URDF" menu action and the payload sent to a STUDIO server.
 
@@ -268,7 +270,7 @@ Starts maximized (not true OS-level fullscreen, so the native window title bar a
 
 ## 🧪 Testing
 
-372 automated tests run with `python -m pytest tests -q`. They need no hardware and nothing outside this machine.
+399 automated tests run with `python -m pytest tests -q`. They need no hardware and nothing outside this machine.
 
 The CI runs `HYDRA_UMC_CI=1 python tools/ci_validate.py`, which checks the manifest, the documents, the eight READMEs and the pictures.
 
@@ -279,7 +281,7 @@ pip install -r requirements-dev.txt
 python -m pytest tests/ -q
 ```
 
-Note: this app's own pure logic (URDF parsing/export, DOF feasibility, forward kinematics, inertia estimation, mesh-reference resolution, GitHub fetching, i18n) had zero automated test coverage. Fixed: 372 real tests across 15 test modules, none of which import PySide6/PyOpenGL - `requirements-dev.txt` installs only what `tests/` actually needs (`numpy` + `pytest`), so the suite runs without a display or a Qt platform plugin. Several tests are explicit regressions for bugs already found and fixed earlier and documented inline in the source itself (`render/kinematics.py`'s infinite-loop-on-a-real-cycle guard, `source/scan.py`'s `had_scheme` gating, `urdf/dof.py`'s negative-mass check) - a future edit can't silently reintroduce any of them without a test failing. CI (`.github/workflows/ci.yml`) runs the same command on every push.
+Note: this app's own pure logic (URDF parsing/export, DOF feasibility, forward kinematics, inertia estimation, mesh-reference resolution, GitHub fetching, i18n) had zero automated test coverage. Fixed: 399 real tests across 15 test modules, none of which import PySide6/PyOpenGL - `requirements-dev.txt` installs only what `tests/` actually needs (`numpy` + `pytest`), so the suite runs without a display or a Qt platform plugin. Several tests are explicit regressions for bugs already found and fixed earlier and documented inline in the source itself (`render/kinematics.py`'s infinite-loop-on-a-real-cycle guard, `source/scan.py`'s `had_scheme` gating, `urdf/dof.py`'s negative-mass check) - a future edit can't silently reintroduce any of them without a test failing. CI (`.github/workflows/ci.yml`) runs the same command on every push.
 
 ## 🏗️ Build & Release
 

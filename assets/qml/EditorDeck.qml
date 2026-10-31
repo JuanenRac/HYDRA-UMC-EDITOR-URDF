@@ -167,6 +167,15 @@ ApplicationWindow {
                 palette.windowText: window.textPrimary
             }
             Text { text: editorBackend.uiText("EXPORT_KEEP_UNSUPPORTED_HINT"); color: window.muted; font.pixelSize: 10; wrapMode: Text.WordWrap; Layout.preferredWidth: 400 }
+            CheckBox {
+                id: exportYUpBox
+                objectName: "exportYUp"
+                text: editorBackend.uiText("EXPORT_Y_UP")
+                checked: editorBackend.exportYUp
+                onToggled: editorBackend.setExportYUp(checked)
+                palette.windowText: window.textPrimary
+            }
+            Text { text: editorBackend.uiText("EXPORT_Y_UP_HINT"); color: window.muted; font.pixelSize: 10; wrapMode: Text.WordWrap; Layout.preferredWidth: 400 }
         }
         onAccepted: exportDialog.open()
     }

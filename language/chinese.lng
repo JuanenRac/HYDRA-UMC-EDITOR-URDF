@@ -113,3 +113,5 @@ EXPORT_KEEP_UNSUPPORTED=保留此编辑器没有对应字段的元素(传动、g
 EXPORT_KEEP_UNSUPPORTED_HINT=默认关闭:它们像以前一样不会写入文件。开启后,会按源文件原样写回,但指向已删除关节或连杆的除外。
 EXPORT_UNSUPPORTED_COUNT=源文件中有 {count} 个此编辑器不会保留的元素。
 EXPORT_UNSUPPORTED_NONE=源文件中没有任何内容会在导出时被丢弃。
+EXPORT_Y_UP=为 Y 轴向上的场景(Three.js)写出模型
+EXPORT_Y_UP_HINT=默认关闭:文件保持 URDF 的 Z 轴向上约定。开启后,一个根链接会旋转世界,使 Y 轴朝上,与 STUDIO 场景一致;缩放比例为配置文件中的 y_up_scale(默认 1)。

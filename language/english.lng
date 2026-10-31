@@ -113,3 +113,5 @@ EXPORT_KEEP_UNSUPPORTED=Keep the elements this editor has no field for (transmis
 EXPORT_KEEP_UNSUPPORTED_HINT=Off by default: they are left out of the file, as before. When on, they are written back as the source file had them, except those that name a joint or link that was deleted.
 EXPORT_UNSUPPORTED_COUNT=The source file has {count} element(s) this editor does not keep.
 EXPORT_UNSUPPORTED_NONE=Nothing in the source file is left out of the export.
+EXPORT_Y_UP=Write the model for a Y-up scene (Three.js)
+EXPORT_Y_UP_HINT=Off by default: the file keeps the Z-up convention of URDF. When on, a root link turns the world so that Y points up, as in the STUDIO scene; the scale is y_up_scale in the configuration file (1 by default).

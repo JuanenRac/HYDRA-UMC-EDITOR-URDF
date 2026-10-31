@@ -21,6 +21,7 @@ from typing import Callable
 
 from PySide6.QtCore import QObject, Signal
 
+from hydra_editor_urdf import i18n
 from hydra_editor_urdf.models import Robot
 from hydra_editor_urdf.source.github_fetcher import GithubFetchError, fetch_github_repo
 from hydra_editor_urdf.source.local_folder import LocalFolderError, validate_local_folder
@@ -29,6 +30,8 @@ from hydra_editor_urdf.urdf.dof import DofReport, validate
 from hydra_editor_urdf.urdf.parser import UrdfParseError, parse_urdf_file
 from hydra_editor_urdf.urdf.save_check import UrdfSaveError, check_before_save
 from hydra_editor_urdf.urdf.writer import robot_to_urdf_string
+from hydra_editor_urdf.urdf.xacro_expand import XacroError, expand_xacro, looks_like_xacro
+from hydra_editor_urdf.urdf.parser import parse_urdf_string
 
 # Where fetched-from-GitHub repos land - a real subfolder of this app's
 # own install/checkout, NOT a bare OS temp dir, so a fetch survives a
@@ -126,8 +129,8 @@ class EditorController(QObject):
     def load_urdf_file(self, urdf_path: str | Path, mesh_search_root: str | Path | None = None) -> None:
         urdf_path = Path(urdf_path)
         try:
-            robot = parse_urdf_file(urdf_path)
-        except UrdfParseError as e:
+            robot = self._parse_with_optional_xacro(urdf_path)
+        except (UrdfParseError, XacroError) as e:
             self.load_failed.emit(f"{urdf_path.name}: {e}")
             return
 
@@ -137,10 +140,63 @@ class EditorController(QObject):
         self._extra_mesh_roots = []  # a fresh load starts over - an extra folder picked for a previous URDF isn't assumed relevant to this one
         self.mesh_resolver = build_mesh_resolver(search_root, urdf_path.parent)
         self.robot = robot
-        self.dof_report = validate(robot)
+        self.dof_report = self._report(robot)
         self.joint_values = {}  # render/kinematics.default_joint_values() fills this in once the viewport asks for a pose
         self.selected_link = None
         self.robot_loaded.emit(robot, self.dof_report)
+
+    # --- optional checks, each behind a switch in hydra_editor_urdf_config.json (all off by default) ----------------------
+
+    @staticmethod
+    def _switch(name: str, default: bool = False) -> bool:
+        value = i18n.load_config().get(name, default)
+        return value if isinstance(value, bool) else default
+
+    @staticmethod
+    def _number(name: str, default: float) -> float:
+        value = i18n.load_config().get(name, default)
+        return float(value) if isinstance(value, (int, float)) and not isinstance(value, bool) else default
+
+    def _parse_with_optional_xacro(self, urdf_path: Path) -> Robot:
+        """The robot of the file. A xacro file is expanded with the xacro tool of the machine only when `xacro_expand` is
+        true in the configuration; otherwise (the default) it is refused with the explanation, as before."""
+        if self._switch("xacro_expand"):
+            try:
+                text = urdf_path.read_text(encoding="utf-8")
+            except (OSError, UnicodeDecodeError):
+                text = ""
+            if looks_like_xacro(text):
+                return parse_urdf_string(expand_xacro(urdf_path, timeout=self._number("xacro_timeout_seconds", 60.0)))
+        return parse_urdf_file(urdf_path)
+
+    def _report(self, robot: Robot) -> DofReport:
+        """The DOF report, plus the warnings of the optional checks whose switch is on (`self_collision_check`,
+        `license_check`). They are warnings only: they never make a robot infeasible."""
+        report = validate(robot)
+        if self._switch("self_collision_check"):
+            from hydra_editor_urdf.urdf.self_collision import collision_warnings, find_self_collisions
+
+            found = find_self_collisions(
+                robot,
+                self.mesh_resolver,
+                steps=int(self._number("self_collision_steps", 9)),
+                tolerance=self._number("self_collision_tolerance_m", 0.001),
+            )
+            report.warnings.extend(collision_warnings(found))
+        if self._switch("license_check") and self._mesh_search_root is not None:
+            from hydra_editor_urdf.source.licenses import check_mesh_licenses, license_warnings
+
+            report.warnings.extend(license_warnings(check_mesh_licenses(robot, self.mesh_resolver, self._mesh_search_root)))
+        return report
+
+    def attribution_text(self) -> str | None:
+        """An ATTRIBUTION text for the meshes of the loaded robot (the license files found beside them), or None."""
+        if self.robot is None or self._mesh_search_root is None:
+            return None
+        from hydra_editor_urdf.source.licenses import attribution_text, check_mesh_licenses
+
+        entries = check_mesh_licenses(self.robot, self.mesh_resolver, self._mesh_search_root)
+        return attribution_text(self.robot.name, entries, self._mesh_search_root)
 
     def add_mesh_search_folder(self, folder: str | Path) -> None:
         """Adds `folder` as an extra place to look up a mesh by basename,
@@ -183,24 +239,31 @@ class EditorController(QObject):
         viewport, whose GPU buffers may now be stale) to refresh."""
         if self.robot is None:
             return
-        self.dof_report = validate(self.robot)
+        self.dof_report = self._report(self.robot)
         self.tree_changed.emit()
 
     # --- export ------------------------------------------------------------
 
-    def export_urdf_string(self, keep_unsupported: bool = False) -> str | None:
+    def export_urdf_string(self, keep_unsupported: bool = False, y_up: bool = False) -> str | None:
         """The URDF text of the robot. With `keep_unsupported` the elements the model has no field for (transmissions,
         gazebo, joint dynamics, ...) are written back as the source file had them; off by default."""
         if self.robot is None:
             return None
-        return robot_to_urdf_string(self.robot, keep_unsupported=keep_unsupported)
+        robot = self.robot
+        if y_up:
+            # The Y-up convention of a Three.js scene (off by default: the file stays in the Z-up convention of URDF).
+            from hydra_editor_urdf.urdf.yup import to_y_up
+
+            robot = to_y_up(robot, scale=self._number("y_up_scale", 1.0))
+        return robot_to_urdf_string(robot, keep_unsupported=keep_unsupported)
 
     def unsupported_count(self) -> int:
         """How many elements of the source file the model has no field for (they are lost on export unless kept)."""
         return sum(self.robot.dropped_elements.values()) if self.robot is not None else 0
 
-    def export_urdf_file(self, path: str | Path, mesh_root: str | Path | None = None, keep_unsupported: bool = False) -> None:
-        text = self.export_urdf_string(keep_unsupported=True) if keep_unsupported else self.export_urdf_string()
+    def export_urdf_file(self, path: str | Path, mesh_root: str | Path | None = None, keep_unsupported: bool = False, y_up: bool = False) -> None:
+        options = {k: True for k, on in (("keep_unsupported", keep_unsupported), ("y_up", y_up)) if on}
+        text = self.export_urdf_string(**options)
         if text is None:
             raise ValueError("No robot loaded to export.")
         path = Path(path)
