@@ -12,6 +12,8 @@
 # =============================================================================
 from __future__ import annotations
 
+from typing import Any
+
 import xml.etree.ElementTree as ET
 from xml.dom import minidom
 
@@ -170,7 +172,7 @@ def robot_to_urdf_string(robot: Robot, pretty: bool = True, keep_unsupported: bo
                 element = ET.fromstring(fragment)
             except ET.ParseError:
                 continue
-            named = set()
+            named: Any = set()
             for e in element.iter():
                 named.update(v for v in (e.get("joint"), e.get("link"), e.get("reference")) if v)
                 if e.tag in ("joint", "link") and e.get("name"):

@@ -43,7 +43,7 @@ class _AxisSpinRow(QWidget):
         layout = QFormLayout(self)
         layout.setContentsMargins(0, 0, 0, 0)
         self.spins: list[QDoubleSpinBox] = []
-        for axis_name, v in zip(("X", "Y", "Z"), value):
+        for axis_name, v in zip(("X", "Y", "Z"), value, strict=False):
             spin = QDoubleSpinBox()
             spin.setRange(minimum, 1e6)
             spin.setSingleStep(step)
@@ -182,7 +182,7 @@ class PropertiesPanel(QWidget):
 
         self._rebuild_scale_row(first_visual)
 
-        self._selected_visual_geometry = first_visual.geometry if first_visual is not None else None
+        self._selected_visual_geometry = first_visual.geometry if first_visual is not None else None  # type: ignore[assignment]
         self._inertial_group.setEnabled(first_visual is not None)
         self._inertial_note.setText("")
         existing = link.inertial

@@ -51,8 +51,8 @@ def scale_robot(robot: Robot, s: float) -> Robot:
     out = copy.deepcopy(robot)
     for link in out.links.values():
         for shape in [*link.visuals, *link.collisions]:
-            shape.origin = _scaled_origin(shape.origin, s)
-            _scale_geometry(shape.geometry, s)
+            shape.origin = _scaled_origin(shape.origin, s)  # type: ignore[attr-defined]
+            _scale_geometry(shape.geometry, s)  # type: ignore[attr-defined]
         inertial = link.inertial
         if inertial is not None:
             inertial.origin = _scaled_origin(inertial.origin, s)

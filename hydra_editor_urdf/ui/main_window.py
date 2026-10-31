@@ -133,7 +133,7 @@ class MainWindow(QMainWindow):
             brand = QSvgWidget(str(icon_path), toolbar)
             brand.renderer().setAnimationEnabled(True)
         else:
-            brand = QLabel("H", toolbar)
+            brand = QLabel("H", toolbar)  # type: ignore[assignment]
         brand.setObjectName("suiteBrand")
         brand.setFixedSize(44, 44)
         toolbar.addWidget(brand)

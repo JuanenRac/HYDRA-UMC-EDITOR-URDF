@@ -189,8 +189,8 @@ class ViewportPanel(QWidget):
     def _rebuild_jog_sliders(self, robot: Robot) -> None:
         while self._jog_container.count():
             item = self._jog_container.takeAt(0)
-            if item.widget():
-                item.widget().deleteLater()
+            if item.widget():  # type: ignore[union-attr]
+                item.widget().deleteLater()  # type: ignore[union-attr]
         self._joint_sliders = []
         starting_pose = default_joint_values(robot)
         for joint in robot.movable_joints():

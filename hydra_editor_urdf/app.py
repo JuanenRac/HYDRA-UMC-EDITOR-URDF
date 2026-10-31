@@ -216,7 +216,7 @@ class EditorController(QObject):
         if folder not in self._extra_mesh_roots:
             self._extra_mesh_roots.append(folder)
         self.mesh_resolver = build_mesh_resolver(
-            self._mesh_search_root, self._urdf_file_dir, extra_roots=self._extra_mesh_roots
+            self._mesh_search_root, self._urdf_file_dir, extra_roots=self._extra_mesh_roots  # type: ignore[arg-type]
         )
         self.tree_changed.emit()
 
@@ -270,7 +270,7 @@ class EditorController(QObject):
         # Refuse a robot with impossible limits, a non-direction axis, empty
         # geometry or a missing mesh before anything is written; the error
         # lists every problem so it can all be fixed in one pass.
-        issues = check_before_save(self.robot, Path(mesh_root) if mesh_root is not None else None)
+        issues = check_before_save(self.robot, Path(mesh_root) if mesh_root is not None else None)  # type: ignore[arg-type]
         if issues:
             raise UrdfSaveError(issues)
         # BUG: this used to call write_text() directly

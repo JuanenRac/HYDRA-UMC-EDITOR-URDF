@@ -116,17 +116,17 @@ def estimate_inertial(
     is_mesh = False
     if isinstance(geometry, BoxGeometry):
         volume = box_volume(geometry.size)
-        size = geometry.size
+        size = geometry.size  # noqa: F841
         inertia_fn = _box_inertia
         inertia_args = (geometry.size,)
     elif isinstance(geometry, CylinderGeometry):
         volume = cylinder_volume(geometry.radius, geometry.length)
-        inertia_fn = _cylinder_inertia
-        inertia_args = (geometry.radius, geometry.length)
+        inertia_fn = _cylinder_inertia  # type: ignore[assignment]
+        inertia_args = (geometry.radius, geometry.length)  # type: ignore[assignment]
     elif isinstance(geometry, SphereGeometry):
         volume = sphere_volume(geometry.radius)
-        inertia_fn = _sphere_inertia
-        inertia_args = (geometry.radius,)
+        inertia_fn = _sphere_inertia  # type: ignore[assignment]
+        inertia_args = (geometry.radius,)  # type: ignore[assignment]
     elif isinstance(geometry, MeshGeometry):
         if mesh_bbox_size is None:
             return None

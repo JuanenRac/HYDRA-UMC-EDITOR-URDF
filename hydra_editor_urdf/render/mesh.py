@@ -219,9 +219,9 @@ def load_obj(path: str | Path, unit: str | None = None, fallback: bool = True) -
             length = np.linalg.norm(n)
             n = (n / length) if length > 1e-12 else np.array([0.0, 0.0, 1.0])
             na = nb = nc = tuple(n)
-        for p, n in ((pa, na), (pb, nb), (pc, nc)):
+        for p, n in ((pa, na), (pb, nb), (pc, nc)):  # type: ignore[assignment]
             out_vertices.append(p)
-            out_normals.append(n)
+            out_normals.append(n)  # type: ignore[arg-type]
 
     def parse_face_token(token: str) -> tuple[int, int | None]:
         # "v", "v/vt", "v/vt/vn", or "v//vn" - only v (position) and vn

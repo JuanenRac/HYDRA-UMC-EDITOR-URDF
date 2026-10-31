@@ -276,7 +276,7 @@ class EditorQtBridge(QObject):
 
     # --- Source -------------------------------------------------------------
 
-    @Property("QVariantList", constant=True)
+    @Property("QVariantList", constant=True)  # type: ignore[arg-type]
     def gallery(self) -> list[dict[str, str]]:
         # Index 0 is a real, inert placeholder entry - mirrors
         # SourcePanel's own _gallery_combo, whose first real QComboBox
@@ -327,7 +327,7 @@ class EditorQtBridge(QObject):
             return
         self._controller.load_from_local_folder(path)
 
-    @Property("QVariantList", notify=changed)
+    @Property("QVariantList", notify=changed)  # type: ignore[arg-type]
     def foundUrdfCandidates(self) -> list[str]:
         return [entry[0] for entry in self._found_urdf_entries]
 
@@ -367,7 +367,7 @@ class EditorQtBridge(QObject):
             return _("DOF_NO_ROBOT_LOADED")
         return _("DOF_VERDICT_FEASIBLE", dof=report.dof_count) if report.is_feasible else _("DOF_VERDICT_INFEASIBLE", dof=report.dof_count)
 
-    @Property("QVariantList", notify=changed)
+    @Property("QVariantList", notify=changed)  # type: ignore[arg-type]
     def dofIssues(self) -> list[str]:
         report = self._controller.dof_report
         if report is None:
@@ -515,7 +515,7 @@ class EditorQtBridge(QObject):
                 rows.append({"name": name, "depth": 0})
         self._link_tree = rows
 
-    @Property("QVariantList", notify=changed)
+    @Property("QVariantList", notify=changed)  # type: ignore[arg-type]
     def linkTree(self) -> list[dict[str, object]]:
         return self._link_tree
 
@@ -546,7 +546,7 @@ class EditorQtBridge(QObject):
             rows.append({"name": joint.name, "unit": unit, "lower": lower, "upper": upper, "value": max(lower, min(upper, value))})
         self._joint_sliders = rows
 
-    @Property("QVariantList", notify=changed)
+    @Property("QVariantList", notify=changed)  # type: ignore[arg-type]
     def jointSliders(self) -> list[dict[str, object]]:
         return self._joint_sliders
 
@@ -577,16 +577,16 @@ class EditorQtBridge(QObject):
 
         link = robot.links[link_name]
         first_visual = link.visuals[0] if link.visuals else None
-        self._props_selected_material = first_visual.material if first_visual is not None else None
+        self._props_selected_material = first_visual.material if first_visual is not None else None  # type: ignore[assignment]
         self._props_color_enabled = first_visual is not None
         self._props_color_hex = _rgba_to_hex(self._props_selected_material.rgba if self._props_selected_material is not None else DEFAULT_COLOR_RGBA)
 
         is_mesh = first_visual is not None and isinstance(first_visual.geometry, MeshGeometry)
-        self._props_selected_mesh_geometry = first_visual.geometry if is_mesh else None
+        self._props_selected_mesh_geometry = first_visual.geometry if is_mesh else None  # type: ignore[union-attr,assignment]
         self._props_is_mesh = is_mesh
-        self._props_scale = first_visual.geometry.scale if is_mesh else (1.0, 1.0, 1.0)
+        self._props_scale = first_visual.geometry.scale if is_mesh else (1.0, 1.0, 1.0)  # type: ignore[union-attr]
 
-        self._props_selected_visual_geometry = first_visual.geometry if first_visual is not None else None
+        self._props_selected_visual_geometry = first_visual.geometry if first_visual is not None else None  # type: ignore[assignment]
         self._props_inertial_note = ""
         existing = link.inertial
         self._props_inertial_mass = existing.mass if existing is not None else 0.0
@@ -643,7 +643,7 @@ class EditorQtBridge(QObject):
     def propsIsMesh(self) -> bool:
         return self._props_is_mesh
 
-    @Property("QVariantList", notify=changed)
+    @Property("QVariantList", notify=changed)  # type: ignore[arg-type]
     def propsScale(self) -> list[float]:
         return list(self._props_scale)
 
@@ -666,7 +666,7 @@ class EditorQtBridge(QObject):
     def propsHasJoint(self) -> bool:
         return self._props_has_joint
 
-    @Property("QVariantList", constant=True)
+    @Property("QVariantList", constant=True)  # type: ignore[arg-type]
     def propsJointTypeNames(self) -> list[str]:
         return [jt.value for jt in JointType]
 
@@ -781,7 +781,7 @@ class EditorQtBridge(QObject):
 
     # --- Upload ---------------------------------------------------------------
 
-    @Property("QVariantList", constant=True)
+    @Property("QVariantList", constant=True)  # type: ignore[arg-type]
     def uploadCategories(self) -> list[str]:
         return list(CATEGORIES)
 
@@ -816,7 +816,7 @@ class EditorQtBridge(QObject):
             client.login(username, password)
             return client
 
-        self._run_on_server_thread(do_login, self._on_connected, self._on_connect_error)
+        self._run_on_server_thread(do_login, self._on_connected, self._on_connect_error)  # type: ignore[arg-type]
 
     def _on_connected(self, client: StudioClient) -> None:
         self._upload_client = client
@@ -855,7 +855,7 @@ class EditorQtBridge(QObject):
         def do_push():
             return client.push_model(robot, category, mesh_resolver, overwrite)
 
-        self._run_on_server_thread(do_push, self._on_push_ok, self._on_push_error)
+        self._run_on_server_thread(do_push, self._on_push_ok, self._on_push_error)  # type: ignore[arg-type]
 
     def _on_push_ok(self, slug: str) -> None:
         self._status_message = _("UPLOAD_SUCCESS_BODY", slug=slug)
@@ -866,7 +866,7 @@ class EditorQtBridge(QObject):
         self._status_message = message
         self.changed.emit()
 
-    @Property("QVariantList", notify=changed)
+    @Property("QVariantList", notify=changed)  # type: ignore[arg-type]
     def uploadModels(self) -> list[str]:
         return [entry["display"] for entry in self._upload_models_by_index]
 
@@ -875,7 +875,7 @@ class EditorQtBridge(QObject):
         if self._upload_client is None:
             return
         client = self._upload_client
-        self._run_on_server_thread(client.list_models, self._on_models_listed, lambda _msg: None)  # a failed background refresh isn't worth interrupting the operator, same as the classic panel
+        self._run_on_server_thread(client.list_models, self._on_models_listed, lambda _msg: None)  # type: ignore[arg-type]  # a failed background refresh is not worth interrupting the operator, same as the classic panel
 
     def _on_models_listed(self, models: list) -> None:
         self._upload_models_by_index = [

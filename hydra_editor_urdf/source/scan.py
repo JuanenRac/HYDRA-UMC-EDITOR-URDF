@@ -73,7 +73,7 @@ def _pick_closest(matches: list[Path], tail: str, urdf_file_dir: Path) -> Path:
     def rank(path: Path) -> tuple[int, int, str]:
         have = [part.lower() for part in path.parts]
         shared = 0
-        for a, b in zip(reversed(wanted), reversed(have)):
+        for a, b in zip(reversed(wanted), reversed(have), strict=False):
             if a != b:
                 break
             shared += 1

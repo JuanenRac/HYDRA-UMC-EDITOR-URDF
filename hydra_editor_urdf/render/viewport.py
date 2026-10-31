@@ -624,10 +624,10 @@ class OffscreenUrdfRenderer:
         self._make_current()
         try:
             self._ensure_fbo()
-            self._fbo.bind()
+            self._fbo.bind()  # type: ignore[union-attr]
             self._renderer.paint_gl()
-            self._fbo.release()
-            return self._fbo.toImage()
+            self._fbo.release()  # type: ignore[union-attr]
+            return self._fbo.toImage()  # type: ignore[union-attr]
         finally:
             self._done_current()
 

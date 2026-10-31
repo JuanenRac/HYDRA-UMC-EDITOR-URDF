@@ -81,8 +81,8 @@ def mesh_filenames(robot: Robot) -> list[str]:
     names: list[str] = []
     for link in robot.links.values():
         for shape in [*link.visuals, *link.collisions]:
-            if isinstance(shape.geometry, MeshGeometry) and shape.geometry.filename and shape.geometry.filename not in names:
-                names.append(shape.geometry.filename)
+            if isinstance(shape.geometry, MeshGeometry) and shape.geometry.filename and shape.geometry.filename not in names:  # type: ignore[attr-defined]
+                names.append(shape.geometry.filename)  # type: ignore[attr-defined]
     return names
 
 
