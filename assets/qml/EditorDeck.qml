@@ -191,6 +191,14 @@ ApplicationWindow {
         }
     }
 
+    FileDialog {
+        id: physicalExportDialog
+        title: editorBackend.uiText("PHYS_EXPORT_JSON")
+        fileMode: FileDialog.SaveFile
+        nameFilters: ["JSON (*.json)"]
+        onAccepted: editorBackend.physicalExportJson(selectedFile.toString())
+    }
+
     Dialog {
         id: exportErrorDialog
         anchors.centerIn: parent
@@ -257,6 +265,13 @@ ApplicationWindow {
                         background: Rectangle { color: "transparent" }
                         TabButton { text: editorBackend.uiText("DOCK_SOURCE") }
                         TabButton { text: editorBackend.uiText("DOCK_DOF") }
+                        // Only when `physical_check` is on; with it off the tab takes no room and cannot be chosen.
+                        TabButton {
+                            objectName: "physicalTab"
+                            text: editorBackend.uiText("PHYS_PANEL_TITLE")
+                            visible: editorBackend.physicalEnabled
+                            width: visible ? implicitWidth : 0
+                        }
                     }
                     StackLayout {
                         currentIndex: sourceTabs.currentIndex
@@ -355,6 +370,83 @@ ApplicationWindow {
                                     color: panelAlt
                                     Text { id: issueText; anchors.fill: parent; anchors.margins: 8; text: modelData; color: textPrimary; font.pixelSize: 11; wrapMode: Text.WordWrap }
                                 }
+                            }
+                        }
+
+                        // -- Physical validation (read-only, only when `physical_check` is on) ------
+                        ColumnLayout {
+                            objectName: "physicalPanel"
+                            spacing: 6
+                            Text { text: editorBackend.uiText("PHYS_PANEL_INTRO"); color: muted; font.pixelSize: 11; wrapMode: Text.WordWrap; Layout.fillWidth: true }
+                            RowLayout {
+                                Layout.fillWidth: true
+                                spacing: 6
+                                ComboBox {
+                                    id: physSeverityCombo
+                                    objectName: "physicalSeverity"
+                                    Layout.fillWidth: true
+                                    model: editorBackend.physicalSeverityOptions
+                                    textRole: "label"
+                                    onActivated: editorBackend.setPhysicalSeverity(model[currentIndex].value)
+                                }
+                                ComboBox {
+                                    id: physRuleCombo
+                                    objectName: "physicalRule"
+                                    Layout.fillWidth: true
+                                    model: editorBackend.physicalRuleOptions
+                                    textRole: "label"
+                                    onActivated: editorBackend.setPhysicalRule(model[currentIndex].value)
+                                }
+                                ComboBox {
+                                    id: physSortCombo
+                                    objectName: "physicalSort"
+                                    Layout.fillWidth: true
+                                    model: editorBackend.physicalSortOptions
+                                    textRole: "label"
+                                    onActivated: editorBackend.setPhysicalSort(model[currentIndex].value)
+                                }
+                            }
+                            TextField {
+                                objectName: "physicalElement"
+                                Layout.fillWidth: true
+                                placeholderText: editorBackend.uiText("PHYS_FILTER_ELEMENT")
+                                color: textPrimary
+                                background: Rectangle { radius: 8; color: panelAlt; border.width: 1; border.color: panelBorder }
+                                onTextEdited: editorBackend.setPhysicalElement(text)
+                            }
+                            Text { objectName: "physicalCount"; text: editorBackend.physicalCountText; color: textPrimary; font.bold: true; font.pixelSize: 11; wrapMode: Text.WordWrap; Layout.fillWidth: true }
+                            ListView {
+                                objectName: "physicalList"
+                                Layout.fillWidth: true
+                                Layout.fillHeight: true
+                                clip: true
+                                model: editorBackend.physicalRows
+                                spacing: 4
+                                delegate: Rectangle {
+                                    width: ListView.view.width
+                                    height: physicalColumn.implicitHeight + 14
+                                    radius: 8
+                                    color: panelAlt
+                                    Column {
+                                        id: physicalColumn
+                                        anchors.left: parent.left
+                                        anchors.right: parent.right
+                                        anchors.top: parent.top
+                                        anchors.margins: 8
+                                        spacing: 2
+                                        Text { width: parent.width; text: modelData.severityLabel + " - " + modelData.what; color: modelData.severity === "error" ? rose : (modelData.severity === "warning" ? "#f0c35a" : cyan); font.bold: true; font.pixelSize: 11; wrapMode: Text.WordWrap }
+                                        Text { width: parent.width; text: modelData.element + ": " + modelData.value + " (" + modelData.limit + ")"; color: textPrimary; font.pixelSize: 11; wrapMode: Text.WordWrap }
+                                        Text { width: parent.width; text: modelData.suggestion; color: muted; font.pixelSize: 11; wrapMode: Text.WordWrap }
+                                    }
+                                }
+                            }
+                            Text { text: editorBackend.physicalMessage; color: muted; font.pixelSize: 11; wrapMode: Text.WordWrap; Layout.fillWidth: true; visible: text !== "" }
+                            RowLayout {
+                                Layout.fillWidth: true
+                                spacing: 6
+                                GameButton { objectName: "physicalRecheck"; text: editorBackend.uiText("PHYS_RECHECK"); onClicked: editorBackend.physicalRecheck() }
+                                GameButton { objectName: "physicalCopy"; text: editorBackend.uiText("PHYS_COPY_JSON"); accent: "#24465e"; onClicked: editorBackend.physicalCopyJson() }
+                                GameButton { objectName: "physicalExport"; text: editorBackend.uiText("PHYS_EXPORT_JSON"); accent: "#24465e"; onClicked: physicalExportDialog.open() }
                             }
                         }
                     }

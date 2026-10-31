@@ -37,6 +37,7 @@ Every file of the repository with a line on what it does: the annotated tree tha
 │   │   ├── writer.py                # models.py tree -> URDF XML string (export + server upload payload)
 │   │   ├── save_check.py            # Checks a robot before it is written out, so a model with an impossible or unusable part is refused with a list of what to fix
 │   │   ├── physical_check.py       # Physical validation (tree, inertia, limits, axes, meshes, units) with a suggested fix per warning - off by default
+│   │   ├── physical_view.py        # What the physical-validation panel shows, without Qt: rows, severity, filters, order, JSON
 │   │   └── dof.py                  # DOF counting, feasibility validation against STUDIO's 3-6 DOF ceiling
 │   ├── render/
 │   │   ├── mesh.py                 # STL/OBJ loading, box/cylinder/sphere primitive generation, mm-vs-m guard
@@ -55,6 +56,7 @@ Every file of the repository with a line on what it does: the annotated tree tha
 │       └── panels/
 │           ├── source_panel.py     # GitHub URL / local folder input, found-URDF list
 │           ├── dof_panel.py        # Feasibility verdict read-out
+│           ├── physical_panel.py   # Physical-validation table with filters, counter and JSON copy/export - only with the physical_check switch on
 │           ├── viewport_panel.py   # 3D viewport host, link tree, jog sliders
 │           ├── properties_panel.py # Recolor / rescale / retype-and-relimit editors
 │           └── upload_panel.py     # Server connect/push/pull
@@ -63,9 +65,10 @@ Every file of the repository with a line on what it does: the annotated tree tha
 │   ├── BUILD_AND_RUN.md
 │   ├── INTEGRATION_CONTRACT.md
 │   └── PHYSICAL_CHECK.md
-├── tests/                          # Real pytest suite (538 tests) - pure logic only, no PySide6 import anywhere here
+├── tests/                          # Real pytest suite (569 tests) - mostly pure logic; the panel and DOF-screen tests open the classic window, the panel and the Qt Quick deck offscreen
 │   ├── test_urdf_parser.py / test_urdf_writer.py  # URDF XML <-> models.py, including parse -> write -> parse round-trips
 │   ├── test_physical_check.py / test_characterization_physical.py  # The physical check: random valid models give no warning, each mutation gives its rule; switch, command line and texts
+│   ├── test_physical_panel.py / test_characterization_dof_screen.py  # The physical-validation panel (rows, filters, order, JSON, both interfaces, switch off = unchanged) and what the DOF screen shows today
 │   ├── test_dof.py                 # Feasibility validation, DOF boundaries, root/orphan/disconnected/multi-parent detection
 │   ├── test_kinematics.py          # Forward kinematics, including the fixed real-cycle-hangs-forever regression
 │   ├── test_inertia_calc.py        # Closed-form box/cylinder/sphere tensors against independently-computed textbook values

@@ -72,3 +72,15 @@ def _chain(n: int) -> str:
 FEASIBLE_COHERENT = _chain(3)
 # The same chain with one mass of zero: still feasible, one physical warning.
 FEASIBLE_ZERO_MASS = FEASIBLE_COHERENT.replace('<mass value="1"/>', '<mass value="0"/>', 1)
+
+
+def _multi() -> str:
+    text = FEASIBLE_ZERO_MASS
+    # j1 loses its limit (a warning) and j2 gets an origin of 5000 m (a hint: it looks like millimetres).
+    text = text.replace('<joint name="j1" type="revolute"><parent link="l1"/><child link="l2"/><axis xyz="0 0 1"/><limit lower="-1" upper="1" effort="5" velocity="2"/>', '<joint name="j1" type="revolute"><parent link="l1"/><child link="l2"/><axis xyz="0 0 1"/>')
+    text = text.replace('<joint name="j2" type="revolute"><parent link="l2"/>', '<joint name="j2" type="revolute"><origin xyz="5000 0 0"/><parent link="l2"/>')
+    return text
+
+
+# One error (mass of zero on l0), one warning (j1 without a limit) and one hint (j2 origin of 5000 m).
+MULTI_ISSUES = _multi()

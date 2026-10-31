@@ -36,6 +36,7 @@ from hydra_editor_urdf.app import EditorController
 from hydra_editor_urdf.i18n import _, AVAILABLE_LANGUAGES, current_language, save_config, CONFIG_FILE_PATH
 from hydra_editor_urdf.ui.about_dialog import AboutDialog
 from hydra_editor_urdf.ui.panels.dof_panel import DofPanel
+from hydra_editor_urdf.ui.panels.physical_panel import PhysicalPanel
 from hydra_editor_urdf.ui.panels.properties_panel import PropertiesPanel
 from hydra_editor_urdf.ui.panels.source_panel import SourcePanel
 from hydra_editor_urdf.ui.panels.upload_panel import UploadPanel
@@ -108,7 +109,17 @@ class MainWindow(QMainWindow):
         self.splitDockWidget(dock_viewport, dock_properties, Qt.Orientation.Horizontal)
         self.resizeDocks([dock_viewport, dock_properties], [1200, 400], Qt.Orientation.Horizontal)
 
-        for dock in (dock_source, dock_dof, dock_viewport, dock_properties, dock_upload):
+        # The physical-validation panel exists only when `physical_check` is true in the configuration; with the
+        # switch off (the default) there is no panel, no dock, no menu entry and no button.
+        self.physical_panel: PhysicalPanel | None = None
+        if self.controller.physical_check_enabled():
+            self.physical_panel = PhysicalPanel(self.controller)
+            dock_physical = self._make_dock(_("PHYS_PANEL_TITLE"), self.physical_panel, Qt.DockWidgetArea.LeftDockWidgetArea)
+            self._deck_docks["physical"] = dock_physical
+            self.tabifyDockWidget(dock_dof, dock_physical)
+            dock_source.raise_()
+
+        for dock in self._deck_docks.values():
             self._view_menu.addAction(dock.toggleViewAction())
 
     def _build_command_deck(self) -> None:
@@ -151,6 +162,8 @@ class MainWindow(QMainWindow):
             ("DOCK_UPLOAD", "upload"),
         ):
             self._add_deck_navigation(label_key, destination)
+            if destination == "dof" and "physical" in self._deck_docks:
+                self._add_deck_navigation("PHYS_PANEL_TITLE", "physical")
 
         export_button = QToolButton(toolbar)
         export_button.setObjectName("commandDeckNav")

@@ -28,6 +28,7 @@ from hydra_editor_urdf.source.local_folder import LocalFolderError, validate_loc
 from hydra_editor_urdf.source.scan import build_mesh_resolver, find_urdf_files
 from hydra_editor_urdf.urdf.dof import DofReport, validate
 from hydra_editor_urdf.urdf.parser import UrdfParseError, parse_urdf_file
+from hydra_editor_urdf.urdf.physical_view import PhysicalRow, build_rows
 from hydra_editor_urdf.urdf.save_check import UrdfSaveError, check_before_save
 from hydra_editor_urdf.urdf.writer import robot_to_urdf_string
 from hydra_editor_urdf.urdf.xacro_expand import XacroError, expand_xacro, looks_like_xacro
@@ -200,6 +201,21 @@ class EditorController(QObject):
         from hydra_editor_urdf.urdf.physical_check import PhysicalLimits, physical_warning_lines
 
         return physical_warning_lines(target, i18n._, self.mesh_resolver, PhysicalLimits.from_config(i18n.load_config()))
+
+    def physical_check_enabled(self) -> bool:
+        """True when `physical_check` is true in the configuration (off by default); the panel of the physical check
+        exists only then. Read from the file on each call, so that "Check again" sees a change of the setting."""
+        return self._switch("physical_check")
+
+    def physical_rows(self) -> list[PhysicalRow]:
+        """The rows of the physical-validation panel for the loaded robot (empty when the switch is off or no robot is
+        loaded). Computed on request and read-only: nothing here changes the robot or the DOF report."""
+        if self.robot is None or not self.physical_check_enabled():
+            return []
+        from hydra_editor_urdf.urdf.physical_check import PhysicalLimits, check_robot
+
+        limits = PhysicalLimits.from_config(i18n.load_config())
+        return build_rows(check_robot(self.robot, self.mesh_resolver, limits), i18n._)
 
     def attribution_text(self) -> str | None:
         """An ATTRIBUTION text for the meshes of the loaded robot (the license files found beside them), or None."""

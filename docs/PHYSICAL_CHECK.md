@@ -6,10 +6,26 @@ A URDF can be valid XML, pass the degree-of-freedom check and still describe a b
 
 | Where | How |
 | --- | --- |
-| Editor | `"physical_check": true` in `hydra_editor_urdf_config.json`. Off when the setting is missing or is not the boolean `true` (the behaviour without it is unchanged). With it on, the warnings appear in the DOF screen after the reasons, with the usual `Warning:` prefix, and are refreshed on every edit. |
+| Editor | `"physical_check": true` in `hydra_editor_urdf_config.json`. Off when the setting is missing or is not the boolean `true` (the behaviour without it is unchanged). With it on, the warnings appear in the DOF screen after the reasons, with the usual `Warning:` prefix, and are refreshed on every edit, and the "Physical validation" panel (below) exists. |
 | Command line | `python main.py --cli physical-check FILE.urdf [--json] [--mesh-root DIR]`. It needs no window and does not import Qt. Exit code 0: nothing found. 1: warnings. 2: the file could not be read or parsed, or the arguments are wrong. `--json` prints a list of objects with `rule`, `element`, `value`, `limit`, `fix` and `message`. |
 
 The command line is an explicit request, so it does not need the switch. It never writes the model.
+
+## The "Physical validation" panel
+
+With `physical_check` true the editor has a panel of its own for the warnings, in the classic window (a dock tabbed with the DOF screen, with its entry in the View menu and a button in the command deck) and in the Qt Quick deck (`main.py --qtquick`, a tab beside Source and DOF). The switch is read when the window is built, so changing it needs a restart; with it off (the default) none of this exists and the interface is the one of the version without the panel.
+
+| Part | What it does |
+| --- | --- |
+| List | One row per warning: severity, rule (the text and the code in brackets), element, value, limit and suggestion. |
+| Severity | Decided by the rule, not by the check: `error` (the model is not a valid tree or body: no root, a cycle, a mass of zero, a tensor no solid has, inverted limits, a zero axis, a name used twice), `warning` (probably wrong: a missing limit, a mesh not found, a link out of reach) and `hint` (a guess from the size of a number, or a stretched mesh). |
+| Filters | By severity, by rule (only the rules that have rows) and by a text that must appear in the element name (case ignored). |
+| Order | By severity (errors first), by rule (the order of the table below) or by element; ties keep the order of the check, so the same model always gives the same list. |
+| Counter | `shown of total`, and the number of errors, warnings and hints of the whole list. |
+| Check again | Reads the model and the settings again (for example a changed `physical_max_length_m`). The panel also refreshes by itself on every edit and every load. |
+| Copy JSON / Export JSON | The rows shown now (after the filters and the order), as a JSON list with the keys `severity`, `rule`, `element`, `value`, `limit`, `message`, `suggestion` and `fix`. Two exports of the same model are the same text. |
+
+The panel is read-only. There is deliberately **no "Apply suggestion" button**: a suggestion is a sentence with a number in it ("add 0.5 to ixx, iyy and izz", "if it is in millimetres, use 5 m"), several of them need a judgement the check cannot make (is it millimetres or really 5000 m?) and an undo for a change of the inertia of a link does not exist in this editor. Applying a suggestion by hand in the Properties panel stays the way.
 
 ## What is checked
 
@@ -62,4 +78,6 @@ All in `hydra_editor_urdf_config.json`; a value that is not a positive finite nu
 
 * It judges numbers, not shapes: a tensor that is coherent is not necessarily the tensor of the real part, and the units rules are guesses from the size of a value.
 * The mesh files are looked for with the resolver of the editor (relative to the model, `package://` tails, the opened folder); a mesh the editor can find is not reported.
+* The panel was tested offscreen (the classic window, the panel and the Qt Quick deck load and behave as described) and by its logic; it has not been looked at on a real display with a real robot, and the severity of a rule is a judgement of this editor.
+* The Qt Quick tests need PyOpenGL (the bridge imports the 3D renderer) and a Qt platform plugin; where they are missing those tests are skipped.
 * It has been tested with generated models and the simulated cases of the test suite, not against a catalogue of real robot descriptions.

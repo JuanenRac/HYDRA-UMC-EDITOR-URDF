@@ -65,6 +65,16 @@ from hydra_editor_urdf.ui.about_dialog import AUTHOR_EMAIL, AUTHOR_NAME, LICENSE
 from hydra_editor_urdf.ui.panels.source_panel import _GithubFetchThread
 from hydra_editor_urdf.ui.panels.upload_panel import CATEGORIES, _ServerCallThread
 from hydra_editor_urdf.urdf.dof import MAX_SUPPORTED_DOF, MIN_SUPPORTED_DOF, issue_lines
+from hydra_editor_urdf.urdf.physical_view import (
+    SEVERITIES,
+    SORT_KEYS,
+    PhysicalRow,
+    counts_by_severity,
+    filter_rows,
+    rows_to_json,
+    rules_present,
+    sort_rows,
+)
 from hydra_editor_urdf.urdf.save_check import check_before_save
 
 ASSETS_DIR = Path(__file__).resolve().parent / "assets"
@@ -176,6 +186,17 @@ class EditorQtBridge(QObject):
         self._viewport_render_failed = False
         self._viewport_render_error = ""
         self._viewport_frame_version = 0
+
+        # -- Physical-validation panel (exists only when `physical_check` is true in the configuration, read once here
+        # like the classic window reads it when it builds its docks).
+        self._phys_enabled = controller.physical_check_enabled()
+        self._phys_all: list[PhysicalRow] = []
+        self._phys_shown: list[PhysicalRow] = []
+        self._phys_severity = ""
+        self._phys_rule = ""
+        self._phys_element = ""
+        self._phys_sort = "severity"
+        self._phys_message = ""
 
         # -- Upload panel
         self._export_keep_unsupported = False
@@ -374,6 +395,115 @@ class EditorQtBridge(QObject):
             return []
         return issue_lines(report, _("DOF_WARNING_PREFIX"), _("DOF_NO_ISSUES"))
 
+    # --- Physical validation (read-only; shown only when `physical_check` is on) ---------------------------------
+
+    @Property(bool, constant=True)
+    def physicalEnabled(self) -> bool:
+        return self._phys_enabled
+
+    def _phys_refresh(self) -> None:
+        if not self._phys_enabled:
+            return
+        self._phys_all = self._controller.physical_rows()
+        if self._phys_rule and self._phys_rule not in {row.rule for row in self._phys_all}:
+            self._phys_rule = ""
+        self._phys_apply()
+
+    def _phys_apply(self) -> None:
+        filtered = filter_rows(self._phys_all, self._phys_severity, self._phys_rule, self._phys_element)
+        self._phys_shown = sort_rows(filtered, self._phys_sort)
+        if self._controller.robot is None:
+            self._phys_message = _("PHYS_PANEL_NO_ROBOT")
+        elif not self._phys_all:
+            self._phys_message = _("PHYS_PANEL_EMPTY")
+        elif not self._phys_shown:
+            self._phys_message = _("PHYS_PANEL_NO_MATCH")
+        else:
+            self._phys_message = ""
+        self.changed.emit()
+
+    @Property("QVariantList", notify=changed)  # type: ignore[arg-type]
+    def physicalRows(self) -> list[dict[str, str]]:
+        return [
+            {
+                "severity": row.severity,
+                "severityLabel": _("PHYS_SEV_" + row.severity),
+                "rule": row.rule,
+                "what": f"{row.what} [{row.rule}]",
+                "element": row.element,
+                "value": row.value,
+                "limit": row.limit,
+                "suggestion": row.suggestion,
+            }
+            for row in self._phys_shown
+        ]
+
+    @Property(str, notify=changed)
+    def physicalCountText(self) -> str:
+        counts = counts_by_severity(self._phys_all)
+        return _("PHYS_COUNT", shown=len(self._phys_shown), total=len(self._phys_all), error=counts["error"], warning=counts["warning"], hint=counts["hint"])
+
+    @Property(str, notify=changed)
+    def physicalMessage(self) -> str:
+        return self._phys_message
+
+    @Property("QVariantList", constant=True)  # type: ignore[arg-type]
+    def physicalSeverityOptions(self) -> list[dict[str, str]]:
+        return [{"value": "", "label": _("PHYS_FILTER_ALL")}] + [{"value": name, "label": _("PHYS_SEV_" + name)} for name in SEVERITIES]
+
+    @Property("QVariantList", constant=True)  # type: ignore[arg-type]
+    def physicalSortOptions(self) -> list[dict[str, str]]:
+        return [{"value": key, "label": _("PHYS_COL_" + key.upper())} for key in SORT_KEYS]
+
+    @Property("QVariantList", notify=changed)  # type: ignore[arg-type]
+    def physicalRuleOptions(self) -> list[dict[str, str]]:
+        return [{"value": "", "label": _("PHYS_FILTER_ALL")}] + [{"value": rule, "label": rule} for rule in rules_present(self._phys_all)]
+
+    @Slot(str)
+    def setPhysicalSeverity(self, severity: str) -> None:
+        self._phys_severity = severity
+        self._phys_apply()
+
+    @Slot(str)
+    def setPhysicalRule(self, rule: str) -> None:
+        self._phys_rule = rule
+        self._phys_apply()
+
+    @Slot(str)
+    def setPhysicalElement(self, text: str) -> None:
+        self._phys_element = text
+        self._phys_apply()
+
+    @Slot(str)
+    def setPhysicalSort(self, key: str) -> None:
+        self._phys_sort = key
+        self._phys_apply()
+
+    @Slot()
+    def physicalRecheck(self) -> None:
+        """Runs the physical check again on the loaded robot (reads the settings again)."""
+        self._phys_refresh()
+
+    @Slot()
+    def physicalCopyJson(self) -> None:
+        QGuiApplication.clipboard().setText(rows_to_json(self._phys_shown))
+        self._phys_message = _("PHYS_COPIED", count=len(self._phys_shown))
+        self.changed.emit()
+
+    @Slot(str, result=bool)
+    def physicalExportJson(self, path: str) -> bool:
+        """Writes the JSON of the rows shown now to `path` (a file URL from the dialog is accepted)."""
+        target = _url_to_local_path(path)
+        try:
+            Path(target).write_text(rows_to_json(self._phys_shown), encoding="utf-8")
+        except OSError as exc:
+            self._phys_message = _("PHYS_EXPORT_FAILED", error=exc)
+            self.changed.emit()
+            return False
+        self._phys_message = _("PHYS_EXPORTED", path=target)
+        self.changed.emit()
+        return True
+
     # --- shared load/edit handlers ---------------------------------------
 
     def _on_robot_loaded(self, robot: Robot, _report) -> None:
@@ -385,6 +515,7 @@ class EditorQtBridge(QObject):
         self._export_y_up = False
         self._reset_properties_selection()
         self._refresh_upload_gate()
+        self._phys_refresh()
         renderer = self._ensure_viewport_renderer()
         if renderer is not None:
             renderer.rebuild_buffers(robot)
@@ -397,6 +528,7 @@ class EditorQtBridge(QObject):
         if self._controller.robot is None:
             return
         self._refresh_upload_gate()
+        self._phys_refresh()
         renderer = self._ensure_viewport_renderer()
         if renderer is not None:
             renderer.rebuild_buffers(self._controller.robot)
