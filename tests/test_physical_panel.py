@@ -248,6 +248,7 @@ def test_a_coherent_model_says_there_is_nothing(monkeypatch, tmp_path) -> None:
 
 
 def test_panel_copies_and_exports_the_rows_shown_as_json(monkeypatch, tmp_path) -> None:
+    qt_app()  # skips here when the machine has no Qt platform libraries
     from PySide6.QtWidgets import QApplication
 
     _controller, panel = _panel(monkeypatch, tmp_path)
@@ -265,6 +266,7 @@ def test_panel_copies_and_exports_the_rows_shown_as_json(monkeypatch, tmp_path) 
 
 
 def test_panel_is_read_only_no_edit_and_no_apply_button(monkeypatch, tmp_path) -> None:
+    qt_app()  # skips here when the machine has no Qt platform libraries
     from PySide6.QtWidgets import QPushButton, QTableWidget
 
     controller, panel = _panel(monkeypatch, tmp_path)
@@ -293,6 +295,7 @@ def _window():
 
 
 def test_window_with_the_switch_off_is_the_same_as_before(monkeypatch, tmp_path) -> None:
+    qt_app()  # skips here when the machine has no Qt platform libraries
     from PySide6.QtWidgets import QDockWidget
 
     set_config(monkeypatch, tmp_path)
@@ -306,6 +309,7 @@ def test_window_with_the_switch_off_is_the_same_as_before(monkeypatch, tmp_path)
 
 
 def test_window_with_the_switch_on_has_the_panel_tabbed_with_the_dof_screen(monkeypatch, tmp_path) -> None:
+    qt_app()  # skips here when the machine has no Qt platform libraries
     from PySide6.QtWidgets import QDockWidget
 
     set_config(monkeypatch, tmp_path, physical_check=True)
@@ -341,6 +345,7 @@ def test_bridge_with_the_switch_off_shows_nothing(monkeypatch, tmp_path) -> None
 
 
 def test_bridge_filters_sorts_counts_copies_and_exports(monkeypatch, tmp_path) -> None:
+    qt_app()  # skips here when the machine has no Qt platform libraries
     from PySide6.QtGui import QGuiApplication
 
     set_config(monkeypatch, tmp_path, physical_check=True)
