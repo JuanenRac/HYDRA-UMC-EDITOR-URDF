@@ -171,7 +171,7 @@ class EditorController(QObject):
 
     def _report(self, robot: Robot) -> DofReport:
         """The DOF report, plus the warnings of the optional checks whose switch is on (`self_collision_check`,
-        `license_check`). They are warnings only: they never make a robot infeasible."""
+        `license_check`, `physical_check`). They are warnings only: they never make a robot infeasible."""
         report = validate(robot)
         if self._switch("self_collision_check"):
             from hydra_editor_urdf.urdf.self_collision import collision_warnings, find_self_collisions
@@ -187,7 +187,19 @@ class EditorController(QObject):
             from hydra_editor_urdf.source.licenses import check_mesh_licenses, license_warnings
 
             report.warnings.extend(license_warnings(check_mesh_licenses(robot, self.mesh_resolver, self._mesh_search_root)))
+        if self._switch("physical_check"):
+            report.warnings.extend(self.physical_warning_lines(robot))
         return report
+
+    def physical_warning_lines(self, robot: Robot | None = None) -> list[str]:
+        """The warnings of the physical check of the loaded robot, one line each in the language of the app. Computed on
+        request; the DOF report carries them only when `physical_check` is true in the configuration (off by default)."""
+        target = robot if robot is not None else self.robot
+        if target is None:
+            return []
+        from hydra_editor_urdf.urdf.physical_check import PhysicalLimits, physical_warning_lines
+
+        return physical_warning_lines(target, i18n._, self.mesh_resolver, PhysicalLimits.from_config(i18n.load_config()))
 
     def attribution_text(self) -> str | None:
         """An ATTRIBUTION text for the meshes of the loaded robot (the license files found beside them), or None."""

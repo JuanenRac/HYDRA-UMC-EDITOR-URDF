@@ -65,12 +65,9 @@ def test_zero_axis_of_a_movable_joint_is_refused_by_the_parser() -> None:
         parse_urdf_string(bad)
 
 
-def test_main_has_no_command_line_mode_today() -> None:
-    source = (ROOT / "main.py").read_text(encoding="utf-8")
-    assert "--cli" not in source
+def test_the_physical_check_is_off_by_default_and_changes_nothing_of_the_report() -> None:
+    from hydra_editor_urdf.app import EditorController
 
-
-def test_the_configuration_file_has_no_physical_switch_today() -> None:
-    config = (ROOT / "hydra_editor_urdf_config.json").read_text(encoding="utf-8")
-    assert "physical_check" not in config
-
+    assert EditorController._switch("physical_check") is False
+    robot = parse_urdf_string(INCOHERENT)
+    assert EditorController()._report(robot).warnings == []

@@ -21,6 +21,12 @@
 # =============================================================================
 import sys
 
+if "--cli" in sys.argv:
+    # The command line needs no window (and no Qt): it is answered before PySide6 is imported.
+    from hydra_editor_urdf.cli import run_cli
+
+    sys.exit(run_cli(sys.argv[1:]))
+
 from PySide6.QtCore import Qt
 from PySide6.QtGui import QShortcut, QKeySequence
 from PySide6.QtQuickControls2 import QQuickStyle

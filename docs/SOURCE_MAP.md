@@ -30,11 +30,13 @@ Every file of the repository with a line on what it does: the annotated tree tha
 │   ├── models.py                   # In-house URDF object tree (Robot/Link/Joint/Visual/Geometry/Material/...)
 │   ├── gallery.py                  # Starter list of real, verified public robot-description repositories
 │   ├── inertia_calc.py             # Closed-form moment-of-inertia formulas for the primitive geometries
+│   ├── cli.py                      # `--cli physical-check FILE.urdf [--json]` - no window, no Qt; exit 0 clean, 1 warnings, 2 error
 │   ├── i18n.py                     # language/*.lng loader, config persistence - ported from HYDRA-UMC-SUITE's own i18n.py
 │   ├── urdf/
 │   │   ├── parser.py               # URDF XML -> models.py tree (ElementTree, xacro detected and rejected with a clear error)
 │   │   ├── writer.py                # models.py tree -> URDF XML string (export + server upload payload)
 │   │   ├── save_check.py            # Checks a robot before it is written out, so a model with an impossible or unusable part is refused with a list of what to fix
+│   │   ├── physical_check.py       # Physical validation (tree, inertia, limits, axes, meshes, units) with a suggested fix per warning - off by default
 │   │   └── dof.py                  # DOF counting, feasibility validation against STUDIO's 3-6 DOF ceiling
 │   ├── render/
 │   │   ├── mesh.py                 # STL/OBJ loading, box/cylinder/sphere primitive generation, mm-vs-m guard
@@ -59,9 +61,11 @@ Every file of the repository with a line on what it does: the annotated tree tha
 ├── docs/
 │   ├── ARCHITECTURE.md
 │   ├── BUILD_AND_RUN.md
-│   └── INTEGRATION_CONTRACT.md
-├── tests/                          # Real pytest suite (355 tests) - pure logic only, no PySide6 import anywhere here
+│   ├── INTEGRATION_CONTRACT.md
+│   └── PHYSICAL_CHECK.md
+├── tests/                          # Real pytest suite (538 tests) - pure logic only, no PySide6 import anywhere here
 │   ├── test_urdf_parser.py / test_urdf_writer.py  # URDF XML <-> models.py, including parse -> write -> parse round-trips
+│   ├── test_physical_check.py / test_characterization_physical.py  # The physical check: random valid models give no warning, each mutation gives its rule; switch, command line and texts
 │   ├── test_dof.py                 # Feasibility validation, DOF boundaries, root/orphan/disconnected/multi-parent detection
 │   ├── test_kinematics.py          # Forward kinematics, including the fixed real-cycle-hangs-forever regression
 │   ├── test_inertia_calc.py        # Closed-form box/cylinder/sphere tensors against independently-computed textbook values
