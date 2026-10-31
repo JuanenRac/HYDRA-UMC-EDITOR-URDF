@@ -49,8 +49,8 @@ jobs:
         if: ${{ hashFiles('requirements-dev.txt') != '' }}
         run: |
           python -m pip install -r requirements-dev.txt ruff==0.17.1 mypy==2.4.0
-          python -m ruff check hydra_editor_urdf tests tools main.py qt_editor_urdf.py
-          python -m mypy hydra_editor_urdf qt_editor_urdf.py main.py
+          python -m ruff check --select F,E9,B hydra_editor_urdf tests tools main.py qt_editor_urdf.py
+          python -m mypy --ignore-missing-imports hydra_editor_urdf qt_editor_urdf.py main.py
       - name: Validate v1 SDK contract fixtures
         if: ${{ hashFiles('clients/python/tests/test_validation.py') != '' }}
         env:

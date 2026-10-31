@@ -1,3 +1,0 @@
-[lint]
-select = ["F", "E9", "B"]
-exclude = ["build", "dist", "images", "assets", "docs"]
