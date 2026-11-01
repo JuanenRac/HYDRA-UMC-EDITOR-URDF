@@ -58,6 +58,8 @@ Ogni riga è una parte di questo repository e il semaforo dice a che punto è og
 | Software | 🟢 | Completo per il suo scopo e stabile; la verifica di onestà qui sopra elenca i limiti noti |
 | Test | 🟢 | 569 test automatici, eseguiti a ogni modifica |
 | Hardware reale | 🟢 | Non applicabile: nulla qui gira su hardware |
+| Distribuzione | 🟠 | Pubblicato come release; l'installazione su una macchina pulita è documentata ma non registrata |
+| Lingue e accessibilità | 🟡 | L'interfaccia e la sua guida sono in otto lingue; l'uso con tastiera e screen reader non è stato provato |
 | Documentazione | 🟢 | README in otto lingue, verificato rispetto al manifesto a ogni modifica |
 
 ## 🎯 Panoramica

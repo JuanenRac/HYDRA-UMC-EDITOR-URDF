@@ -58,6 +58,8 @@ Each line is one part of this repository and the light says how far it is today.
 | Software | 🟢 | Complete for its purpose and stable; the honesty check above lists the known limits |
 | Tests | 🟢 | 569 automated tests, run on every change |
 | Real hardware | 🟢 | Not applicable: nothing here runs on hardware |
+| Deployment | 🟠 | Published as a release; installing it on a clean machine is documented but not recorded |
+| Languages and accessibility | 🟡 | The interface and its help are in eight languages; keyboard and screen-reader use has not been tested |
 | Documentation | 🟢 | README in eight languages, checked against the manifest on every change |
 
 ## 🎯 Overview
