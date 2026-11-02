@@ -24,6 +24,7 @@ from PySide6.QtCore import QObject, Signal
 from hydra_editor_urdf import i18n
 from hydra_editor_urdf.models import Robot
 from hydra_editor_urdf.source.github_fetcher import GithubFetchError, fetch_github_repo
+from hydra_editor_urdf.source.licenses import LicenseGate
 from hydra_editor_urdf.source.local_folder import LocalFolderError, validate_local_folder
 from hydra_editor_urdf.source.scan import build_mesh_resolver, find_urdf_files
 from hydra_editor_urdf.urdf.dof import DofReport, validate
@@ -216,6 +217,11 @@ class EditorController(QObject):
 
         limits = PhysicalLimits.from_config(i18n.load_config())
         return build_rows(check_robot(self.robot, self.mesh_resolver, limits), i18n._)
+
+    def push_license_gate(self) -> tuple[LicenseGate, Path | None]:
+        """The license gate of a push to the server (`push_license_gate` in the configuration; off unless asked for) and the
+        folder the meshes are searched for license files under."""
+        return LicenseGate.from_config(i18n.load_config()), self._mesh_search_root
 
     def attribution_text(self) -> str | None:
         """An ATTRIBUTION text for the meshes of the loaded robot (the license files found beside them), or None."""

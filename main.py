@@ -20,6 +20,7 @@
 # (occasional blocking calls, not a persistent live connection).
 # =============================================================================
 import sys
+from pathlib import Path
 
 if "--cli" in sys.argv:
     # The command line needs no window (and no Qt): it is answered before PySide6 is imported.
@@ -82,6 +83,17 @@ def main() -> int:
     shortcut.activated.connect(toggle_fullscreen)
 
     window.showMaximized()
+
+    # `main.py --open FILE.urdf` opens that model at start (the STL editor uses it to hand a model over). Only a .urdf file
+    # that exists is opened; anything else is ignored and the window starts empty as usual.
+    if "--open" in sys.argv:
+        index = sys.argv.index("--open")
+        target = Path(sys.argv[index + 1]) if index + 1 < len(sys.argv) else None
+        if target is not None and target.suffix.lower() == ".urdf" and target.is_file():
+            try:
+                window.controller.load_urdf_file(target, target.parent)
+            except Exception as error:  # noqa: BLE001 - a bad file must leave the window usable
+                print(f"Could not open {target}: {error}", file=sys.stderr)
 
     return app.exec()
 

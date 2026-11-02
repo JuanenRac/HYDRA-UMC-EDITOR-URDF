@@ -65,7 +65,7 @@ Every file of the repository with a line on what it does: the annotated tree tha
 │   ├── BUILD_AND_RUN.md
 │   ├── INTEGRATION_CONTRACT.md
 │   └── PHYSICAL_CHECK.md
-├── tests/                          # Real pytest suite (569 tests) - mostly pure logic; the panel and DOF-screen tests open the classic window, the panel and the Qt Quick deck offscreen
+├── tests/                          # Real pytest suite (606 tests) - mostly pure logic; the panel and DOF-screen tests open the classic window, the panel and the Qt Quick deck offscreen
 │   ├── test_urdf_parser.py / test_urdf_writer.py  # URDF XML <-> models.py, including parse -> write -> parse round-trips
 │   ├── test_physical_check.py / test_characterization_physical.py  # The physical check: random valid models give no warning, each mutation gives its rule; switch, command line and texts
 │   ├── test_physical_panel.py / test_characterization_dof_screen.py  # The physical-validation panel (rows, filters, order, JSON, both interfaces, switch off = unchanged) and what the DOF screen shows today
@@ -73,6 +73,8 @@ Every file of the repository with a line on what it does: the annotated tree tha
 │   ├── test_kinematics.py          # Forward kinematics, including the fixed real-cycle-hangs-forever regression
 │   ├── test_inertia_calc.py        # Closed-form box/cylinder/sphere tensors against independently-computed textbook values
 │   ├── test_models.py              # Robot.root_link_name()/joints_by_parent()/movable_joints()
+│   ├── test_golden_urdf.py         # The golden URDF set shared with the STL editor and the physics replica (tests/golden/)
+│   ├── test_license_gate.py        # The license gate of a push: off by default, warn, block, the attribution in the URDF
 │   ├── test_scan.py                # find_urdf_files()/build_mesh_resolver(), including the fixed had_scheme regression
 │   ├── test_local_folder.py / test_github_fetcher.py  # Source validation; GitHub network calls mocked, never real
 │   ├── test_i18n.py                # Config/language file I/O against real temp files, never the operator's real config

@@ -30,3 +30,19 @@ merely opening a file:
 No hardware-control authority, motion command, or robot connection is
 provided by this project under any code path - that boundary is unaffected
 by either network path above.
+
+## License gate and attribution before a push
+
+`push_license_gate` in `hydra_editor_urdf_config.json` is `off` unless it says `warn` or `block` (anything else is `off`). When it is on, `StudioClient.push_model` looks, for every mesh the URDF uses, for LICENSE, COPYING, NOTICE, ATTRIBUTION and COPYRIGHT files in the folders from the mesh up to the folder that was opened, and guesses the license from well-known sentences (`source/licenses.py`; this is a help, not legal advice).
+
+| Key | Default | Meaning |
+|---|---|---|
+| `push_license_gate` | `off` | `warn`: the push goes on; `block`: the push is refused with the list of meshes that fail |
+| `push_license_require_file` | `true` | a mesh with no license-like file fails |
+| `push_license_blocked` | `["CC-BY-NC"]` | licenses (as `guess_license` names them) that fail |
+
+With `warn` or `block` the text of the attribution (the nearest license file of each mesh) goes at the top of `urdfXml` as an XML comment, so the server stores it next to the meshes without any new field in `POST /api/models/submit`.
+
+## Golden URDF set
+
+`tests/golden/` is the set of files that this editor, HYDRA-UMC-EDITOR-STL (the rotation of a placement) and HYDRA-UMC-PHYSICS-REPLICA (`fk`) all check. `cases.json` gives, for each robot and set of joint values, where every joint frame must be (meters, base frame, tolerance 1e-6); `rotations.json` gives rpy and the matrix it stands for. The numbers come from `tools/make_golden_urdf.py`, which uses plain matrix products and neither numpy nor editor code. `MANIFEST.sha256` lists the files (line endings are ignored when hashing); `tools/golden_sync.py --check` compares the copies next to this checkout.

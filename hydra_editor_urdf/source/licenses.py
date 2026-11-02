@@ -137,3 +137,59 @@ def attribution_text(robot_name: str, entries: list[MeshLicense], root: str | Pa
         lines.extend(f"  - {m}" for m in sorted(unlicensed))
         lines.append("")
     return "\n".join(lines)
+
+
+# --- the gate before a push to the server ---------------------------------------------------------------------------------
+
+GATE_MODES = ("off", "warn", "block")
+DEFAULT_BLOCKED_LICENSES = ("CC-BY-NC",)
+
+
+@dataclass(frozen=True)
+class LicenseGate:
+    """What a push does about the licenses of the meshes it would send.
+
+    `mode` is "off" (the default: nothing is checked and nothing is added), "warn" (the problems are reported and the push goes
+    on) or "block" (the push is refused while there is a problem). A mesh is a problem when no license-like file sits in its
+    folders (`require_license_file`) or when its license is one of `blocked_licenses` (a licence that forbids the use, such as
+    non-commercial). Every value comes from the configuration file of the editor.
+    """
+
+    mode: str = "off"
+    require_license_file: bool = True
+    blocked_licenses: tuple[str, ...] = DEFAULT_BLOCKED_LICENSES
+
+    @classmethod
+    def from_config(cls, config: dict) -> "LicenseGate":
+        mode = config.get("push_license_gate", "off")
+        if mode not in GATE_MODES:
+            mode = "off"
+        require = config.get("push_license_require_file", True)
+        blocked = config.get("push_license_blocked", list(DEFAULT_BLOCKED_LICENSES))
+        if not isinstance(blocked, list) or not all(isinstance(b, str) for b in blocked):
+            blocked = list(DEFAULT_BLOCKED_LICENSES)
+        return cls(mode=mode, require_license_file=require if isinstance(require, bool) else True, blocked_licenses=tuple(blocked))
+
+    @property
+    def active(self) -> bool:
+        return self.mode != "off"
+
+
+def gate_problems(entries: list[MeshLicense], gate: LicenseGate) -> list[str]:
+    """One line per mesh that the gate objects to; empty when the gate is off or everything is in order."""
+    if not gate.active:
+        return []
+    lines: list[str] = []
+    for entry in entries:
+        if gate.require_license_file and not entry.files:
+            lines.append(f"{entry.mesh}: no LICENSE, COPYING, NOTICE or ATTRIBUTION file beside it")
+        forbidden = sorted(set(entry.licenses) & set(gate.blocked_licenses))
+        if forbidden:
+            lines.append(f"{entry.mesh}: license {', '.join(forbidden)} is not allowed for a push")
+    return lines
+
+
+def attribution_comment(text: str) -> str:
+    """The attribution text as an XML comment that can sit at the top of a URDF the server stores next to the meshes."""
+    safe = text.replace("--", "- -").strip()
+    return f"<!--\n{safe}\n-->\n"

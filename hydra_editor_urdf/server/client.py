@@ -34,10 +34,19 @@ import urllib.request
 from pathlib import Path
 
 from hydra_editor_urdf.models import Robot
+from hydra_editor_urdf.source.licenses import LicenseGate, attribution_comment, attribution_text, check_mesh_licenses, gate_problems
 from hydra_editor_urdf.source.scan import MESH_EXTENSIONS
 from hydra_editor_urdf.urdf.writer import robot_to_urdf_string
 
 REQUEST_TIMEOUT_S = 15.0
+
+
+def _put_after_declaration(xml: str, block: str) -> str:
+    """`block` right after the <?xml ...?> line, or at the top when there is none (a comment may precede the root element)."""
+    if xml.lstrip().startswith("<?xml"):
+        end = xml.index("?>") + 2
+        return xml[:end] + chr(10) + block + xml[end:].lstrip(chr(10))
+    return block + xml
 
 
 class StudioClientError(Exception):
@@ -111,7 +120,15 @@ class StudioClient:
         models = data.get("models")
         return models if isinstance(models, list) else []
 
-    def push_model(self, robot: Robot, category: str, mesh_resolver, overwrite: bool = False) -> str:
+    def push_model(
+        self,
+        robot: Robot,
+        category: str,
+        mesh_resolver,
+        overwrite: bool = False,
+        license_gate: LicenseGate | None = None,
+        mesh_root: str | Path | None = None,
+    ) -> str:
         """POST /api/models/submit - serializes `robot` back to URDF XML
         (urdf/writer.py) and base64-encodes every mesh file its own
         <mesh filename> references (resolved via `mesh_resolver`, the
@@ -122,6 +139,16 @@ class StudioClient:
         operator decides whether to resubmit with overwrite=True or pick
         a different name, this method never guesses."""
         urdf_xml = robot_to_urdf_string(robot)
+        if license_gate is not None and license_gate.active and mesh_root is not None:
+            # The gate of the licenses of the meshes (push_license_gate in the configuration; off unless asked for):
+            # "block" refuses the push while a mesh has no license file or a forbidden license, "warn" lets it go on.
+            # Either way the attribution of the meshes travels at the top of the URDF the server stores.
+            entries = check_mesh_licenses(robot, mesh_resolver, mesh_root)
+            problems = gate_problems(entries, license_gate)
+            if problems and license_gate.mode == "block":
+                shown = "; ".join(problems[:5]) + (f"; and {len(problems) - 5} more" if len(problems) > 5 else "")
+                raise StudioClientError(f"The push was stopped by the license check of the meshes: {shown}.")
+            urdf_xml = _put_after_declaration(urdf_xml, attribution_comment(attribution_text(robot.name, entries, mesh_root)))
         mesh_files: list[dict] = []
         seen_filenames: set[str] = set()
         for link in robot.links.values():

@@ -193,10 +193,11 @@ class UploadPanel(QWidget):
         mesh_resolver = self._controller.mesh_resolver
         category = self._category_combo.currentText()
         overwrite = self._overwrite_checkbox.isChecked()
+        license_gate, mesh_root = self._controller.push_license_gate()
         self._push_btn.setEnabled(False)
 
         def do_push():
-            return client.push_model(robot, category, mesh_resolver, overwrite)
+            return client.push_model(robot, category, mesh_resolver, overwrite, license_gate, mesh_root)
 
         self._run_on_thread(do_push, self._on_push_ok, self._on_push_error)
 

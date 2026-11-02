@@ -19,7 +19,7 @@ GPL-3.0-or-later - see LICENSE
   <img src="https://img.shields.io/badge/Language-Python%203.11-3776AB.svg" alt="Language">
   <img src="https://img.shields.io/badge/Framework-PySide6-41CD52.svg" alt="Framework">
   <img src="https://img.shields.io/badge/Format-URDF-red.svg" alt="Format">
-  <img src="https://img.shields.io/badge/Tests-569%20passing-2ea44f.svg" alt="Tests">
+  <img src="https://img.shields.io/badge/Tests-606%20passing-2ea44f.svg" alt="Tests">
   <img src="https://img.shields.io/badge/Version-0.1.8-0f6cbd.svg" alt="Version">
   <img src="https://img.shields.io/badge/Maturity-established-2EA44F.svg" alt="Maturity">
 </p>
@@ -28,7 +28,7 @@ GPL-3.0-or-later - see LICENSE
 
 ---
 
-**Verificação de honestidade - o que realmente funciona hoje:** o núcleo de lógica pura - leitura/exportação de URDF (`urdf/parser.py`, `urdf/writer.py`), validação da viabilidade de GDL (`urdf/dof.py`), cinemática direta (`render/kinematics.py`), estimativa de inércia (`inertia_calc.py`), resolução de referências a malhas e descarga de zipballs do GitHub (`source/scan.py`, `source/github_fetcher.py`, `source/local_folder.py`), o modelo em memória (`models.py`), a lista da galeria (`gallery.py`) e o carregador de i18n (`i18n.py`) - é real e coberto por 569 testes a passar (`tests/`), nenhum dos quais importa PySide6/PyOpenGL, exceto os poucos que abrem sem ecrã o ecrã GDL, o painel de validação física e o painel Qt Quick (são ignorados onde faltam as bibliotecas de plataforma do Qt). O `test_github_fetcher.py` simula todas as chamadas de rede - uma descarga real de zipball do GitHub foi executada manualmente, nunca como parte da suíte automática. A camada Qt/OpenGL (o `UrdfGLRenderer` do `render/viewport.py`, o `render/mesh.py`, cada painel de `ui/*` e o `OffscreenUrdfRenderer` do painel `--qtquick`) é código real e funcional, mas só tem cobertura de testes automáticos para o ecrã GDL e o painel de validação física (sem ecrã) - o resto precisa de um ecrã real/plugin de plataforma Qt, que o CI não tem, pelo que é verificado à mão, não por uma suíte de testes. O `StudioClient` do `server/client.py` (login/push/pull contra o `server.ts` do HYDRA-UMC-SERVER) é código HTTP real, testado contra um pequeno servidor local que respeita o contrato do `server.ts` (o token em cada chamada, uma colisão de nome, a transferência de um modelo, uma resposta hostil). A expansão de xacro e o carregamento de malhas COLLADA (`.dae`) são não-funcionalidades explícitas e nomeadas (um erro claro, não uma má interpretação silenciosa) - ver a nota de honestidade na Visão geral abaixo e as secções Leitura de URDF/Carregamento de malhas para saber porquê. Consulte o `CHANGELOG.md` para saber exatamente o que já foi entregue. A única exceção é opcional: com `xacro_expand` a true em `hydra_editor_urdf_config.json` e a ferramenta `xacro` instalada no equipamento, um ficheiro xacro é expandido por essa ferramenta (não é incluído nada).
+**Verificação de honestidade - o que realmente funciona hoje:** o núcleo de lógica pura - leitura/exportação de URDF (`urdf/parser.py`, `urdf/writer.py`), validação da viabilidade de GDL (`urdf/dof.py`), cinemática direta (`render/kinematics.py`), estimativa de inércia (`inertia_calc.py`), resolução de referências a malhas e descarga de zipballs do GitHub (`source/scan.py`, `source/github_fetcher.py`, `source/local_folder.py`), o modelo em memória (`models.py`), a lista da galeria (`gallery.py`) e o carregador de i18n (`i18n.py`) - é real e coberto por 606 testes a passar (`tests/`), nenhum dos quais importa PySide6/PyOpenGL, exceto os poucos que abrem sem ecrã o ecrã GDL, o painel de validação física e o painel Qt Quick (são ignorados onde faltam as bibliotecas de plataforma do Qt). O `test_github_fetcher.py` simula todas as chamadas de rede - uma descarga real de zipball do GitHub foi executada manualmente, nunca como parte da suíte automática. A camada Qt/OpenGL (o `UrdfGLRenderer` do `render/viewport.py`, o `render/mesh.py`, cada painel de `ui/*` e o `OffscreenUrdfRenderer` do painel `--qtquick`) é código real e funcional, mas só tem cobertura de testes automáticos para o ecrã GDL e o painel de validação física (sem ecrã) - o resto precisa de um ecrã real/plugin de plataforma Qt, que o CI não tem, pelo que é verificado à mão, não por uma suíte de testes. O `StudioClient` do `server/client.py` (login/push/pull contra o `server.ts` do HYDRA-UMC-SERVER) é código HTTP real, testado contra um pequeno servidor local que respeita o contrato do `server.ts` (o token em cada chamada, uma colisão de nome, a transferência de um modelo, uma resposta hostil). A expansão de xacro e o carregamento de malhas COLLADA (`.dae`) são não-funcionalidades explícitas e nomeadas (um erro claro, não uma má interpretação silenciosa) - ver a nota de honestidade na Visão geral abaixo e as secções Leitura de URDF/Carregamento de malhas para saber porquê. Consulte o `CHANGELOG.md` para saber exatamente o que já foi entregue. A única exceção é opcional: com `xacro_expand` a true em `hydra_editor_urdf_config.json` e a ferramenta `xacro` instalada no equipamento, um ficheiro xacro é expandido por essa ferramenta (não é incluído nada).
 
 ---
 
@@ -42,7 +42,7 @@ GPL-3.0-or-later - see LICENSE
 |---|---|
 | Versão | `0.1.8` |
 | Maturidade | Estabelecido |
-| Testes | 569 (`python -m pytest tests -q`) |
+| Testes | 606 (`python -m pytest tests -q`) |
 | Tecnologia | Python / PySide6 / Qt6 / OpenGL |
 | Destino | O PC de quem o usa |
 | Em hardware real | Não aplicável: nada aqui corre em hardware |
@@ -58,7 +58,7 @@ Cada linha é uma parte deste repositório e a luz diz até onde chega hoje. É 
 | Área | Estado | O que significa aqui |
 |---|---|---|
 | Software | 🟢 | Completo para o seu propósito e estável; a verificação de honestidade acima lista os limites conhecidos |
-| Testes | 🟢 | 569 testes automáticos, executados a cada alteração |
+| Testes | 🟢 | 606 testes automáticos, executados a cada alteração |
 | Hardware real | 🟢 | Não aplicável: nada aqui corre em hardware |
 | Implantação | 🟠 | Publicado como release; instalá-lo numa máquina limpa está documentado mas não registado |
 | Idiomas e acessibilidade | 🟡 | A interface e a sua ajuda estão em oito idiomas; a utilização com teclado e leitor de ecrã não foi testada |
@@ -181,6 +181,8 @@ python main.py --qtquick
 ~~~
 
 Uma `ApplicationWindow` QML genuinamente autónoma (`qt_editor_urdf.py` + `assets/qml/EditorDeck.qml`), nunca embebida dentro da `QMainWindow` clássica - o mesmo padrão comprovado que o HYDRA-UMC-OS-REBUILDER, o HYDRA-UMC-UPDATER, o URTC-TESTER, o URTC-FLASHER e o HYDRA-UMC-SUITE já usam, lançada ao lado do ponto de entrada clássico inalterado em vez de o substituir. Espelha a disposição real do espaço de trabalho acoplável clássico (Origem e GDL em separadores à esquerda, Vista e Propriedades lado a lado, Envio ao longo da parte inferior) e as funcionalidades reais de cada um dos seus 5 painéis - carregamento a partir do GitHub/galeria/pasta local, validação de GDL em direto, uma pré-visualização 3D com órbita/deslocação/zoom com árvore de links clicável e cursores de jog por junta, edição de cor/escala/limites das juntas/massa e inércia, e a ida e volta de ligar/enviar/trazer com o servidor STUDIO - através do mesmo `EditorController`, sem uma segunda implementação de nada disso. A pré-visualização 3D reutiliza o código real de renderização da vista clássica (o `UrdfGLRenderer` do `render/viewport.py`) através de um `OffscreenUrdfRenderer` dedicado, a mesma abordagem real de `QOpenGLContext`/`QOffscreenSurface`/framebuffer que o painel Viewport Qt Quick do próprio HYDRA-UMC-SUITE já usa, alimentada ao QML através de um `QQuickImageProvider`.
+* ✅ **Conjunto comum de URDF de referência (testes):** `tests/golden/` guarda seis robôs pequenos e, de cada um, onde deve ficar cada referencial de junta, calculado por uma referência de matemática simples (`tools/make_golden_urdf.py`, sem numpy nem código do editor). Os mesmos ficheiros são guardados byte a byte no HYDRA-UMC-EDITOR-STL e no HYDRA-UMC-PHYSICS-REPLICA e aí também são verificados, de modo que os três leem `origin`, `rpy`, `axis` e os tipos de junta da mesma maneira; `tools/golden_sync.py --check` lista as cópias que diferem. *(implementado, testado nos três repositórios)*
+* ✅ **Verificação de licenças antes de enviar, e `--open` (desligado por omissão):** com `push_license_gate` em `warn` ou `block` em `hydra_editor_urdf_config.json`, um envio para o servidor olha para os ficheiros de licença junto a cada malha. `block` recusa o envio enquanto uma malha não tiver ficheiro LICENSE, COPYING, NOTICE ou ATTRIBUTION (`push_license_require_file`, verdadeiro por omissão) ou tiver uma licença de `push_license_blocked` (`CC-BY-NC` por omissão); com `warn` ou `block` a atribuição das malhas segue como comentário no início do URDF que o servidor guarda. `main.py --open FICHEIRO.urdf` abre um modelo quando a janela arranca (o editor STL usa-o). *(implementado, testado; a licença é deduzida de frases conhecidas e não é aconselhamento jurídico)*
 
 ## 🔒 Segurança e proteção
 
@@ -248,7 +250,7 @@ Arranca maximizado (não em ecrã inteiro verdadeiro do sistema operativo, para 
 
 ## 🧪 Testes
 
-569 testes automáticos correm com `python -m pytest tests -q`. Não precisam de hardware nem de nada fora desta máquina.
+606 testes automáticos correm com `python -m pytest tests -q`. Não precisam de hardware nem de nada fora desta máquina.
 
 A CI executa `HYDRA_UMC_CI=1 python tools/ci_validate.py`, que verifica o manifesto, os documentos, os oito README e as imagens.
 
@@ -259,7 +261,7 @@ pip install -r requirements-dev.txt
 python -m pytest tests/ -q
 ```
 
-Nota: a lógica pura desta aplicação (leitura/exportação de URDF, viabilidade de GDL, cinemática direta, estimativa de inércia, resolução de referências a malhas, descarga do GitHub, i18n) tinha cobertura de testes automáticos zero. Corrigido: 569 testes reais em 15 módulos de teste, todos menos alguns evitam PySide6/PyOpenGL (esses poucos abrem sem ecrã o ecrã GDL e o painel de validação física e são ignorados onde o Qt não consegue arrancar) - o `requirements-dev.txt` instala apenas o que os `tests/` realmente precisam (`numpy` + `pytest`), pelo que a suíte corre sem ecrã nem plugin de plataforma Qt. Vários testes são regressões explícitas de erros já encontrados e corrigidos anteriormente e documentados em linha no próprio código-fonte (a proteção contra ciclo infinito num ciclo real do `render/kinematics.py`, a condição `had_scheme` do `source/scan.py`, a verificação de massa negativa do `urdf/dof.py`) - uma edição futura não pode reintroduzir nenhum deles em silêncio sem que um teste falhe. O CI (`.github/workflows/ci.yml`) executa o mesmo comando a cada push.
+Nota: a lógica pura desta aplicação (leitura/exportação de URDF, viabilidade de GDL, cinemática direta, estimativa de inércia, resolução de referências a malhas, descarga do GitHub, i18n) tinha cobertura de testes automáticos zero. Corrigido: 606 testes reais em 15 módulos de teste, todos menos alguns evitam PySide6/PyOpenGL (esses poucos abrem sem ecrã o ecrã GDL e o painel de validação física e são ignorados onde o Qt não consegue arrancar) - o `requirements-dev.txt` instala apenas o que os `tests/` realmente precisam (`numpy` + `pytest`), pelo que a suíte corre sem ecrã nem plugin de plataforma Qt. Vários testes são regressões explícitas de erros já encontrados e corrigidos anteriormente e documentados em linha no próprio código-fonte (a proteção contra ciclo infinito num ciclo real do `render/kinematics.py`, a condição `had_scheme` do `source/scan.py`, a verificação de massa negativa do `urdf/dof.py`) - uma edição futura não pode reintroduzir nenhum deles em silêncio sem que um teste falhe. O CI (`.github/workflows/ci.yml`) executa o mesmo comando a cada push.
 
 ## 🏗️ Compilação e publicação
 
