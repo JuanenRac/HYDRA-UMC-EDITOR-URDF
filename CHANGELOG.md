@@ -4,6 +4,8 @@ All notable changes to this project are documented here.
 
 ## [Unreleased]
 
+## [0.1.9] - A golden URDF set shared with the STL editor and the physics replica, a license gate before a push that is off by default and main.py --open FILE.urdf
+
 - **A golden URDF set shared with the STL editor and the physics replica:** `tests/golden/` has six small robots (rpy probes, a 3-joint arm, a branching tree, a continuous joint with a tilted axis) and the position every joint frame must have at some joint values, worked out by the plain-math reference in `tools/make_golden_urdf.py`. The same files are kept byte for byte in the other two repositories; `tools/golden_sync.py --check` lists the copies that differ and `--apply` copies the master. `tests/test_golden_urdf.py` checks the forward kinematics, a write and read back, the rpy matrices, the manifest and that the files are what the generator writes.
 - **A license gate before a push (off by default):** `push_license_gate` (`off`, `warn`, `block`), `push_license_require_file` (true) and `push_license_blocked` (`["CC-BY-NC"]`) in `hydra_editor_urdf_config.json`. With `block` a push is refused, before anything is sent, while a mesh has no license file or carries a blocked license; with `warn` or `block` the attribution of the meshes is added as a comment at the top of the URDF sent to the server (the server needs no change). New tests in `tests/test_license_gate.py`.
 - **`main.py --open FILE.urdf`:** opens a model when the window starts (only an existing `.urdf` file); the STL editor uses it to hand a model over.
