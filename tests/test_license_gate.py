@@ -102,3 +102,13 @@ def test_without_the_gate_the_urdf_is_sent_as_before(tmp_path: Path) -> None:
 def test_the_attribution_comment_cannot_close_itself_early() -> None:
     assert "--" not in attribution_comment("a -- b --> c").split("<!--", 1)[1].rsplit("-->", 1)[0]
     json.dumps(attribution_comment("x"))
+
+
+def test_the_attribution_also_travels_in_its_own_field_and_only_when_the_gate_is_on(tmp_path: Path) -> None:
+    root = _folder(tmp_path, NONCOMMERCIAL)
+    client = _Capture()
+    client.push_model(_robot(["meshes/a.stl"]), "arms", _resolver(root), license_gate=LicenseGate(mode="warn"), mesh_root=root)
+    sent = client.sent  # type: ignore[assignment]
+    assert "LICENSE" in sent["attribution"] and len(sent["attribution"]) <= 8000
+    client.push_model(_robot(["meshes/a.stl"]), "arms", _resolver(root))
+    assert "attribution" not in client.sent  # type: ignore[operator]

@@ -49,6 +49,10 @@ def _put_after_declaration(xml: str, block: str) -> str:
     return block + xml
 
 
+#: The most characters of attribution the server keeps in its own field (the same text is whole at the top of the URDF).
+ATTRIBUTION_MAX_CHARS = 8000
+
+
 class StudioClientError(Exception):
     """Always carries a human-readable message - shown directly in
     ui/panels/upload_panel.py."""
@@ -139,6 +143,7 @@ class StudioClient:
         operator decides whether to resubmit with overwrite=True or pick
         a different name, this method never guesses."""
         urdf_xml = robot_to_urdf_string(robot)
+        attribution: str | None = None
         if license_gate is not None and license_gate.active and mesh_root is not None:
             # The gate of the licenses of the meshes (push_license_gate in the configuration; off unless asked for):
             # "block" refuses the push while a mesh has no license file or a forbidden license, "warn" lets it go on.
@@ -148,7 +153,8 @@ class StudioClient:
             if problems and license_gate.mode == "block":
                 shown = "; ".join(problems[:5]) + (f"; and {len(problems) - 5} more" if len(problems) > 5 else "")
                 raise StudioClientError(f"The push was stopped by the license check of the meshes: {shown}.")
-            urdf_xml = _put_after_declaration(urdf_xml, attribution_comment(attribution_text(robot.name, entries, mesh_root)))
+            attribution = attribution_text(robot.name, entries, mesh_root)
+            urdf_xml = _put_after_declaration(urdf_xml, attribution_comment(attribution))
         mesh_files: list[dict] = []
         seen_filenames: set[str] = set()
         for link in robot.links.values():
@@ -174,6 +180,9 @@ class StudioClient:
             "meshFiles": mesh_files,
             "overwrite": overwrite,
         }
+        if attribution and attribution.strip():
+            # The same credit travels in its own field, so the server keeps it apart from the file (it accepts at most this many characters).
+            body["attribution"] = attribution.strip()[:ATTRIBUTION_MAX_CHARS]
         data = self._request("POST", "/api/models/submit", body, auth=True)
         slug = data.get("slug", robot.name)
         return slug if isinstance(slug, str) and slug else robot.name

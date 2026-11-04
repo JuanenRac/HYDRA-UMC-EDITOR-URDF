@@ -4,6 +4,8 @@ All notable changes to this project are documented here.
 
 ## [Unreleased]
 
+- **The credit of the meshes goes in its own field:** when the licence check is on, a push also sends the attribution text as the `attribution` field of the submission (at most 8000 characters), besides the comment at the top of the URDF, so the server keeps it apart from the file.
+
 ## [0.1.9] - A golden URDF set shared with the STL editor and the physics replica, a license gate before a push that is off by default and main.py --open FILE.urdf
 
 - **A golden URDF set shared with the STL editor and the physics replica:** `tests/golden/` has six small robots (rpy probes, a 3-joint arm, a branching tree, a continuous joint with a tilted axis) and the position every joint frame must have at some joint values, worked out by the plain-math reference in `tools/make_golden_urdf.py`. The same files are kept byte for byte in the other two repositories; `tools/golden_sync.py --check` lists the copies that differ and `--apply` copies the master. `tests/test_golden_urdf.py` checks the forward kinematics, a write and read back, the rpy matrices, the manifest and that the files are what the generator writes.
