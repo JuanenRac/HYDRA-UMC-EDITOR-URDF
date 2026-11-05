@@ -4,6 +4,8 @@ All notable changes to this project are documented here.
 
 ## [Unreleased]
 
+- **The build test of the repository compiles only on CI or when allowed:** for the stacks that compile (`rust`, `go`, `android`, `flutter`, `firmware-c`), `tools/build_test.py` prints `BUILD_TEST=SKIPPED` with exit status 2 on a plain PC, never a pass; `ALLOW_LOCAL_BUILD=1` allows it and a CI runner always may. The `python` and `node` stacks are not locked.
+
 - **The credit of the meshes goes in its own field:** when the licence check is on, a push also sends the attribution text as the `attribution` field of the submission (at most 8000 characters), besides the comment at the top of the URDF, so the server keeps it apart from the file.
 
 ## [0.1.9] - A golden URDF set shared with the STL editor and the physics replica, a license gate before a push that is off by default and main.py --open FILE.urdf
