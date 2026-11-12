@@ -358,7 +358,7 @@ class EditorController(QObject):
         joint = self.robot.joints.get(joint_name) if self.robot is not None else None
         if joint is None:
             return False
-        joint.origin = dataclasses.replace(joint.origin, xyz=tuple(float(v) for v in xyz))
+        joint.origin = dataclasses.replace(joint.origin, xyz=(float(xyz[0]), float(xyz[1]), float(xyz[2])))
         return True
 
     def finish_origin_drag(self, text: str | None = None) -> bool:
