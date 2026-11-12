@@ -21,7 +21,6 @@ from pathlib import Path
 from typing import Callable
 
 from PySide6.QtCore import QObject, Signal
-from PySide6.QtGui import QUndoCommand, QUndoStack
 
 from hydra_editor_urdf import i18n
 from hydra_editor_urdf.models import Robot
@@ -75,25 +74,32 @@ def _capture(robot: Robot) -> tuple:
     return copy.deepcopy((robot.name, robot.links, robot.joints, robot.materials))
 
 
-class _RobotEditCommand(QUndoCommand):
-    """One edit of the loaded robot, as the state before it and the state after it. The first redo() is a no-op: the edit has already been applied."""
+def _edit_command_class():
+    """The class of the undo step. It is built on first use: QtGui needs the graphics libraries of the machine (libEGL on Linux), and the controller
+    is also used, and tested, on machines that have only QtCore."""
+    from PySide6.QtGui import QUndoCommand
 
-    def __init__(self, controller: "EditorController", text: str, before: tuple, after: tuple) -> None:
-        super().__init__(text)
-        self._controller = controller
-        self._before = before
-        self._after = after
-        self._applied = True
+    class _RobotEditCommand(QUndoCommand):
+        """One edit of the loaded robot, as the state before it and the state after it. The first redo() is a no-op: the edit has already been applied."""
 
-    def undo(self) -> None:
-        self._controller._restore(self._before)
-        self._applied = False
+        def __init__(self, controller: "EditorController", text: str, before: tuple, after: tuple) -> None:
+            super().__init__(text)
+            self._controller = controller
+            self._before = before
+            self._after = after
+            self._applied = True
 
-    def redo(self) -> None:
-        if self._applied:
-            return
-        self._controller._restore(self._after)
-        self._applied = True
+        def undo(self) -> None:
+            self._controller._restore(self._before)
+            self._applied = False
+
+        def redo(self) -> None:
+            if self._applied:
+                return
+            self._controller._restore(self._after)
+            self._applied = True
+
+    return _RobotEditCommand
 
 
 class EditorController(QObject):
@@ -120,8 +126,17 @@ class EditorController(QObject):
         self._mesh_search_root: Path | None = None
         self._urdf_file_dir: Path | None = None
         self._extra_mesh_roots: list[Path] = []
-        self.undo_stack = QUndoStack(self)
-        self.undo_stack.setUndoLimit(UNDO_LIMIT)
+        self._undo_stack = None  # created on first use, see undo_stack
+
+    @property
+    def undo_stack(self):
+        """The QUndoStack of the edits (QtGui is imported on first use)."""
+        if self._undo_stack is None:
+            from PySide6.QtGui import QUndoStack
+
+            self._undo_stack = QUndoStack(self)
+            self._undo_stack.setUndoLimit(UNDO_LIMIT)
+        return self._undo_stack
 
     # --- loading ---------------------------------------------------------------
 
@@ -178,7 +193,8 @@ class EditorController(QObject):
         self.dof_report = self._report(robot)
         self.joint_values = {}  # render/kinematics.default_joint_values() fills this in once the viewport asks for a pose
         self.selected_link = None
-        self.undo_stack.clear()  # the edits of the previous robot do not apply to this one
+        if self._undo_stack is not None:
+            self._undo_stack.clear()  # the edits of the previous robot do not apply to this one
         self.robot_loaded.emit(robot, self.dof_report)
 
     # --- optional checks, each behind a switch in hydra_editor_urdf_config.json (all off by default) ----------------------
@@ -309,7 +325,7 @@ class EditorController(QObject):
         after = _capture(self.robot)
         changed = before != after
         if changed:
-            self.undo_stack.push(_RobotEditCommand(self, text, before, after))
+            self.undo_stack.push(_edit_command_class()(self, text, before, after))
         self.notify_tree_changed()
         return changed
 
