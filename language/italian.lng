@@ -79,6 +79,7 @@ EDIT_COLOR=Colore
 EDIT_SCALE=Scala
 EDIT_JOINT=Giunto
 EDIT_INERTIAL=Massa e inerzia
+EDIT_GIZMO_MOVE=Spostare l'origine del giunto
 MENU_VIEW=Visualizza
 MENU_LANGUAGE=Lingua
 MENU_HELP=Aiuto

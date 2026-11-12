@@ -79,6 +79,7 @@ EDIT_COLOR=Color
 EDIT_SCALE=Scale
 EDIT_JOINT=Joint
 EDIT_INERTIAL=Mass and inertia
+EDIT_GIZMO_MOVE=Move joint origin
 MENU_VIEW=View
 MENU_LANGUAGE=Language
 MENU_HELP=Help

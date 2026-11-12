@@ -46,6 +46,7 @@ from PySide6.QtOpenGL import QOpenGLFramebufferObject, QOpenGLFramebufferObjectF
 from PySide6.QtOpenGLWidgets import QOpenGLWidget
 
 from hydra_editor_urdf.models import BoxGeometry, CylinderGeometry, MeshGeometry, Robot, SphereGeometry, Visual
+from hydra_editor_urdf.render import gizmo
 from hydra_editor_urdf.render.kinematics import compute_link_world_transforms, default_joint_values, origin_to_matrix
 from hydra_editor_urdf.render.mesh import MalformedMeshFile, Mesh, UnsupportedMeshFormat, load_mesh_file, make_box_mesh, make_cylinder_mesh, make_sphere_mesh
 
@@ -230,6 +231,13 @@ class UrdfGLRenderer:
         self._width = 320
         self._height = 240
 
+        # The translation gizmo (see render/gizmo.py): gizmo_listener(phase, joint_name, xyz) is told "begin", "move" and "end"
+        # of a drag; the owner decides what a move does to the robot (EditorController.preview_joint_origin).
+        self.gizmo_listener: Callable[[str, str, tuple[float, float, float]], None] | None = None
+        self.gizmo_snap = 0.0  # meters; 0 = free
+        self._gizmo_buffers: list[GLMeshBuffer] | None = None
+        self._gizmo_drag: dict | None = None
+
     # --- public setters (owner decides whether/how to schedule a
     # repaint after calling one of these) ----------------------------------
 
@@ -369,10 +377,7 @@ class UrdfGLRenderer:
         gl.glUseProgram(self._program)
 
         eye = self._camera_eye()
-        up = np.array([0.0, 0.0, 1.0], dtype=np.float32)  # Z-up, see this module's own header
-        view = look_at(eye, self._target, up)
-        aspect = max(self._width, 1) / max(self._height, 1)
-        proj = perspective(45.0, aspect, 0.01, 50.0)
+        view, proj = self._view_projection(eye)
 
         gl.glUniformMatrix4fv(self._uniforms["uView"], 1, gl.GL_TRUE, view)
         gl.glUniformMatrix4fv(self._uniforms["uProjection"], 1, gl.GL_TRUE, proj)
@@ -391,6 +396,96 @@ class UrdfGLRenderer:
                 model = link_world @ origin_to_matrix(visual.origin)
                 color = self._colors.get((link.name, i), (*DEFAULT_COLOR, 1.0))
                 self._draw_model(model, buf, color, highlight)
+        self._draw_gizmo(world_transforms)
+
+    def _view_projection(self, eye: np.ndarray | None = None) -> tuple[np.ndarray, np.ndarray]:
+        eye = self._camera_eye() if eye is None else eye
+        up = np.array([0.0, 0.0, 1.0], dtype=np.float32)  # Z-up, see this module's own header
+        view = look_at(eye, self._target, up)
+        aspect = max(self._width, 1) / max(self._height, 1)
+        return view, perspective(45.0, aspect, 0.01, 50.0)
+
+    # --- translation gizmo: three axes at the selected link that move the origin of the joint carrying it ---
+
+    def _gizmo_context(self, world_transforms: dict | None = None):
+        """(joint, parent pose, gizmo origin) of the selected link, or None when it has no joint above it (the root)
+        or its parent is not placed."""
+        if self._robot is None or self._selected_link is None:
+            return None
+        joint = next((j for j in self._robot.joints.values() if j.child == self._selected_link), None)
+        if joint is None:
+            return None
+        world = world_transforms if world_transforms is not None else compute_link_world_transforms(self._robot, self._joint_values)
+        parent, child = world.get(joint.parent), world.get(joint.child)
+        if parent is None or child is None:
+            return None
+        return joint, np.asarray(parent, dtype=np.float64), np.asarray(child, dtype=np.float64)[:3, 3]
+
+    def _gizmo_length(self) -> float:
+        return self._distance * 0.18  # a constant share of the screen whatever the zoom
+
+    def _draw_gizmo(self, world_transforms: dict) -> None:
+        context = self._gizmo_context(world_transforms)
+        if context is None:
+            return
+        if self._gizmo_buffers is None:
+            length, thickness = 1.0, 0.04
+            sizes = ((length, thickness, thickness), (thickness, length, thickness), (thickness, thickness, length))
+            self._gizmo_buffers = [GLMeshBuffer(make_box_mesh(size)) for size in sizes]
+        _joint, _parent, origin = context
+        length = self._gizmo_length()
+        gl.glDisable(gl.GL_DEPTH_TEST)  # the handles stay reachable inside a mesh
+        try:
+            for index, buf in enumerate(self._gizmo_buffers):
+                direction = gizmo.AXIS_DIRECTIONS[index]
+                model = np.eye(4)
+                model[:3, :3] = np.diag(np.where(direction > 0, length, length * 0.12))
+                model[:3, 3] = origin + direction * length / 2.0
+                self._draw_model(model, buf, gizmo.AXIS_COLORS[index], (0.0, 0.0, 0.0))
+        finally:
+            gl.glEnable(gl.GL_DEPTH_TEST)
+
+    def gizmo_press(self, x: float, y: float) -> bool:
+        """The mouse went down at the pixel (x, y): starts a drag when it is on an axis of the gizmo."""
+        context = self._gizmo_context()
+        if context is None:
+            return False
+        joint, parent, origin = context
+        view, proj = self._view_projection()
+        ray = gizmo.pixel_ray(view, proj, x, y, self._width, self._height)
+        length = self._gizmo_length()
+        axis = gizmo.pick_axis(ray[0], ray[1], origin, length, length * 0.12)
+        if axis is None:
+            return False
+        self._gizmo_drag = {"joint": joint.name, "axis": axis, "start_ray": ray, "origin": origin, "parent": parent, "start_xyz": tuple(joint.origin.xyz)}
+        if self.gizmo_listener is not None:
+            self.gizmo_listener("begin", joint.name, tuple(joint.origin.xyz))
+        return True
+
+    def gizmo_move(self, x: float, y: float) -> bool:
+        """The mouse moved during a drag: previews the joint at its new place. Returns whether a drag is going on."""
+        drag = self._gizmo_drag
+        if drag is None:
+            return False
+        view, proj = self._view_projection()
+        ray = gizmo.pixel_ray(view, proj, x, y, self._width, self._height)
+        distance = gizmo.drag_distance(drag["start_ray"], ray, drag["origin"], drag["axis"])
+        if distance is not None and self.gizmo_listener is not None:
+            delta = gizmo.world_delta_to_parent(drag["parent"], drag["axis"], distance)
+            self.gizmo_listener("move", drag["joint"], gizmo.moved_origin(drag["start_xyz"], delta, self.gizmo_snap))
+        return True
+
+    def gizmo_release(self) -> bool:
+        drag, self._gizmo_drag = self._gizmo_drag, None
+        if drag is None:
+            return False
+        if self.gizmo_listener is not None:
+            self.gizmo_listener("end", drag["joint"], drag["start_xyz"])
+        return True
+
+    @property
+    def gizmo_dragging(self) -> bool:
+        return self._gizmo_drag is not None
 
     def _draw_model(self, model: np.ndarray, buf: GLMeshBuffer, color: tuple[float, float, float, float], highlight: tuple[float, float, float]) -> None:
         model32 = model.astype(np.float32)
@@ -478,6 +573,9 @@ class UrdfViewport(QOpenGLWidget):
         self._renderer.rebuild_buffers(robot)
         self.update()
 
+    def set_gizmo_listener(self, listener) -> None:
+        self._renderer.gizmo_listener = listener
+
     def refresh_colors(self) -> None:
         self._renderer.refresh_colors()
         self.update()
@@ -496,12 +594,20 @@ class UrdfViewport(QOpenGLWidget):
     def mousePressEvent(self, event: QMouseEvent) -> None:
         self._last_mouse_pos = event.position()
         self._drag_button = event.button()
+        if event.button() == Qt.MouseButton.LeftButton:
+            self._renderer.gizmo_press(event.position().x(), event.position().y())
 
     def mouseReleaseEvent(self, event: QMouseEvent) -> None:
+        if self._renderer.gizmo_release():
+            self.update()
         self._last_mouse_pos = None
         self._drag_button = None
 
     def mouseMoveEvent(self, event: QMouseEvent) -> None:
+        if self._renderer.gizmo_dragging:
+            self._renderer.gizmo_move(event.position().x(), event.position().y())
+            self.update()
+            return
         if self._last_mouse_pos is None:
             return
         delta = event.position() - self._last_mouse_pos

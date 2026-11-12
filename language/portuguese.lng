@@ -79,6 +79,7 @@ EDIT_COLOR=Cor
 EDIT_SCALE=Escala
 EDIT_JOINT=Articulação
 EDIT_INERTIAL=Massa e inércia
+EDIT_GIZMO_MOVE=Mover a origem da articulação
 MENU_VIEW=Ver
 MENU_LANGUAGE=Idioma
 MENU_HELP=Ajuda

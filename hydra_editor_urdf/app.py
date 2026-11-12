@@ -14,6 +14,7 @@
 from __future__ import annotations
 
 import copy
+import dataclasses
 import os
 import shutil
 import sys
@@ -127,6 +128,7 @@ class EditorController(QObject):
         self._urdf_file_dir: Path | None = None
         self._extra_mesh_roots: list[Path] = []
         self._undo_stack = None  # created on first use, see undo_stack
+        self._origin_drag_before: tuple | None = None  # the state when the gizmo drag began, see begin_origin_drag
 
     @property
     def undo_stack(self):
@@ -342,6 +344,34 @@ class EditorController(QObject):
             self.selected_link = None
         self.notify_tree_changed()
         self.selected_link_changed.emit(self.selected_link)  # the panels read the objects of the selected link again
+
+    # --- the translation gizmo of the 3D view: a drag is previewed live and becomes ONE step of the undo stack ---
+
+    def begin_origin_drag(self) -> None:
+        """The operator grabbed an axis of the gizmo: remember the state to undo to."""
+        if self.robot is not None:
+            self._origin_drag_before = _capture(self.robot)
+
+    def preview_joint_origin(self, joint_name: str, xyz: tuple[float, float, float]) -> bool:
+        """Moves the origin of a joint while the drag goes on. The robot changes in place and the panels are not told
+        (the viewport redraws by itself); finish_origin_drag() puts the whole move on the undo stack."""
+        joint = self.robot.joints.get(joint_name) if self.robot is not None else None
+        if joint is None:
+            return False
+        joint.origin = dataclasses.replace(joint.origin, xyz=tuple(float(v) for v in xyz))
+        return True
+
+    def finish_origin_drag(self, text: str | None = None) -> bool:
+        """The drag ended: one undoable step when something moved. Returns whether a step was pushed."""
+        text = text or i18n._("EDIT_GIZMO_MOVE")
+        before, self._origin_drag_before = self._origin_drag_before, None
+        if self.robot is None or before is None:
+            return False
+        changed = before != _capture(self.robot)
+        if changed:
+            self.undo_stack.push(_edit_command_class()(self, text, before, _capture(self.robot)))
+        self.notify_tree_changed()
+        return changed
 
     def notify_tree_changed(self) -> None:
         """Called by a properties-editing panel after mutating

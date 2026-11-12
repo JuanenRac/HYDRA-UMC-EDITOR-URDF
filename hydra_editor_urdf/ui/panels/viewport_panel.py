@@ -13,7 +13,7 @@
 from __future__ import annotations
 
 
-from PySide6.QtCore import Qt, Signal
+from PySide6.QtCore import QThread, Qt, Signal
 from PySide6.QtWidgets import (
     QFileDialog,
     QLabel,
@@ -30,6 +30,7 @@ from hydra_editor_urdf.app import EditorController
 from hydra_editor_urdf.i18n import _
 from hydra_editor_urdf.models import Joint, JointType, Robot
 from hydra_editor_urdf.render.kinematics import default_joint_values, jog_range
+from hydra_editor_urdf.render.mesh_prefetch import mesh_jobs, prefetch_meshes
 from hydra_editor_urdf.render.viewport import UrdfViewport
 
 SLIDER_STEPS = 1000  # QSlider is integer-only - joint radians/meters are mapped onto [0, SLIDER_STEPS]
@@ -69,6 +70,22 @@ class _JointSlider(QWidget):
         self._slider.blockSignals(True)
         self._slider.setValue(int(round(max(0.0, min(1.0, t)) * SLIDER_STEPS)))
         self._slider.blockSignals(False)
+
+
+class _MeshPrefetchThread(QThread):
+    """Reads the meshes of one robot into the mesh cache so the interface thread only uploads them afterwards."""
+
+    def __init__(self, robot: Robot, resolver, parent=None):
+        super().__init__(parent)
+        self._robot = robot
+        self._resolver = resolver
+        self._cancelled = False
+
+    def cancel(self) -> None:
+        self._cancelled = True
+
+    def run(self) -> None:
+        prefetch_meshes(self._robot, self._resolver, should_stop=lambda: self._cancelled)
 
 
 class ViewportPanel(QWidget):
@@ -128,24 +145,61 @@ class ViewportPanel(QWidget):
         splitter.setSizes([200, 700, 260])
 
         self._joint_sliders: list[_JointSlider] = []
+        self._prefetch: _MeshPrefetchThread | None = None
+        self._retired_prefetches: list[_MeshPrefetchThread] = []  # cancelled reads that Qt still runs: keep a Python reference until they end
 
         controller.robot_loaded.connect(self._on_robot_loaded)
         controller.tree_changed.connect(self._on_tree_changed)
         controller.selected_link_changed.connect(self._viewport.set_selected_link)
+        self._viewport.set_gizmo_listener(self._on_gizmo)
 
     def _on_robot_loaded(self, robot: Robot, _report) -> None:
         self._locate_meshes_btn.setVisible(False)  # a fresh load starts without any known-missing mesh from a previous file
         self._rebuild_link_tree(robot)
         self._rebuild_jog_sliders(robot)
-        self._viewport.rebuild_buffers(robot)
+        self._rebuild_viewport(robot)
         self._viewport.set_joint_values(default_joint_values(robot))
 
     def _on_tree_changed(self) -> None:
         if self._controller.robot is None:
             return
         self._locate_meshes_btn.setVisible(False)  # rebuild_buffers() below re-raises mesh_warning (and re-shows the button) if anything is still missing after this
-        self._viewport.rebuild_buffers(self._controller.robot)
+        self._rebuild_viewport(self._controller.robot)
         self._viewport.refresh_colors()
+
+    def _rebuild_viewport(self, robot: Robot) -> None:
+        """Rebuilds the GPU buffers. A robot with meshes reads them on a worker thread first (a large STL would freeze
+        the window), then uploads on this thread once the cache is warm; a newer request cancels the one in flight."""
+        if self._prefetch is not None:
+            self._prefetch.cancel()
+            self._retired_prefetches.append(self._prefetch)
+            self._prefetch = None
+        if not mesh_jobs(robot, lambda name: self._controller.mesh_resolver(name)):
+            self._viewport.rebuild_buffers(robot)
+            return
+        thread = _MeshPrefetchThread(robot, lambda name: self._controller.mesh_resolver(name))
+        thread.finished.connect(lambda t=thread: self._on_prefetch_finished(t, robot))
+        self._prefetch = thread
+        thread.start()
+
+    def _on_prefetch_finished(self, thread: "_MeshPrefetchThread", robot: Robot) -> None:
+        if thread in self._retired_prefetches:
+            self._retired_prefetches.remove(thread)
+        if thread is not self._prefetch:
+            return  # a newer load replaced this one
+        self._prefetch = None
+        if self._controller.robot is robot:
+            self._viewport.rebuild_buffers(robot)
+            self._viewport.refresh_colors()
+
+    def wait_for_meshes(self, timeout_ms: int = 30000) -> None:
+        """Blocks until the mesh read in flight (if any) has ended and its result was applied (used by tests)."""
+        thread = self._prefetch
+        if thread is not None:
+            thread.wait(timeout_ms)
+            from PySide6.QtCore import QCoreApplication
+
+            QCoreApplication.processEvents()
 
     def _on_mesh_warning(self, message: str) -> None:
         self._controller.status_message.emit(message)
@@ -198,6 +252,15 @@ class ViewportPanel(QWidget):
             slider.value_changed.connect(self._on_jog)
             self._jog_container.addWidget(slider)
             self._joint_sliders.append(slider)
+
+    def _on_gizmo(self, phase: str, joint_name: str, xyz: tuple) -> None:
+        """A drag of the translation gizmo: preview while it goes on, one undo step when it ends."""
+        if phase == "begin":
+            self._controller.begin_origin_drag()
+        elif phase == "move":
+            self._controller.preview_joint_origin(joint_name, xyz)
+        else:
+            self._controller.finish_origin_drag()
 
     def _on_jog(self, joint_name: str, value: float) -> None:
         self._controller.set_joint_value(joint_name, value)

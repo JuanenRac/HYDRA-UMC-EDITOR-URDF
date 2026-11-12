@@ -79,6 +79,7 @@ EDIT_COLOR=Farbe
 EDIT_SCALE=Skalierung
 EDIT_JOINT=Gelenk
 EDIT_INERTIAL=Masse und Trägheit
+EDIT_GIZMO_MOVE=Gelenkursprung verschieben
 MENU_VIEW=Ansicht
 MENU_LANGUAGE=Sprache
 MENU_HELP=Hilfe

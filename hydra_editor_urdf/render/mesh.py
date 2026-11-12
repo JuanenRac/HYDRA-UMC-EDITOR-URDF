@@ -24,6 +24,7 @@ from __future__ import annotations
 
 import json
 import struct
+import threading
 from collections import OrderedDict
 from dataclasses import dataclass
 from pathlib import Path
@@ -371,6 +372,8 @@ def make_sphere_mesh(radius: float, segments: int = 16, rings: int = 12) -> Mesh
 MESH_CACHE_BYTES = 256 * 1024 * 1024
 _mesh_cache: "OrderedDict[tuple[str, int, int, str, bool, float], Mesh]" = OrderedDict()
 _mesh_cache_bytes = 0
+# The meshes are read from a worker thread (render/mesh_prefetch.py) while the interface thread reads the cache too.
+_mesh_cache_lock = threading.Lock()
 
 
 def _mesh_bytes(mesh: Mesh) -> int:
@@ -380,8 +383,9 @@ def _mesh_bytes(mesh: Mesh) -> int:
 def clear_mesh_cache() -> None:
     """Forgets every mesh read from disk (used by the checks, and when memory must be given back)."""
     global _mesh_cache_bytes
-    _mesh_cache.clear()
-    _mesh_cache_bytes = 0
+    with _mesh_cache_lock:
+        _mesh_cache.clear()
+        _mesh_cache_bytes = 0
 
 
 def load_mesh_file(path: str | Path, fallback: bool = True) -> Mesh:
@@ -396,20 +400,23 @@ def load_mesh_file(path: str | Path, fallback: bool = True) -> Mesh:
         key = (str(path.resolve()), stat.st_mtime_ns, stat.st_size, unit or "", fallback, millimeter_span())
     except OSError:
         return _read_mesh_file(path, unit, fallback)  # the error of the read says what is wrong with the path
-    cached = _mesh_cache.get(key)
-    if cached is not None:
-        _mesh_cache.move_to_end(key)
-        return cached
+    with _mesh_cache_lock:
+        cached = _mesh_cache.get(key)
+        if cached is not None:
+            _mesh_cache.move_to_end(key)
+            return cached
     mesh = _read_mesh_file(path, unit, fallback)
     mesh.vertices.flags.writeable = False
     mesh.normals.flags.writeable = False
     size = _mesh_bytes(mesh)
     if size <= MESH_CACHE_BYTES:
-        _mesh_cache[key] = mesh
-        _mesh_cache_bytes += size
-        while _mesh_cache_bytes > MESH_CACHE_BYTES and len(_mesh_cache) > 1:
-            _, evicted = _mesh_cache.popitem(last=False)
-            _mesh_cache_bytes -= _mesh_bytes(evicted)
+        with _mesh_cache_lock:
+            if key not in _mesh_cache:  # another thread may have read the same file meanwhile
+                _mesh_cache[key] = mesh
+                _mesh_cache_bytes += size
+            while _mesh_cache_bytes > MESH_CACHE_BYTES and len(_mesh_cache) > 1:
+                _, evicted = _mesh_cache.popitem(last=False)
+                _mesh_cache_bytes -= _mesh_bytes(evicted)
     return mesh
 
 
