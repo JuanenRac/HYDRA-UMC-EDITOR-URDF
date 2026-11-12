@@ -87,6 +87,7 @@ def test_the_renderer_picks_and_drags_an_axis_without_a_gpu(controller) -> None:
     import numpy as np
 
     from hydra_editor_urdf.render import gizmo
+    pytest.importorskip("OpenGL")  # the renderer module imports PyOpenGL; CI has only the core requirements
     from hydra_editor_urdf.render.viewport import UrdfGLRenderer
 
     renderer = UrdfGLRenderer(lambda: None, lambda: None, lambda name: None)
@@ -113,6 +114,7 @@ def test_the_renderer_picks_and_drags_an_axis_without_a_gpu(controller) -> None:
 
 
 def test_the_root_link_has_no_gizmo(controller) -> None:
+    pytest.importorskip("OpenGL")  # the renderer module imports PyOpenGL; CI has only the core requirements
     from hydra_editor_urdf.render.viewport import UrdfGLRenderer
 
     renderer = UrdfGLRenderer(lambda: None, lambda: None, lambda name: None)

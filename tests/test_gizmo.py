@@ -12,7 +12,7 @@ import numpy as np
 import pytest
 
 from hydra_editor_urdf.render import gizmo
-from hydra_editor_urdf.render.viewport import look_at, perspective
+from hydra_editor_urdf.render.camera import look_at, perspective
 
 EYE = np.array([3.0, 0.0, 0.0], dtype=np.float32)
 VIEW = look_at(EYE, np.zeros(3, dtype=np.float32), np.array([0.0, 0.0, 1.0], dtype=np.float32))

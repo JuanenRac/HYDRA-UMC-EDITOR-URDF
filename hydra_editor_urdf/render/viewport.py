@@ -47,6 +47,7 @@ from PySide6.QtOpenGLWidgets import QOpenGLWidget
 
 from hydra_editor_urdf.models import BoxGeometry, CylinderGeometry, MeshGeometry, Robot, SphereGeometry, Visual
 from hydra_editor_urdf.render import gizmo
+from hydra_editor_urdf.render.camera import look_at, perspective
 from hydra_editor_urdf.render.kinematics import compute_link_world_transforms, default_joint_values, origin_to_matrix
 from hydra_editor_urdf.render.mesh import MalformedMeshFile, Mesh, UnsupportedMeshFormat, load_mesh_file, make_box_mesh, make_cylinder_mesh, make_sphere_mesh
 
@@ -106,33 +107,6 @@ void main() {
     fragColor = vec4(color, uAlpha);
 }
 """
-
-
-def perspective(fovy_deg: float, aspect: float, near: float, far: float) -> np.ndarray:
-    f = 1.0 / np.tan(np.radians(fovy_deg) / 2.0)
-    m = np.zeros((4, 4), dtype=np.float32)
-    m[0, 0] = f / aspect
-    m[1, 1] = f
-    m[2, 2] = (far + near) / (near - far)
-    m[2, 3] = (2 * far * near) / (near - far)
-    m[3, 2] = -1.0
-    return m
-
-
-def look_at(eye: np.ndarray, target: np.ndarray, up: np.ndarray) -> np.ndarray:
-    f = target - eye
-    f = f / np.linalg.norm(f)
-    s = np.cross(f, up)
-    s = s / np.linalg.norm(s)
-    u = np.cross(s, f)
-    m = np.eye(4, dtype=np.float32)
-    m[0, 0:3] = s
-    m[1, 0:3] = u
-    m[2, 0:3] = -f
-    m[0, 3] = -np.dot(s, eye)
-    m[1, 3] = -np.dot(u, eye)
-    m[2, 3] = np.dot(f, eye)
-    return m
 
 
 class GLMeshBuffer:
