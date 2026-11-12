@@ -227,29 +227,41 @@ class PropertiesPanel(QWidget):
             return
         new_rgba = (chosen.redF(), chosen.greenF(), chosen.blueF(), chosen.alphaF())
         link = self._robot.links[self._link_name]
-        for visual in link.visuals:
-            # Every visual sharing the SAME material object (a top-level
-            # <material name> referenced by more than one link) recolors
-            # together, matching what a real URDF's own shared-material
-            # semantics mean - a single visual's own inline, unshared
-            # material recolors alone.
-            if visual.material is self._selected_material:
-                visual.material.rgba = new_rgba
-            elif visual.material is not None and visual.material.name and visual.material.name == self._selected_material.name:
-                visual.material.rgba = new_rgba
-        self._controller.notify_tree_changed()
+        selected = self._selected_material
+
+        def mutate() -> None:
+            for visual in link.visuals:
+                # Every visual sharing the SAME material object (a top-level
+                # <material name> referenced by more than one link) recolors
+                # together, matching what a real URDF's own shared-material
+                # semantics mean - a single visual's own inline, unshared
+                # material recolors alone.
+                if visual.material is selected:
+                    visual.material.rgba = new_rgba
+                elif visual.material is not None and visual.material.name and visual.material.name == selected.name:
+                    visual.material.rgba = new_rgba
+
+        self._controller.edit(_("EDIT_COLOR"), mutate)
 
     def _on_apply_scale(self) -> None:
         if self._scale_row is None or self._selected_mesh_geometry is None:
             return
-        self._selected_mesh_geometry.scale = self._scale_row.value()
-        self._controller.notify_tree_changed()
+        geometry = self._selected_mesh_geometry
+        scale = self._scale_row.value()
+
+        def mutate() -> None:
+            geometry.scale = scale
+
+        self._controller.edit(_("EDIT_SCALE"), mutate)
 
     def _on_apply_joint(self) -> None:
         if self._robot is None or self._selected_joint_name is None:
             return
         joint = self._robot.joints[self._selected_joint_name]
-        joint.type = self._joint_type_combo.currentData()
+        self._controller.edit(_("EDIT_JOINT"), lambda: self._apply_joint(joint))
+
+    def _apply_joint(self, joint) -> None:
+        joint.type = JointType(self._joint_type_combo.currentData())
         if joint.type in (JointType.REVOLUTE, JointType.PRISMATIC):
             joint.limit = JointLimit(
                 lower=self._joint_lower.value(),
@@ -274,7 +286,6 @@ class PropertiesPanel(QWidget):
             # just lose real user-entered data for no benefit).
             if joint.type != JointType.CONTINUOUS:
                 joint.limit = None
-        self._controller.notify_tree_changed()
 
     def _on_calc_inertial(self) -> None:
         if self._selected_visual_geometry is None:
@@ -323,10 +334,14 @@ class PropertiesPanel(QWidget):
         if self._robot is None or self._link_name is None:
             return
         link = self._robot.links[self._link_name]
-        link.inertial = Inertial(
+        inertial = Inertial(
             mass=self._inertial_mass.value(),
             ixx=self._inertial_ixx.value(),
             iyy=self._inertial_iyy.value(),
             izz=self._inertial_izz.value(),
         )
-        self._controller.notify_tree_changed()
+
+        def mutate() -> None:
+            link.inertial = inertial
+
+        self._controller.edit(_("EDIT_INERTIAL"), mutate)

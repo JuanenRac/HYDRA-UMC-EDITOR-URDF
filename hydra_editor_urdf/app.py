@@ -13,6 +13,7 @@
 # =============================================================================
 from __future__ import annotations
 
+import copy
 import os
 import shutil
 import sys
@@ -20,6 +21,7 @@ from pathlib import Path
 from typing import Callable
 
 from PySide6.QtCore import QObject, Signal
+from PySide6.QtGui import QUndoCommand, QUndoStack
 
 from hydra_editor_urdf import i18n
 from hydra_editor_urdf.models import Robot
@@ -64,6 +66,35 @@ else:
     _base_dir = Path(__file__).resolve().parent.parent
 WORK_DIR = _base_dir / "work"
 
+UNDO_LIMIT = 100  # edits that can be undone; older ones are dropped
+
+
+def _capture(robot: Robot) -> tuple:
+    """A copy of everything an edit can change. The links, the joints and the shared materials are copied together, so a material
+    that several links share is still one object in the copy."""
+    return copy.deepcopy((robot.name, robot.links, robot.joints, robot.materials))
+
+
+class _RobotEditCommand(QUndoCommand):
+    """One edit of the loaded robot, as the state before it and the state after it. The first redo() is a no-op: the edit has already been applied."""
+
+    def __init__(self, controller: "EditorController", text: str, before: tuple, after: tuple) -> None:
+        super().__init__(text)
+        self._controller = controller
+        self._before = before
+        self._after = after
+        self._applied = True
+
+    def undo(self) -> None:
+        self._controller._restore(self._before)
+        self._applied = False
+
+    def redo(self) -> None:
+        if self._applied:
+            return
+        self._controller._restore(self._after)
+        self._applied = True
+
 
 class EditorController(QObject):
     robot_loaded = Signal(object, object)  # (Robot, DofReport) - emitted on every successful import, even an infeasible one (the report itself carries why)
@@ -89,6 +120,8 @@ class EditorController(QObject):
         self._mesh_search_root: Path | None = None
         self._urdf_file_dir: Path | None = None
         self._extra_mesh_roots: list[Path] = []
+        self.undo_stack = QUndoStack(self)
+        self.undo_stack.setUndoLimit(UNDO_LIMIT)
 
     # --- loading ---------------------------------------------------------------
 
@@ -145,6 +178,7 @@ class EditorController(QObject):
         self.dof_report = self._report(robot)
         self.joint_values = {}  # render/kinematics.default_joint_values() fills this in once the viewport asks for a pose
         self.selected_link = None
+        self.undo_stack.clear()  # the edits of the previous robot do not apply to this one
         self.robot_loaded.emit(robot, self.dof_report)
 
     # --- optional checks, each behind a switch in hydra_editor_urdf_config.json (all off by default) ----------------------
@@ -264,6 +298,34 @@ class EditorController(QObject):
     def set_joint_value(self, joint_name: str, value: float) -> None:
         self.joint_values[joint_name] = value
         self.joint_values_changed.emit(dict(self.joint_values))
+
+    def edit(self, text: str, mutate: Callable[[], None]) -> bool:
+        """Applies `mutate` (which changes self.robot in place) as one step that can be undone and redone with the undo stack. Returns False
+        when there is no robot or the edit changed nothing (nothing is put on the stack then). The panels listen to tree_changed as before."""
+        if self.robot is None:
+            return False
+        before = _capture(self.robot)
+        mutate()
+        after = _capture(self.robot)
+        changed = before != after
+        if changed:
+            self.undo_stack.push(_RobotEditCommand(self, text, before, after))
+        self.notify_tree_changed()
+        return changed
+
+    def _restore(self, state: tuple) -> None:
+        """Puts a captured state back into the loaded robot (the object stays the same one) and tells every panel."""
+        if self.robot is None:
+            return
+        name, links, joints, materials = copy.deepcopy(state)
+        self.robot.name = name
+        self.robot.links = links
+        self.robot.joints = joints
+        self.robot.materials = materials
+        if self.selected_link is not None and self.selected_link not in links:
+            self.selected_link = None
+        self.notify_tree_changed()
+        self.selected_link_changed.emit(self.selected_link)  # the panels read the objects of the selected link again
 
     def notify_tree_changed(self) -> None:
         """Called by a properties-editing panel after mutating

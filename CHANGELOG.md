@@ -4,6 +4,8 @@ All notable changes to this project are documented here.
 
 ## [Unreleased]
 
+- **Undo and redo of the edits (Edit menu, Ctrl+Z / Ctrl+Y):** colour, mesh scale, joint type and limits, and mass and inertia are each one step of a `QUndoStack` of the controller (up to 100 steps; a new robot starts a fresh stack). Undo puts the robot back as it was, keeping the same robot object and the materials that several links share, and the panels read the selected link again. The joint type of the panel is now stored as a `JointType`, not as plain text. The menu texts exist in the eight languages. 21 tests (607 -> 628).
+
 ## [0.2.0] - The build test of the repository compiles only on CI or when allowed: for the stacks that compile (rust, go, android, flutter, firmware-c), tools/buildtest.py prints BUILDTEST=SKIPPED with exit status 2 on a plain PC, never a... (and 1 more changes)
 
 - **The build test of the repository compiles only on CI or when allowed:** for the stacks that compile (`rust`, `go`, `android`, `flutter`, `firmware-c`), `tools/build_test.py` prints `BUILD_TEST=SKIPPED` with exit status 2 on a plain PC, never a pass; `ALLOW_LOCAL_BUILD=1` allows it and a CI runner always may. The `python` and `node` stacks are not locked.

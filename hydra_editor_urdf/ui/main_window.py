@@ -17,7 +17,7 @@ from __future__ import annotations
 from pathlib import Path
 
 from PySide6.QtCore import QSize, Qt
-from PySide6.QtGui import QActionGroup
+from PySide6.QtGui import QActionGroup, QKeySequence
 from PySide6.QtSvgWidgets import QSvgWidget
 from PySide6.QtWidgets import (
     QDockWidget,
@@ -239,6 +239,16 @@ class MainWindow(QMainWindow):
         file_menu.addSeparator()
         quit_action = file_menu.addAction(_("MENU_QUIT"))
         quit_action.triggered.connect(self.close)
+
+        edit_menu = menu.addMenu(_("MENU_EDIT"))
+        undo_action = self.controller.undo_stack.createUndoAction(self, _("EDIT_UNDO"))
+        undo_action.setShortcut(QKeySequence.StandardKey.Undo)
+        redo_action = self.controller.undo_stack.createRedoAction(self, _("EDIT_REDO"))
+        redo_action.setShortcut(QKeySequence.StandardKey.Redo)
+        edit_menu.addAction(undo_action)
+        edit_menu.addAction(redo_action)
+        self._undo_action = undo_action
+        self._redo_action = redo_action
 
         view_menu = menu.addMenu(_("MENU_VIEW"))
         self._view_menu = view_menu
