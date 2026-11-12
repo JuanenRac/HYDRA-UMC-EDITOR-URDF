@@ -74,6 +74,8 @@ GPL-3.0-or-later - see LICENSE
 
 **HYDRA-UMC-EDITOR-URDF** 是桌面工具，它把向 HYDRA-UMC-STUDIO 模型目录移植新机器人这件事，从手工调查变成可重复的流程。它从 GitHub 仓库或本地文件夹加载 URDF，判断机器人是否符合 STUDIO 支持的 3 到 6 个自由度，在实时 3D 视图中显示，可对连杆改色、缩放并设置新的关节限位，然后导出 URDF 或推送到 HYDRA-UMC-SERVER。
 
+> **平台：** 本 README 中的 CM5 指的是目前正在运行的试验台；HYDRA-UMC 的目标平台是 NVIDIA Jetson Orin NX 16 GB，这是尚未制造或测试的设计。
+
 ## 🏛️ 架构
 
 <p align="center">

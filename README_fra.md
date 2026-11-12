@@ -74,6 +74,8 @@ Construit avec **Python** et **PySide6/Qt6**, en utilisant les mêmes patrons ar
 
 **HYDRA-UMC-EDITOR-URDF** est l'outil de bureau qui transforme le portage d'un nouveau robot vers le catalogue de modèles de HYDRA-UMC-STUDIO, d'une enquête manuelle, en un flux reproductible. Il charge un URDF depuis un dépôt GitHub ou un dossier local, dit si le robot tient dans les 3 à 6 degrés de liberté que STUDIO accepte, le montre dans une vue 3D en direct où l'on peut recolorer les maillons, les mettre à l'échelle et leur donner de nouvelles limites d'articulation, et exporte l'URDF ou l'envoie à un HYDRA-UMC-SERVER.
 
+> **Plateforme :** là où ce README dit CM5, il s'agit du banc pilote qui fonctionne aujourd'hui ; la plateforme visée par HYDRA-UMC est un NVIDIA Jetson Orin NX 16 Go, une conception ni construite ni testée.
+
 ## 🏛️ Architecture
 
 <p align="center">
