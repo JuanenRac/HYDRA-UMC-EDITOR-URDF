@@ -53,13 +53,13 @@ GPL-3.0-or-later - see LICENSE
 
 Cada linha é uma parte deste repositório e a luz diz até onde chega hoje. É escrita com o que o repositório consegue demonstrar (testes, compilações, execuções), não com o que está previsto.
 
-🟢 Feito e verificado · 🟡 Funciona, com limites conhecidos · 🟠 Feito a meio ou ainda por verificar · 🔴 Por fazer ou a não funcionar
+🟢 Feito e verificado · 🟡 Funciona, com limites conhecidos · 🟠 Feito a meio ou ainda por verificar · 🔴 Por fazer ou a não funcionar · ⚪ Não aplicável
 
 | Área | Estado | O que significa aqui |
 |---|---|---|
 | Software | 🟢 | Completo para o seu propósito e estável; a verificação de honestidade acima lista os limites conhecidos |
 | Testes | 🟢 | 652 testes automáticos, executados a cada alteração |
-| Hardware real | 🟢 | Não aplicável: nada aqui corre em hardware |
+| Hardware real | ⚪ | Não aplicável: nada aqui corre em hardware |
 | Implantação | 🟠 | Publicado como release; instalá-lo numa máquina limpa está documentado mas não registado |
 | Idiomas e acessibilidade | 🟡 | A interface e a sua ajuda estão em oito idiomas; a utilização com teclado e leitor de ecrã não foi testada |
 | Documentação | 🟢 | README em oito idiomas, verificado contra o manifesto a cada alteração |
