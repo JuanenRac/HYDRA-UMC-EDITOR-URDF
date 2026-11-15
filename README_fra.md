@@ -20,7 +20,7 @@ GPL-3.0-or-later - see LICENSE
   <img src="https://img.shields.io/badge/Framework-PySide6-41CD52.svg" alt="Framework">
   <img src="https://img.shields.io/badge/Format-URDF-red.svg" alt="Format">
   <img src="https://img.shields.io/badge/Tests-652%20passing-2ea44f.svg" alt="Tests">
-  <img src="https://img.shields.io/badge/Version-0.2.0-0f6cbd.svg" alt="Version">
+  <img src="https://img.shields.io/badge/Version-0.2.1-0f6cbd.svg" alt="Version">
   <img src="https://img.shields.io/badge/Maturity-established-2EA44F.svg" alt="Maturity">
 </p>
 
@@ -38,7 +38,7 @@ GPL-3.0-or-later - see LICENSE
 
 | | |
 |---|---|
-| Version | `0.2.0` |
+| Version | `0.2.1` |
 | Maturité | Établi |
 | Tests | 652 (`python -m pytest tests -q`) |
 | Technologie | Python / PySide6 / Qt6 / OpenGL |
@@ -274,7 +274,7 @@ pip install -r requirements-dev.txt
 python -m pytest tests/ -q
 ```
 
-Note : la logique pure de cette application (analyse/export URDF, validation de faisabilité DOF, cinématique directe, estimation d'inertie, résolution des références de maillage, récupération GitHub, i18n) n'avait aucune couverture de tests automatisés. Corrigé : 652 vrais tests répartis sur 28 modules de test, dont tous sauf quelques-uns évitent PySide6/PyOpenGL (ces quelques-uns ouvrent sans écran l'écran DOF et le panneau de validation physique et sont ignorés là où Qt ne peut pas démarrer) - `requirements-dev.txt` installe uniquement ce dont `tests/` a réellement besoin (`numpy` + `pytest`), donc la suite s'exécute sans écran ni plugin de plateforme Qt. Plusieurs tests sont des régressions explicites pour des bugs déjà trouvés et corrigés auparavant et documentés directement dans le code source (la protection contre la boucle infinie sur un vrai cycle de `render/kinematics.py`, le conditionnement `had_scheme` de `source/scan.py`, la vérification de masse négative de `urdf/dof.py`) - une future modification ne peut plus réintroduire silencieusement l'un d'eux sans faire échouer un test. La CI (`.github/workflows/ci.yml`) exécute la même commande à chaque push.
+Note : la logique pure de cette application (analyse/export URDF, validation de faisabilité DOF, cinématique directe, estimation d'inertie, résolution des références de maillage, récupération GitHub, i18n) n'avait aucune couverture de tests automatisés. Corrigé : 652 vrais tests répartis sur 30 modules de test, dont tous sauf quelques-uns évitent PySide6/PyOpenGL (ces quelques-uns ouvrent sans écran l'écran DOF et le panneau de validation physique et sont ignorés là où Qt ne peut pas démarrer) - `requirements-dev.txt` installe uniquement ce dont `tests/` a réellement besoin (`numpy` + `pytest`), donc la suite s'exécute sans écran ni plugin de plateforme Qt. Plusieurs tests sont des régressions explicites pour des bugs déjà trouvés et corrigés auparavant et documentés directement dans le code source (la protection contre la boucle infinie sur un vrai cycle de `render/kinematics.py`, le conditionnement `had_scheme` de `source/scan.py`, la vérification de masse négative de `urdf/dof.py`) - une future modification ne peut plus réintroduire silencieusement l'un d'eux sans faire échouer un test. La CI (`.github/workflows/ci.yml`) exécute la même commande à chaque push.
 
 ## 🏗️ Compilation et publication
 
