@@ -4,6 +4,9 @@ All notable changes to this project are documented here.
 
 ## [Unreleased]
 
+
+## [0.2.1]
+
 - **The SDK pin and the shared tools are up to date:** the SDK dependency names the newest release tag, and the shared tools are the canonical copies again.
 - **A simulation bench for the URDF logic:** `tests/test_simulation_bench.py` runs the real parser, writer, degrees-of-freedom check, kinematics and physical check on serial arms of random length drawn from a fixed seed (written and read back as the same robot, the pose of every link compared with a product of matrices the bench computes itself), damages the robots in seventeen ways and requires the physical check to name the rule of each, and reads three hundred damaged copies of a file without any error but the parse error. The workflow "Simulation bench" runs it on every change and `docs/SIMULATION.md` describes it. The manifest now declares the evidence level `simulator`.
 - **The coverage of the tests is measured on every change:** the workflow "Coverage floor" runs the whole suite under line and branch coverage and fails when it falls under 90 %; the window, viewport and panels, which need a display and OpenGL, are left out of the measure.
@@ -13,6 +16,8 @@ All notable changes to this project are documented here.
 - **A translation gizmo in the 3D view:** with a link selected, three coloured axes appear at its frame; dragging one moves the origin of the joint that carries the link along that world axis (the move is written in the frame of the parent link, the rotation of the origin is kept, `gizmo_snap` rounds to a grid when set). The preview is live and the whole drag is ONE step of the undo stack. The root link, which has no joint above it, shows none. The mathematics (rays through a pixel, picking, drag distance, frame conversion) is in `render/gizmo.py` and is tested without a window or a GPU.
 - **The meshes of a model are read on a worker thread:** loading a robot or editing it no longer freezes the window while large STL/OBJ files are parsed; `render/mesh_prefetch.py` fills the mesh cache on a `QThread`, the GPU buffers are uploaded on the interface thread once the cache is warm, and a newer load cancels the one in flight. The mesh cache is now safe to use from several threads.
 - **Undo and redo of the edits (Edit menu, Ctrl+Z / Ctrl+Y):** colour, mesh scale, joint type and limits, and mass and inertia are each one step of a `QUndoStack` of the controller (up to 100 steps; a new robot starts a fresh stack). Undo puts the robot back as it was, keeping the same robot object and the materials that several links share, and the panels read the selected link again. The joint type of the panel is now stored as a `JointType`, not as plain text. The menu texts exist in the eight languages. 21 tests (607 -> 628).
+
+- Build version synchronized with `hydra-umc.project.json` and the repository-native version source.
 
 ## [0.2.0] - The build test of the repository compiles only on CI or when allowed: for the stacks that compile (rust, go, android, flutter, firmware-c), tools/buildtest.py prints BUILDTEST=SKIPPED with exit status 2 on a plain PC, never a... (and 1 more changes)
 
