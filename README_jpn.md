@@ -16,7 +16,7 @@ GPL-3.0-or-later - see LICENSE
 
 <p align="center">
   <img src="https://img.shields.io/badge/License-GPL%203.0--or--later-blue.svg" alt="GPL 3.0 or later">
-  <img src="https://img.shields.io/badge/Language-Python%203.11-3776AB.svg" alt="Language">
+  <img src="https://img.shields.io/badge/Language-Python%203.12-3776AB.svg" alt="Language">
   <img src="https://img.shields.io/badge/Framework-PySide6-41CD52.svg" alt="Framework">
   <img src="https://img.shields.io/badge/Format-URDF-red.svg" alt="Format">
   <img src="https://img.shields.io/badge/Tests-691%20passing-2ea44f.svg" alt="Tests">
@@ -229,7 +229,7 @@ python main.py --qtquick
 
 ## 🚀 クイックスタート
 
-Python 3.11 以降と OpenGL 3.3 対応のグラフィックスドライバーが必要です。パッケージは `requirements.txt` で固定されており、`git` は不要です。GitHub のソースは zip としてダウンロードされます。
+Python 3.12 以降と OpenGL 3.3 対応のグラフィックスドライバーが必要です。パッケージは `requirements.txt` で固定されており、`git` は不要です。GitHub のソースは zip としてダウンロードされます。
 
 ```bash
 pip install -r requirements.txt  # installs PySide6, PyOpenGL, numpy and numpy-stl at the pinned versions
@@ -239,7 +239,7 @@ python -m pytest tests -q        # runs the tests (pip install -r requirements-d
 ```
 
 ### 必要環境
-- [Python](https://www.python.org/) 3.11 以上
+- [Python](https://www.python.org/) 3.12 以上
 - pip
 
 ### インストール

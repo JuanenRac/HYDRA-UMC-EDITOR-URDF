@@ -16,7 +16,7 @@ GPL-3.0-or-later - see LICENSE
 
 <p align="center">
   <img src="https://img.shields.io/badge/License-GPL%203.0--or--later-blue.svg" alt="GPL 3.0 or later">
-  <img src="https://img.shields.io/badge/Language-Python%203.11-3776AB.svg" alt="Language">
+  <img src="https://img.shields.io/badge/Language-Python%203.12-3776AB.svg" alt="Language">
   <img src="https://img.shields.io/badge/Framework-PySide6-41CD52.svg" alt="Framework">
   <img src="https://img.shields.io/badge/Format-URDF-red.svg" alt="Format">
   <img src="https://img.shields.io/badge/Tests-691%20passing-2ea44f.svg" alt="Tests">
@@ -230,7 +230,7 @@ Es gibt eine kleine Konfigurationsdatei und die festgelegten Abhängigkeiten; au
 
 ## 🚀 Schnellstart
 
-Benötigt Python 3.11 oder neuer und einen Grafiktreiber mit OpenGL 3.3. Die Pakete sind in `requirements.txt` festgelegt und es ist kein `git` nötig: Die GitHub-Quellen werden als Zip geladen.
+Benötigt Python 3.12 oder neuer und einen Grafiktreiber mit OpenGL 3.3. Die Pakete sind in `requirements.txt` festgelegt und es ist kein `git` nötig: Die GitHub-Quellen werden als Zip geladen.
 
 ```bash
 pip install -r requirements.txt  # installs PySide6, PyOpenGL, numpy and numpy-stl at the pinned versions
@@ -240,7 +240,7 @@ python -m pytest tests -q        # runs the tests (pip install -r requirements-d
 ```
 
 ### Voraussetzungen
-- [Python](https://www.python.org/) 3.11 oder höher
+- [Python](https://www.python.org/) 3.12 oder höher
 - pip
 
 ### Installation
