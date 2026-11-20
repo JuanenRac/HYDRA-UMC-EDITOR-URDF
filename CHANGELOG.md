@@ -4,6 +4,8 @@ All notable changes to this project are documented here.
 
 ## [Unreleased]
 
+- **README: the Python version matches the one the tests run on:** the badge, the requirements line and the build list say Python 3.12 or newer, the version the continuous-integration workflows use, instead of 3.11; the eight READMEs are written from the shared documentation source.
+
 
 ## [0.2.1]
 
