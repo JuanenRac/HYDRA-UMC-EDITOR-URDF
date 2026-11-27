@@ -65,6 +65,7 @@ UPLOAD_SERVER_MODELS_LABEL=このサーバー上の既存のモデル（ダブ�
 UPLOAD_REFRESH_BUTTON=更新
 UPLOAD_STATUS_CONNECTING=接続中…
 UPLOAD_STATUS_CONNECTED={host} に接続しました
+UPLOAD_STATUS_PLAIN_HTTP=警告: 暗号化されていない http です。パスワードとトークンが平文で送られます。https:// を使ってください。
 UPLOAD_ERROR_TITLE=サーバーエラー
 UPLOAD_INFEASIBLE_WARNING=このロボットはまだ自由度検証に合格していません（DOF パネルを参照）——アップロード前に問題を修正してください。
 UPLOAD_SUCCESS_TITLE=アップロード完了

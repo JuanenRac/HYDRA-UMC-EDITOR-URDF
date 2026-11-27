@@ -4,6 +4,8 @@ All notable changes to this project are documented here.
 
 ## [Unreleased]
 
+- **The catalog client speaks https:** the server field also takes `https://name[:port]` (a private CA goes in `server_ca_file` of the configuration); a host without a scheme stays plain http, and signing in over plain http to another machine now says so (eight languages).
+- **A repository brought from GitHub has limits:** at most 500 MB downloaded, 2048 MB extracted and 50000 files (`github_max_download_mb`, `github_max_extracted_mb`, `github_max_files`; `0` removes one), and an archive that holds a link is not extracted.
 - **Names outside ASCII survive a xacro expansion, and a cut GitHub download is a message:** on Windows the output of xacro was read with the code page of the console, so a link or a mesh named with other characters came out garbled or stopped the load; a download cut or reset in the middle ended with an unhandled error and left half a file.
 
 - **README: the Python version matches the one the tests run on:** the badge, the requirements line and the build list say Python 3.12 or newer, the version the continuous-integration workflows use, instead of 3.11; the eight READMEs are written from the shared documentation source.

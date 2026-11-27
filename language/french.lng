@@ -65,6 +65,7 @@ UPLOAD_SERVER_MODELS_LABEL=Modèles déjà présents sur ce serveur (double-clic
 UPLOAD_REFRESH_BUTTON=Actualiser
 UPLOAD_STATUS_CONNECTING=Connexion en cours...
 UPLOAD_STATUS_CONNECTED=Connecté à {host}
+UPLOAD_STATUS_PLAIN_HTTP=Attention : http non chiffré, le mot de passe et le jeton circulent en clair. Utilisez https://.
 UPLOAD_ERROR_TITLE=Erreur du serveur
 UPLOAD_INFEASIBLE_WARNING=Ce robot ne passe pas encore la validation DDL (voir le panneau DDL) - corrigez les problèmes avant l'envoi.
 UPLOAD_SUCCESS_TITLE=Envoyé

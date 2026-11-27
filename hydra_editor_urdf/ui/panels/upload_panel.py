@@ -164,7 +164,10 @@ class UploadPanel(QWidget):
     def _on_connected(self, client: StudioClient) -> None:
         self._client = client
         self._connect_btn.setEnabled(True)
-        self._connection_status.setText(_("UPLOAD_STATUS_CONNECTED", host=client.base_url))
+        status = _("UPLOAD_STATUS_CONNECTED", host=client.base_url)
+        if client.sends_secrets_in_the_clear:
+            status += " " + _("UPLOAD_STATUS_PLAIN_HTTP")
+        self._connection_status.setText(status)
         if self._controller.dof_report is not None:
             self._push_btn.setEnabled(self._controller.dof_report.is_feasible)
         self._on_refresh_models()
