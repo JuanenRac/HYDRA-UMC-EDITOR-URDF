@@ -4,6 +4,8 @@ All notable changes to this project are documented here.
 
 ## [Unreleased]
 
+- **Names outside ASCII survive a xacro expansion, and a cut GitHub download is a message:** on Windows the output of xacro was read with the code page of the console, so a link or a mesh named with other characters came out garbled or stopped the load; a download cut or reset in the middle ended with an unhandled error and left half a file.
+
 - **README: the Python version matches the one the tests run on:** the badge, the requirements line and the build list say Python 3.12 or newer, the version the continuous-integration workflows use, instead of 3.11; the eight READMEs are written from the shared documentation source.
 
 

@@ -11,6 +11,7 @@ and only if a `xacro` program (or `ros2 run xacro xacro`) is found. No xacro cod
 
 from __future__ import annotations
 
+import os
 import shutil
 import subprocess
 from pathlib import Path
@@ -43,7 +44,9 @@ def expand_xacro(path: str | Path, command: list[str] | None = None, timeout: fl
         raise XacroError("The xacro tool was not found (neither `xacro` nor `ros2` is on the PATH).")
     path = Path(path)
     try:
-        done = subprocess.run([*cmd, str(path)], capture_output=True, text=True, timeout=timeout, check=False, cwd=str(path.parent))
+        # xacro is a Python program: asked to write UTF-8, and read as UTF-8, so a name outside ASCII is the same on every system
+        done = subprocess.run([*cmd, str(path)], capture_output=True, encoding="utf-8", errors="replace", timeout=timeout, check=False,
+                              cwd=str(path.parent), env={**os.environ, "PYTHONIOENCODING": "utf-8"})
     except subprocess.TimeoutExpired as exc:
         raise XacroError(f"xacro did not finish in {timeout:g} s.") from exc
     except OSError as exc:
