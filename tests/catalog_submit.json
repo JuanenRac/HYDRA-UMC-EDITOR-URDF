@@ -1,0 +1,55 @@
+{
+  "note": "What the editors send to HYDRA-UMC-SERVER to publish a model and read back. The origin is HYDRA-UMC-SDK (conformance/fixtures/v1/catalog-submit.json); EDITOR-URDF and EDITOR-STL hold byte copies and compare what they send with it. `required` is always sent; `optional` may be left out; nothing else is sent.",
+  "version": 1,
+  "login": {
+    "method": "POST",
+    "path": "/api/login",
+    "request": {
+      "username": "admin",
+      "password": "not-a-real-one"
+    },
+    "response": {
+      "token": "example-token",
+      "role": "admin"
+    }
+  },
+  "submit": {
+    "method": "POST",
+    "path": "/api/models/submit",
+    "authorization": "Bearer",
+    "required": {
+      "name": "arm",
+      "category": "robots",
+      "urdfFilename": "arm.urdf",
+      "urdfXml": "<robot name=\"arm\"/>",
+      "meshFiles": [
+        {
+          "filename": "base.stl",
+          "base64": "c29saWQgYmFzZQo="
+        }
+      ],
+      "overwrite": false
+    },
+    "optional": {
+      "attribution": "meshes by their authors, with their licences"
+    },
+    "response": {
+      "slug": "arm"
+    }
+  },
+  "download": {
+    "method": "GET",
+    "path": "/api/models/{category}/{slug}/download",
+    "authorization": "public; the token is sent when signed in",
+    "response": {
+      "urdfFilename": "arm.urdf",
+      "urdfXml": "<robot name=\"arm\"/>",
+      "meshFiles": [
+        {
+          "filename": "base.stl",
+          "base64": "c29saWQgYmFzZQo="
+        }
+      ]
+    }
+  }
+}
