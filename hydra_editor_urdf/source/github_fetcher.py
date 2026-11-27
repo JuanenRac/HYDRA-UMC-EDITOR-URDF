@@ -21,6 +21,7 @@
 # =============================================================================
 from __future__ import annotations
 
+import http.client
 import json
 import re
 import shutil
@@ -81,7 +82,7 @@ def resolve_default_branch(owner: str, repo: str) -> str:
         if e.code == 404:
             raise GithubFetchError(f"GitHub repo {owner}/{repo} not found (or it's private - this app only fetches public repos).") from e
         raise GithubFetchError(f"GitHub API request failed: HTTP {e.code}") from e
-    except (urllib.error.URLError, TimeoutError) as e:
+    except (urllib.error.URLError, OSError, http.client.HTTPException) as e:
         raise GithubFetchError(f"Couldn't reach GitHub: {e}") from e
     except ValueError as e:  # not JSON, or not UTF-8: a proxy or captive-portal page, say
         raise GithubFetchError("GitHub's answer was not valid JSON.") from e
@@ -107,8 +108,10 @@ def _download_zipball(owner: str, repo: str, ref: str, dest_zip: Path) -> None:
         if e.code == 404:
             raise GithubFetchError(f"{owner}/{repo}@{ref} not found - check the repo exists, is public, and the branch/tag name is right.") from e
         raise GithubFetchError(f"Download failed: HTTP {e.code}") from e
-    except (urllib.error.URLError, TimeoutError) as e:
-        raise GithubFetchError(f"Couldn't reach GitHub: {e}") from e
+    except (urllib.error.URLError, OSError, http.client.HTTPException) as e:
+        # a reset or a cut in the middle of the file is not a URLError; half a file is not kept
+        dest_zip.unlink(missing_ok=True)
+        raise GithubFetchError(f"Couldn't download from GitHub: {e}") from e
 
 
 def fetch_github_repo(url_or_shorthand: str, work_dir: str | Path) -> Path:
