@@ -29,7 +29,9 @@ import base64
 import binascii
 import http.client
 import json
+import ssl
 import urllib.error
+import urllib.parse
 import urllib.request
 from pathlib import Path
 
@@ -37,6 +39,7 @@ from hydra_editor_urdf.models import Robot
 from hydra_editor_urdf.source.licenses import LicenseGate, attribution_comment, attribution_text, check_mesh_licenses, gate_problems
 from hydra_editor_urdf.source.scan import MESH_EXTENSIONS
 from hydra_editor_urdf.urdf.writer import robot_to_urdf_string
+from ..i18n import load_config
 
 REQUEST_TIMEOUT_S = 15.0
 
@@ -58,6 +61,21 @@ class StudioClientError(Exception):
     ui/panels/upload_panel.py."""
 
 
+def _base_url(host: str, port: int) -> tuple[str, str | None]:
+    """(base URL, why the address cannot be used or None)."""
+    if "://" not in host:
+        return f"http://{host}:{port}", None
+    try:
+        parsed = urllib.parse.urlsplit(host)
+        written = parsed.port
+    except ValueError:
+        return host, f"{host!r} is not a server address"
+    if parsed.scheme not in ("http", "https") or not parsed.hostname or parsed.username or parsed.path not in ("", "/") or parsed.query:
+        return host, f"{host!r} is not a server address: use a name, http://name or https://name"
+    name = f"[{parsed.hostname}]" if ":" in parsed.hostname else parsed.hostname
+    return f"{parsed.scheme}://{name}:{written or port}", None
+
+
 class StudioClient:
     """One instance per server the operator has pointed this app at -
     holds the base URL and bearer token (obtained via login()) needed for
@@ -66,12 +84,35 @@ class StudioClient:
     smaller, since this app only ever needs the 4 endpoints below, not a
     live bidirectional sync."""
 
-    def __init__(self, host: str, port: int = 3000):
-        self.base_url = f"http://{host}:{port}"
+    def __init__(self, host: str, port: int = 3000, ca_file: str | None = None):
+        """`host` is a name or address (plain http, as always), or `https://name[:port]` / `http://name[:port]`; a port written there wins over `port`.
+        `ca_file` is a private CA for https; without it, `server_ca_file` of hydra_editor_urdf_config.json."""
+        self.base_url, self._address_error = _base_url(host, port)
         self.token: str | None = None
+        if ca_file is None:
+            configured = load_config().get("server_ca_file")
+            ca_file = configured if isinstance(configured, str) and configured else None
+        self._ca_file = ca_file
+
+    @property
+    def sends_secrets_in_the_clear(self) -> bool:
+        """True for plain http to another machine: the password and the token then travel unencrypted."""
+        parsed = urllib.parse.urlsplit(self.base_url)
+        return parsed.scheme == "http" and (parsed.hostname or "") not in ("localhost", "127.0.0.1", "::1")
+
+    def _tls(self) -> ssl.SSLContext | None:
+        if not self.base_url.startswith("https://") or not self._ca_file:
+            return None  # the certificates the system trusts
+        try:
+            return ssl.create_default_context(cafile=self._ca_file)
+        except (OSError, ssl.SSLError) as e:
+            raise StudioClientError(f"The CA file {self._ca_file} cannot be used: {e}") from e
 
     def _request(self, method: str, path: str, body: dict | None = None, auth: bool = False) -> dict:
+        if self._address_error:
+            raise StudioClientError(self._address_error)
         url = f"{self.base_url}{path}"
+        context = self._tls()
         data = json.dumps(body).encode("utf-8") if body is not None else None
         headers = {"Content-Type": "application/json"}
         if auth and not self.token:
@@ -82,7 +123,7 @@ class StudioClient:
             headers["Authorization"] = f"Bearer {self.token}"
         request = urllib.request.Request(url, data=data, headers=headers, method=method)
         try:
-            with urllib.request.urlopen(request, timeout=REQUEST_TIMEOUT_S) as resp:
+            with (urllib.request.urlopen(request, timeout=REQUEST_TIMEOUT_S, context=context) if context else urllib.request.urlopen(request, timeout=REQUEST_TIMEOUT_S)) as resp:
                 answer = json.loads(resp.read().decode("utf-8"))
         except urllib.error.HTTPError as e:
             message = f"HTTP {e.code}"

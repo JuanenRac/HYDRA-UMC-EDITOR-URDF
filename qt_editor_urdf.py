@@ -954,6 +954,8 @@ class EditorQtBridge(QObject):
         self._upload_client = client
         self._upload_connecting = False
         self._upload_status_text = _("UPLOAD_STATUS_CONNECTED", host=client.base_url)
+        if client.sends_secrets_in_the_clear:
+            self._upload_status_text += " " + _("UPLOAD_STATUS_PLAIN_HTTP")
         self._refresh_upload_gate()
         self.changed.emit()
         self.refreshModels()

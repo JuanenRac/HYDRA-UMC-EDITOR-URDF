@@ -24,11 +24,13 @@ from __future__ import annotations
 import http.client
 import json
 import re
-import shutil
+import stat
 import urllib.error
 import urllib.request
 import zipfile
 from pathlib import Path
+
+from ..i18n import load_config
 
 USER_AGENT = "HYDRA-UMC-EDITOR-URDF (github.com/JuanenRac/HYDRA-UMC-EDITOR-URDF)"
 REQUEST_TIMEOUT_S = 20.0
@@ -92,6 +94,42 @@ def resolve_default_branch(owner: str, repo: str) -> str:
     return branch
 
 
+# Limits of a repository brought from GitHub; hydra_editor_urdf_config.json changes them and 0 removes one.
+DEFAULT_LIMITS = {"github_max_download_mb": 500, "github_max_extracted_mb": 2048, "github_max_files": 50000}
+_MEGABYTE = 1024 * 1024
+_CHUNK = 256 * 1024
+
+
+def _limit(name: str) -> int:
+    value = load_config().get(name, DEFAULT_LIMITS[name])
+    return value if isinstance(value, int) and not isinstance(value, bool) and value >= 0 else DEFAULT_LIMITS[name]
+
+
+def _copy_bounded(source, target, limit_bytes: int, what: str) -> None:
+    total = 0
+    while True:
+        block = source.read(_CHUNK)
+        if not block:
+            return
+        total += len(block)
+        if limit_bytes and total > limit_bytes:
+            raise GithubFetchError(f"{what} is larger than the limit of {limit_bytes // _MEGABYTE} MB (github_max_download_mb); nothing was kept")
+        target.write(block)
+
+
+def _check_archive(zf: zipfile.ZipFile, what: str) -> None:
+    """Refused before anything is extracted: too many files, too many bytes once extracted, or a link."""
+    members = zf.infolist()
+    max_files, max_bytes = _limit("github_max_files"), _limit("github_max_extracted_mb") * _MEGABYTE
+    if max_files and len(members) > max_files:
+        raise GithubFetchError(f"{what} holds {len(members)} files, more than the limit of {max_files} (github_max_files)")
+    if max_bytes and sum(member.file_size for member in members) > max_bytes:
+        raise GithubFetchError(f"{what} is larger once extracted than the limit of {max_bytes // _MEGABYTE} MB (github_max_extracted_mb)")
+    for member in members:
+        if stat.S_ISLNK(member.external_attr >> 16):
+            raise GithubFetchError(f"{what} holds a link ({member.filename}); it is not extracted")
+
+
 def _download_zipball(owner: str, repo: str, ref: str, dest_zip: Path) -> None:
     # codeload accepts both branch and tag names under refs/heads and
     # refs/tags respectively - a plain /zip/<ref> without either prefix
@@ -103,7 +141,10 @@ def _download_zipball(owner: str, repo: str, ref: str, dest_zip: Path) -> None:
     request = urllib.request.Request(url, headers={"User-Agent": USER_AGENT})
     try:
         with urllib.request.urlopen(request, timeout=REQUEST_TIMEOUT_S) as resp, open(dest_zip, "wb") as f:
-            shutil.copyfileobj(resp, f)
+            _copy_bounded(resp, f, _limit("github_max_download_mb") * _MEGABYTE, f"{owner}/{repo}@{ref}")
+    except GithubFetchError:
+        dest_zip.unlink(missing_ok=True)
+        raise
     except urllib.error.HTTPError as e:
         if e.code == 404:
             raise GithubFetchError(f"{owner}/{repo}@{ref} not found - check the repo exists, is public, and the branch/tag name is right.") from e
@@ -140,6 +181,7 @@ def fetch_github_repo(url_or_shorthand: str, work_dir: str | Path) -> Path:
             names = zf.namelist()
             if not names:
                 raise GithubFetchError(f"Downloaded archive for {owner}/{repo}@{ref} is empty.")
+            _check_archive(zf, f"{owner}/{repo}@{ref}")
             top_level = names[0].split("/", 1)[0]
             zf.extractall(work_dir)
     except zipfile.BadZipFile as e:

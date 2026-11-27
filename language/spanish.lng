@@ -65,6 +65,7 @@ UPLOAD_SERVER_MODELS_LABEL=Modelos ya presentes en este servidor (doble clic par
 UPLOAD_REFRESH_BUTTON=Actualizar
 UPLOAD_STATUS_CONNECTING=Conectando...
 UPLOAD_STATUS_CONNECTED=Conectado a {host}
+UPLOAD_STATUS_PLAIN_HTTP=Aviso: http sin cifrar, la contraseña y el token viajan en claro. Use https://.
 UPLOAD_ERROR_TITLE=Error del servidor
 UPLOAD_INFEASIBLE_WARNING=Este robot todavía no pasa la validación de GDL (ver el panel de GDL) - corrige los problemas antes de subirlo.
 UPLOAD_SUCCESS_TITLE=Subido

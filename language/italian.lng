@@ -65,6 +65,7 @@ UPLOAD_SERVER_MODELS_LABEL=Modelli già presenti su questo server (doppio clic p
 UPLOAD_REFRESH_BUTTON=Aggiorna
 UPLOAD_STATUS_CONNECTING=Connessione in corso...
 UPLOAD_STATUS_CONNECTED=Connesso a {host}
+UPLOAD_STATUS_PLAIN_HTTP=Avviso: http non cifrato, la password e il token viaggiano in chiaro. Usi https://.
 UPLOAD_ERROR_TITLE=Errore del server
 UPLOAD_INFEASIBLE_WARNING=Questo robot non supera ancora la validazione GDL (vedi il pannello GDL) - risolvi i problemi prima di caricarlo.
 UPLOAD_SUCCESS_TITLE=Caricato

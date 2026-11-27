@@ -65,6 +65,7 @@ UPLOAD_SERVER_MODELS_LABEL=Models already on this server (double-click to pull f
 UPLOAD_REFRESH_BUTTON=Refresh
 UPLOAD_STATUS_CONNECTING=Connecting...
 UPLOAD_STATUS_CONNECTED=Connected to {host}
+UPLOAD_STATUS_PLAIN_HTTP=Warning: plain http, the password and the token travel unencrypted. Use https://.
 UPLOAD_ERROR_TITLE=Server error
 UPLOAD_INFEASIBLE_WARNING=This robot doesn't pass DOF validation yet (see the DOF panel) - fix the issues before uploading.
 UPLOAD_SUCCESS_TITLE=Uploaded

@@ -65,6 +65,7 @@ UPLOAD_SERVER_MODELS_LABEL=Bereits auf diesem Server vorhandene Modelle (Doppelk
 UPLOAD_REFRESH_BUTTON=Aktualisieren
 UPLOAD_STATUS_CONNECTING=Verbindung wird hergestellt...
 UPLOAD_STATUS_CONNECTED=Verbunden mit {host}
+UPLOAD_STATUS_PLAIN_HTTP=Warnung: unverschlüsseltes http, Passwort und Token werden im Klartext übertragen. Verwenden Sie https://.
 UPLOAD_ERROR_TITLE=Serverfehler
 UPLOAD_INFEASIBLE_WARNING=Dieser Roboter besteht die Freiheitsgrad-Prüfung noch nicht (siehe Freiheitsgrad-Panel) - beheben Sie die Probleme vor dem Hochladen.
 UPLOAD_SUCCESS_TITLE=Hochgeladen
