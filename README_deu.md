@@ -19,7 +19,7 @@ GPL-3.0-or-later - see LICENSE
   <img src="https://img.shields.io/badge/Language-Python%203.12-3776AB.svg" alt="Language">
   <img src="https://img.shields.io/badge/Framework-PySide6-41CD52.svg" alt="Framework">
   <img src="https://img.shields.io/badge/Format-URDF-red.svg" alt="Format">
-  <img src="https://img.shields.io/badge/Tests-695%20passing-2ea44f.svg" alt="Tests">
+  <img src="https://img.shields.io/badge/Tests-706%20passing-2ea44f.svg" alt="Tests">
   <img src="https://img.shields.io/badge/Version-0.2.1-0f6cbd.svg" alt="Version">
   <img src="https://img.shields.io/badge/Maturity-established-2EA44F.svg" alt="Maturity">
 </p>
@@ -28,7 +28,7 @@ GPL-3.0-or-later - see LICENSE
 
 ---
 
-**Ehrlichkeitscheck - was heute wirklich läuft:** der Kern aus reiner Logik - URDF-Parsing/-Export (`urdf/parser.py`, `urdf/writer.py`), DOF-Machbarkeitsprüfung (`urdf/dof.py`), Vorwärtskinematik (`render/kinematics.py`), Trägheitsschätzung (`inertia_calc.py`), Mesh-Referenzauflösung und GitHub-Zipball-Download (`source/scan.py`, `source/github_fetcher.py`, `source/local_folder.py`), das In-Memory-Modell (`models.py`), die Galerie-Liste (`gallery.py`) und der i18n-Lader (`i18n.py`) - ist real und durch 695 bestandene Tests abgedeckt (`tests/`), von denen keiner PySide6/PyOpenGL importiert, außer den wenigen, die den DOF-Bildschirm, das Panel der physikalischen Prüfung und das Qt-Quick-Deck ohne Anzeige öffnen (sie werden übersprungen, wo die Qt-Plattformbibliotheken fehlen). `test_github_fetcher.py` simuliert jeden Netzwerkaufruf - ein echter GitHub-Zipball-Download wurde manuell ausgeführt, nie als Teil der automatisierten Suite. Die Qt/OpenGL-Schicht (`render/viewport.py` mit seinem `UrdfGLRenderer`, `render/mesh.py`, jedes `ui/*`-Panel und der `OffscreenUrdfRenderer` des `--qtquick`-Decks) ist echter, funktionierender Code, hat aber nur für den DOF-Bildschirm und das Panel der physikalischen Prüfung eine automatisierte Testabdeckung (ohne Anzeige) - der Rest benötigt ein echtes Display/Qt-Plattform-Plugin, das die CI nicht hat, also wird er von Hand geprüft, nicht durch eine Testsuite. `server/client.py`s `StudioClient` (Login/Push/Pull gegen das `server.ts` von HYDRA-UMC-SERVER) ist echter HTTP-Code, getestet gegen einen kleinen lokalen Server, der den Vertrag des `server.ts` einhält (das Token bei jedem Aufruf, eine Namenskollision, der Download eines Modells, eine feindliche Antwort). xacro-Expansion und das Laden von COLLADA-Meshes (`.dae`) sind explizite, benannte Nicht-Funktionen (ein klarer Fehler, kein stiller Fehlparse) - siehe den Ehrlichkeitshinweis im Überblick weiter unten und die Abschnitte URDF-Parsing/Mesh-Laden für das Warum. Siehe `CHANGELOG.md` für das, was bisher genau ausgeliefert wurde. Die einzige Ausnahme ist optional: Steht `xacro_expand` in `hydra_editor_urdf_config.json` auf true und ist das Werkzeug `xacro` auf dem Rechner installiert, wird eine xacro-Datei von diesem Werkzeug expandiert (nichts wird mitgeliefert).
+**Ehrlichkeitscheck - was heute wirklich läuft:** der Kern aus reiner Logik - URDF-Parsing/-Export (`urdf/parser.py`, `urdf/writer.py`), DOF-Machbarkeitsprüfung (`urdf/dof.py`), Vorwärtskinematik (`render/kinematics.py`), Trägheitsschätzung (`inertia_calc.py`), Mesh-Referenzauflösung und GitHub-Zipball-Download (`source/scan.py`, `source/github_fetcher.py`, `source/local_folder.py`), das In-Memory-Modell (`models.py`), die Galerie-Liste (`gallery.py`) und der i18n-Lader (`i18n.py`) - ist real und durch 706 bestandene Tests abgedeckt (`tests/`), von denen keiner PySide6/PyOpenGL importiert, außer den wenigen, die den DOF-Bildschirm, das Panel der physikalischen Prüfung und das Qt-Quick-Deck ohne Anzeige öffnen (sie werden übersprungen, wo die Qt-Plattformbibliotheken fehlen). `test_github_fetcher.py` simuliert jeden Netzwerkaufruf - ein echter GitHub-Zipball-Download wurde manuell ausgeführt, nie als Teil der automatisierten Suite. Die Qt/OpenGL-Schicht (`render/viewport.py` mit seinem `UrdfGLRenderer`, `render/mesh.py`, jedes `ui/*`-Panel und der `OffscreenUrdfRenderer` des `--qtquick`-Decks) ist echter, funktionierender Code, hat aber nur für den DOF-Bildschirm und das Panel der physikalischen Prüfung eine automatisierte Testabdeckung (ohne Anzeige) - der Rest benötigt ein echtes Display/Qt-Plattform-Plugin, das die CI nicht hat, also wird er von Hand geprüft, nicht durch eine Testsuite. `server/client.py`s `StudioClient` (Login/Push/Pull gegen das `server.ts` von HYDRA-UMC-SERVER) ist echter HTTP-Code, getestet gegen einen kleinen lokalen Server, der den Vertrag des `server.ts` einhält (das Token bei jedem Aufruf, eine Namenskollision, der Download eines Modells, eine feindliche Antwort). xacro-Expansion und das Laden von COLLADA-Meshes (`.dae`) sind explizite, benannte Nicht-Funktionen (ein klarer Fehler, kein stiller Fehlparse) - siehe den Ehrlichkeitshinweis im Überblick weiter unten und die Abschnitte URDF-Parsing/Mesh-Laden für das Warum. Siehe `CHANGELOG.md` für das, was bisher genau ausgeliefert wurde. Die einzige Ausnahme ist optional: Steht `xacro_expand` in `hydra_editor_urdf_config.json` auf true und ist das Werkzeug `xacro` auf dem Rechner installiert, wird eine xacro-Datei von diesem Werkzeug expandiert (nichts wird mitgeliefert).
 
 > **Stand von Sicherheit (Safety) und Security:** Dieses Ökosystem ist kein zertifiziertes Sicherheitssystem. Es gibt noch keinen Hardware-E-STOP-Pfad, keine von der Firmware durchgesetzten Grenzen oder Verriegelungen und keinen verifizierten Bewegungsbefehl; Firmware-Images werden mit CRC-32 und einer Ed25519-Signatur geprüft, und ein Release-Build verweigert die veröffentlichten Entwicklungsschlüssel (die URTC-Bootloader hinter dem Relais verwenden keinen gemeinsamen Schlüssel mehr: die Hauptplatine prüft einen Ed25519-Eintrag gegen eine Tabelle öffentlicher Schlüssel, und eine Erweiterungsplatine installiert ein Abbild nur, wenn die Hauptplatine ihr genau dieses Abbild bestätigt hat); TLS und gegenseitiges TLS sind optional und standardmäßig aus; noch keine eigene Platine wurde bestückt oder getestet. Lesen Sie die [Sicherheitsbasis](https://github.com/JuanenRac/HYDRA-UMC-DOCS/blob/main/docs/SECURITY_BASELINE.md) und das [Bedrohungsmodell](https://github.com/JuanenRac/HYDRA-UMC-DOCS/blob/main/docs/THREAT_MODEL.md), bevor Sie sich für die Sicherheit einer Person auf eine Aussage hier verlassen.
 
@@ -40,7 +40,7 @@ GPL-3.0-or-later - see LICENSE
 |---|---|
 | Version | `0.2.1` |
 | Reifegrad | Etabliert |
-| Tests | 695 (`python -m pytest tests -q`) |
+| Tests | 706 (`python -m pytest tests -q`) |
 | Technik | Python / PySide6 / Qt6 / OpenGL |
 | Ziel | Der PC der Person, die es benutzt |
 | Auf echter Hardware | Nicht zutreffend: nichts hiervon läuft auf Hardware |
@@ -56,7 +56,7 @@ Jede Zeile ist ein Teil dieses Repositorys, und die Ampel sagt, wie weit er heut
 | Bereich | Stand | Was das hier bedeutet |
 |---|---|---|
 | Software | 🟢 | Für seinen Zweck vollständig und stabil; die Ehrlichkeitsprüfung in diesem README nennt die bekannten Grenzen |
-| Tests | 🟢 | 695 automatische Tests, bei jeder Änderung ausgeführt |
+| Tests | 🟢 | 706 automatische Tests, bei jeder Änderung ausgeführt |
 | Echte Hardware | ⚪ | Nicht zutreffend: nichts hiervon läuft auf Hardware |
 | Bereitstellung | 🟠 | Als Release veröffentlicht; die Installation auf einem frischen Rechner ist dokumentiert, aber nicht vermerkt |
 | Sprachen und Barrierefreiheit | 🟡 | Oberfläche und Hilfe gibt es in acht Sprachen; die Bedienung per Tastatur und Screenreader wurde nicht getestet |
@@ -263,7 +263,7 @@ Startet maximiert (kein echtes Vollbild auf Betriebssystemebene, sodass die nati
 
 ## 🧪 Tests
 
-695 automatische Tests laufen mit `python -m pytest tests -q`. Sie brauchen weder Hardware noch etwas außerhalb dieses Rechners.
+706 automatische Tests laufen mit `python -m pytest tests -q`. Sie brauchen weder Hardware noch etwas außerhalb dieses Rechners.
 
 Die CI führt `HYDRA_UMC_CI=1 python tools/ci_validate.py` aus; das prüft das Manifest, die Dokumente, die acht READMEs und die Bilder.
 
@@ -274,7 +274,7 @@ pip install -r requirements-dev.txt
 python -m pytest tests/ -q
 ```
 
-Hinweis: die eigene reine Logik dieser App (URDF-Parsing/-Export, DOF-Machbarkeitsprüfung, Vorwärtskinematik, Trägheitsschätzung, Mesh-Referenzauflösung, GitHub-Abruf, i18n) hatte null automatisierte Testabdeckung. Behoben: 695 echte Tests über 32 Testmodule, von denen alle bis auf wenige PySide6/PyOpenGL meiden (diese wenigen öffnen den DOF-Bildschirm und das Panel der physikalischen Prüfung ohne Anzeige und werden übersprungen, wo Qt nicht starten kann) - `requirements-dev.txt` installiert nur das, was `tests/` tatsächlich braucht (`numpy` + `pytest`), sodass die Suite ohne Display oder Qt-Plattform-Plugin läuft. Mehrere Tests sind explizite Regressionstests für Bugs, die bereits zuvor gefunden und behoben wurden und direkt im Quellcode dokumentiert sind (die Schutzmaßnahme gegen die Endlosschleife bei einem echten Zyklus in `render/kinematics.py`, die `had_scheme`-Bedingung in `source/scan.py`, die Prüfung auf negative Masse in `urdf/dof.py`) - eine zukünftige Änderung kann keinen davon mehr stillschweigend wieder einführen, ohne dass ein Test fehlschlägt. Die CI (`.github/workflows/ci.yml`) führt bei jedem Push denselben Befehl aus.
+Hinweis: die eigene reine Logik dieser App (URDF-Parsing/-Export, DOF-Machbarkeitsprüfung, Vorwärtskinematik, Trägheitsschätzung, Mesh-Referenzauflösung, GitHub-Abruf, i18n) hatte null automatisierte Testabdeckung. Behoben: 706 echte Tests über 32 Testmodule, von denen alle bis auf wenige PySide6/PyOpenGL meiden (diese wenigen öffnen den DOF-Bildschirm und das Panel der physikalischen Prüfung ohne Anzeige und werden übersprungen, wo Qt nicht starten kann) - `requirements-dev.txt` installiert nur das, was `tests/` tatsächlich braucht (`numpy` + `pytest`), sodass die Suite ohne Display oder Qt-Plattform-Plugin läuft. Mehrere Tests sind explizite Regressionstests für Bugs, die bereits zuvor gefunden und behoben wurden und direkt im Quellcode dokumentiert sind (die Schutzmaßnahme gegen die Endlosschleife bei einem echten Zyklus in `render/kinematics.py`, die `had_scheme`-Bedingung in `source/scan.py`, die Prüfung auf negative Masse in `urdf/dof.py`) - eine zukünftige Änderung kann keinen davon mehr stillschweigend wieder einführen, ohne dass ein Test fehlschlägt. Die CI (`.github/workflows/ci.yml`) führt bei jedem Push denselben Befehl aus.
 
 ## 🏗️ Build und Veröffentlichung
 
