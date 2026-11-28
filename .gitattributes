@@ -8,5 +8,8 @@
 
 # The shared golden URDF files are compared byte for byte across repositories.
 tests/golden/** -text
+
+# The questionable URDF files, master of the copies of PHYSICS-REPLICA and HIL-BRIDGE, byte for byte.
+tests/urdf_invalid/** -text
 # the contract of the model catalog, compared byte for byte with the SDK
 tests/catalog_submit.json -text

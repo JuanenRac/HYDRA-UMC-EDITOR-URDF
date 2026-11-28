@@ -2,6 +2,10 @@
 
 All notable changes to this project are documented here.
 
+## [Unreleased]
+
+- **One origin for the corpus of questionable URDF files:** `tests/urdf_invalid/` here is the master that `tools/golden_sync.py` copies to HYDRA-UMC-PHYSICS-REPLICA and HYDRA-UMC-HIL-BRIDGE, with the same fingerprint asserted in the three. Test added.
+
 ## [0.2.2] - Catalog contract, https and limits for downloaded repositories
 
 - **What the editor sends to the model catalog is checked against a shared contract:** `tests/catalog_submit.json`, the same bytes as in HYDRA-UMC-EDITOR-STL, with its origin in HYDRA-UMC-SDK (`conformance/fixtures/v1/catalog-submit.json`). Tests only.
