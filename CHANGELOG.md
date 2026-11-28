@@ -2,7 +2,7 @@
 
 All notable changes to this project are documented here.
 
-## [Unreleased]
+## [0.2.2] - Catalog contract, https and limits for downloaded repositories
 
 - **What the editor sends to the model catalog is checked against a shared contract:** `tests/catalog_submit.json`, the same bytes as in HYDRA-UMC-EDITOR-STL, with its origin in HYDRA-UMC-SDK (`conformance/fixtures/v1/catalog-submit.json`). Tests only.
 - **The catalog client speaks https:** the server field also takes `https://name[:port]` (a private CA goes in `server_ca_file` of the configuration); a host without a scheme stays plain http, and signing in over plain http to another machine now says so (eight languages).
